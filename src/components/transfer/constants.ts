@@ -35,10 +35,22 @@ export const STATS = [
   { value: "4.9★", label: "Средняя оценка" },
 ];
 
+function hashPair(a: string, b: string): number {
+  const key = [a, b].sort().join("|");
+  let hash = 0;
+  for (let i = 0; i < key.length; i++) {
+    hash = ((hash << 5) - hash) + key.charCodeAt(i);
+    hash |= 0;
+  }
+  return Math.abs(hash);
+}
+
 export function getDistance(from: string, to: string): number {
+  if (!from || !to || from === to) return 0;
   if (DISTANCES[from]?.[to]) return DISTANCES[from][to];
   if (DISTANCES[to]?.[from]) return DISTANCES[to][from];
-  return Math.floor(250 + Math.random() * 500);
+  const h = hashPair(from, to);
+  return 250 + (h % 500);
 }
 
 export type IconName =

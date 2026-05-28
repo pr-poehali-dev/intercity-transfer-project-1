@@ -1,7 +1,8 @@
 import { useRef, useState } from "react";
 import Icon from "@/components/ui/icon";
-import { CITIES, TARIFFS, getDistance } from "./constants";
+import { TARIFFS } from "./constants";
 import type { IconName } from "./constants";
+import CitySelect from "./CitySelect";
 import func2url from "../../../backend/func2url.json";
 
 interface CalculatorSectionProps {
@@ -83,31 +84,11 @@ export default function CalculatorSection({
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
                 <div>
                   <label className="text-xs font-display text-muted-foreground tracking-wider mb-2 block">ОТКУДА</label>
-                  <div className="relative">
-                    <Icon name="MapPin" size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-neon pointer-events-none" />
-                    <select
-                      value={from}
-                      onChange={(e) => { setFrom(e.target.value); }}
-                      className="w-full bg-background border border-border rounded-lg pl-9 pr-4 py-3 text-sm appearance-none cursor-pointer text-foreground"
-                    >
-                      <option value="Скажу по телефону">Скажу по телефону</option>
-                      {CITIES.map((c) => <option key={c} value={c}>{c}</option>)}
-                    </select>
-                  </div>
+                  <CitySelect value={from} onChange={setFrom} iconName="MapPin" exclude={to} />
                 </div>
                 <div>
                   <label className="text-xs font-display text-muted-foreground tracking-wider mb-2 block">КУДА</label>
-                  <div className="relative">
-                    <Icon name="Navigation" size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-neon pointer-events-none" />
-                    <select
-                      value={to}
-                      onChange={(e) => { setTo(e.target.value); }}
-                      className="w-full bg-background border border-border rounded-lg pl-9 pr-4 py-3 text-sm appearance-none cursor-pointer text-foreground"
-                    >
-                      <option value="Скажу по телефону">Скажу по телефону</option>
-                      {CITIES.filter((c) => c !== from).map((c) => <option key={c} value={c}>{c}</option>)}
-                    </select>
-                  </div>
+                  <CitySelect value={to} onChange={setTo} iconName="Navigation" exclude={from} />
                 </div>
               </div>
 

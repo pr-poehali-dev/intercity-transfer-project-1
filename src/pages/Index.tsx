@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import Navbar from "@/components/transfer/Navbar";
 import HeroSection from "@/components/transfer/HeroSection";
 import CalculatorSection from "@/components/transfer/CalculatorSection";
+import PopularRoutesSection from "@/components/transfer/PopularRoutesSection";
 import ContactsSection from "@/components/transfer/ContactsSection";
 import { TARIFFS, getDistance } from "@/components/transfer/constants";
 
@@ -79,6 +80,7 @@ export default function Index() {
         onRouteSelect={handleRouteSelect}
         sectionRef={bookRef}
       />
+      <PopularRoutesSection />
       <ContactsSection />
 
       <style>{`

@@ -1,7 +1,8 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import Icon from "@/components/ui/icon";
 import { CITIES, TARIFFS, getDistance } from "./constants";
 import type { IconName } from "./constants";
+import func2url from "../../../backend/func2url.json";
 
 interface CalculatorSectionProps {
   from: string;
@@ -30,6 +31,43 @@ export default function CalculatorSection({
   onCalculate, onRouteSelect,
   sectionRef,
 }: CalculatorSectionProps) {
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [sending, setSending] = useState(false);
+  const [sent, setSent] = useState(false);
+  const [error, setError] = useState("");
+
+  async function handleBook() {
+    if (!name.trim() || !phone.trim()) {
+      setError("Заполните имя и телефон");
+      return;
+    }
+    setError("");
+    setSending(true);
+    try {
+      const res = await fetch(func2url["send-booking"], {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name,
+          phone,
+          from_city: from,
+          to_city: to,
+          date,
+          passengers,
+          tariff: TARIFFS[tariff].name,
+          price,
+        }),
+      });
+      if (!res.ok) throw new Error();
+      setSent(true);
+    } catch {
+      setError("Ошибка отправки. Попробуйте позже");
+    } finally {
+      setSending(false);
+    }
+  }
+
   return (
     <>
       {/* CALCULATOR */}
@@ -148,21 +186,40 @@ export default function CalculatorSection({
                     <div className="text-sm text-muted-foreground mb-6">
                       {from} → {to} · {TARIFFS[tariff].name} · {passengers} пасс.
                     </div>
-                    <div className="space-y-2 text-sm mb-6">
-                      {[
-                        "Фиксированная цена, без доплат",
-                        "Встреча по адресу или в аэропорту",
-                        "Бесплатное ожидание 30 минут",
-                      ].map((text, i) => (
-                        <div key={i} className="flex items-center gap-2 text-muted-foreground">
-                          <Icon name="CheckCircle" size={14} className="text-neon flex-shrink-0" />
-                          {text}
+                    {sent ? (
+                      <div className="text-center py-6">
+                        <Icon name="CheckCircle2" size={48} className="text-neon mx-auto mb-3" />
+                        <div className="font-display text-lg font-bold mb-1">Заявка принята!</div>
+                        <p className="text-sm text-muted-foreground">Мы перезвоним вам в течение 15 минут</p>
+                      </div>
+                    ) : (
+                      <>
+                        <div className="space-y-3 mb-4">
+                          <input
+                            type="text"
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                            placeholder="Ваше имя"
+                            className="w-full bg-background border border-border rounded-lg px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/60"
+                          />
+                          <input
+                            type="tel"
+                            value={phone}
+                            onChange={(e) => setPhone(e.target.value)}
+                            placeholder="Телефон, например +7 999 123-45-67"
+                            className="w-full bg-background border border-border rounded-lg px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/60"
+                          />
                         </div>
-                      ))}
-                    </div>
-                    <button className="w-full bg-neon text-background font-display font-bold py-4 rounded-xl hover:opacity-90 transition-all glow-neon">
-                      ЗАБРОНИРОВАТЬ ЗА {price.toLocaleString("ru-RU")} ₽
-                    </button>
+                        {error && <div className="text-sm text-red-400 mb-3">{error}</div>}
+                        <button
+                          onClick={handleBook}
+                          disabled={sending}
+                          className="w-full bg-neon text-background font-display font-bold py-4 rounded-xl hover:opacity-90 transition-all glow-neon disabled:opacity-50"
+                        >
+                          {sending ? "ОТПРАВЛЯЕМ..." : `ЗАБРОНИРОВАТЬ ЗА ${price.toLocaleString("ru-RU")} ₽`}
+                        </button>
+                      </>
+                    )}
                   </div>
                 ) : (
                   <div className="flex flex-col items-center justify-center h-52 text-center">

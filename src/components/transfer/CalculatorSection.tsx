@@ -170,31 +170,7 @@ export default function CalculatorSection({
                 )}
               </div>
 
-              <div className="reveal border border-border rounded-2xl p-6 bg-surface">
-                <div className="text-xs font-display text-muted-foreground tracking-wider mb-4">ПОПУЛЯРНЫЕ МАРШРУТЫ</div>
-                <div className="space-y-1">
-                  {[
-                    { from: "Москва", to: "Санкт-Петербург", price: "от 3 200 ₽" },
-                    { from: "Москва", to: "Казань", price: "от 3 700 ₽" },
-                    { from: "Москва", to: "Нижний Новгород", price: "от 1 850 ₽" },
-                    { from: "Казань", to: "Уфа", price: "от 2 360 ₽" },
-                  ].map((r, i) => (
-                    <button
-                      key={i}
-                      onClick={() => onRouteSelect(r.from, r.to)}
-                      className="w-full flex items-center justify-between py-3 px-4 rounded-lg hover:bg-background transition-colors group"
-                    >
-                      <div className="flex items-center gap-2 text-sm text-foreground">
-                        <Icon name="ArrowRight" size={14} className="text-neon" />
-                        <span>{r.from}</span>
-                        <span className="text-muted-foreground">→</span>
-                        <span>{r.to}</span>
-                      </div>
-                      <span className="text-sm text-neon font-display font-semibold">{r.price}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
+
             </div>
           </div>
         </div>

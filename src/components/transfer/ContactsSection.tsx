@@ -15,6 +15,8 @@ export default function ContactsSection() {
             <div className="reveal space-y-4">
               {[
                 { icon: "Phone", label: "Максим", value: "+7 996 160-65-67", href: "tel:+79961606567", highlight: true },
+                { icon: "Phone", label: "Дополнительный", value: "+7 919 266-78-85", href: "tel:+79192667885", highlight: false },
+                { icon: "Send", label: "Telegram", value: "@Nashe_for_Russia", href: "https://t.me/Nashe_for_Russia", highlight: false },
               ].map((c, i) => (
                 <a
                   key={i}

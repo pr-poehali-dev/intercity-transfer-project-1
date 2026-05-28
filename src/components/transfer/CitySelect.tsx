@@ -78,6 +78,8 @@ export default function CitySelect({ value, onChange, iconName, exclude }: CityS
     setSearch("");
   }
 
+  const specialOption = "Скажу по телефону";
+
   return (
     <div ref={ref} className="relative">
       <button
@@ -105,6 +107,15 @@ export default function CitySelect({ value, onChange, iconName, exclude }: CityS
               />
             </div>
           </div>
+
+          <button
+            type="button"
+            onClick={() => pick(specialOption)}
+            className="w-full text-left px-4 py-3 text-sm border-b border-border hover:bg-neon/10 transition-colors flex items-center gap-2"
+          >
+            <Icon name="Phone" size={14} className="text-neon" />
+            <span className="font-semibold">{specialOption}</span>
+          </button>
 
           {!filtered.isSearch && (
             <div className="flex flex-wrap gap-1 p-3 border-b border-border max-h-32 overflow-y-auto">

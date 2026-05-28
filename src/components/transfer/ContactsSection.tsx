@@ -88,12 +88,15 @@ export default function ContactsSection() {
             <div className="w-7 h-7 bg-neon rounded-sm flex items-center justify-center">
               <Icon name="MapPin" size={14} className="text-background" />
             </div>
-            <span className="font-display text-lg font-bold">
-              ТРАНС<span className="text-neon">ФЕР</span>
-            </span>
+            <div className="flex flex-col leading-none">
+              <span className="font-display text-lg font-bold">
+                НАШЕ<span className="text-neon"> for Russia</span>
+              </span>
+              <span className="text-[10px] text-muted-foreground tracking-widest">TRANSFER</span>
+            </div>
           </div>
           <p className="text-xs text-muted-foreground text-center">
-            © 2024 ТрансферЭкспресс. Межгородние перевозки и трансфер по всей России.
+            © 2024 НАШЕ for Russia Transfer. Поездки по России без агрегаторов.
           </p>
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
             <Icon name="MapPin" size={12} className="text-neon" />

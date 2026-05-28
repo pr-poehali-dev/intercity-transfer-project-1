@@ -23,11 +23,11 @@ export default function HeroSection({ onBookClick }: HeroSectionProps) {
               ОНЛАЙН БРОНИРОВАНИЕ ДОСТУПНО
             </div>
             <h1 className="font-display text-6xl md:text-7xl lg:text-8xl font-bold leading-none tracking-tight mb-6 animate-fade-up" style={{ animationDelay: "0.1s" }}>
-              МЕЖГОРОД<br />
-              <span className="text-neon glow-neon-text">&amp; ТРАНСФЕР</span>
+              НАШЕ<br />
+              <span className="text-neon glow-neon-text">for Russia Transfer</span>
             </h1>
             <p className="text-lg text-muted-foreground mb-10 leading-relaxed max-w-lg animate-fade-up" style={{ animationDelay: "0.2s" }}>
-              Комфортные поездки по всей России. Фиксированная цена, профессиональные водители, точно в срок.
+              Поездки по России без агрегаторов — дёшево и с комфортом!
             </p>
             <div className="flex flex-wrap gap-4 animate-fade-up" style={{ animationDelay: "0.3s" }}>
               <button

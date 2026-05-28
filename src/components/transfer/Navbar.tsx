@@ -12,9 +12,12 @@ export default function Navbar({ onBookClick }: NavbarProps) {
           <div className="w-8 h-8 bg-neon rounded-sm flex items-center justify-center">
             <Icon name="MapPin" size={16} className="text-background" />
           </div>
-          <span className="font-display text-xl font-bold tracking-wide">
-            ТРАНС<span className="text-neon">ФЕР</span>
-          </span>
+          <div className="flex flex-col leading-none">
+            <span className="font-display text-xl font-bold tracking-wide">
+              НАШЕ<span className="text-neon"> for Russia</span>
+            </span>
+            <span className="text-[10px] text-muted-foreground tracking-widest">TRANSFER</span>
+          </div>
         </div>
         <div className="hidden md:flex items-center gap-8 text-sm text-muted-foreground">
           <a href="#routes" className="hover:text-foreground transition-colors">Маршруты</a>

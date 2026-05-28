@@ -2,6 +2,7 @@ import json
 import os
 import urllib.request
 import urllib.parse
+import urllib.error
 
 
 def handler(event: dict, context) -> dict:
@@ -40,8 +41,11 @@ def handler(event: dict, context) -> dict:
         f"💰 Стоимость: {price} ₽"
     )
 
-    token = os.environ['TELEGRAM_BOT_TOKEN']
-    chat_id = os.environ['TELEGRAM_CHAT_ID']
+    token = os.environ.get('TELEGRAM_BOT_TOKEN', '')
+    chat_id = os.environ.get('TELEGRAM_CHAT_ID', '')
+
+    token_hint = f"{token[:10]}...{token[-4:]}" if len(token) > 14 else "EMPTY/SHORT"
+    print(f"Using token: {token_hint}, chat_id: {chat_id}")
 
     data = urllib.parse.urlencode({
         'chat_id': chat_id,
@@ -54,11 +58,19 @@ def handler(event: dict, context) -> dict:
         data=data,
         method='POST'
     )
-    with urllib.request.urlopen(req) as resp:
-        result = json.loads(resp.read())
-
-    return {
-        'statusCode': 200,
-        'headers': {'Access-Control-Allow-Origin': '*'},
-        'body': json.dumps({'ok': result.get('ok', False)})
-    }
+    try:
+        with urllib.request.urlopen(req) as resp:
+            result = json.loads(resp.read())
+        return {
+            'statusCode': 200,
+            'headers': {'Access-Control-Allow-Origin': '*'},
+            'body': json.dumps({'ok': result.get('ok', False)})
+        }
+    except urllib.error.HTTPError as e:
+        err_body = e.read().decode()
+        print(f"Telegram error {e.code}: {err_body}, token_hint={token_hint}")
+        return {
+            'statusCode': 200,
+            'headers': {'Access-Control-Allow-Origin': '*'},
+            'body': json.dumps({'ok': False, 'error': err_body, 'code': e.code, 'token_hint': token_hint})
+        }

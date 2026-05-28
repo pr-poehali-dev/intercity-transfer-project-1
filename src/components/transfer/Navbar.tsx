@@ -20,7 +20,6 @@ export default function Navbar({ onBookClick }: NavbarProps) {
           </div>
         </div>
         <div className="hidden md:flex items-center gap-8 text-sm text-muted-foreground">
-          <a href="#routes" className="hover:text-foreground transition-colors">Маршруты</a>
           <a href="#calc" className="hover:text-foreground transition-colors">Калькулятор</a>
           <a href="#contacts" className="hover:text-foreground transition-colors">Контакты</a>
         </div>

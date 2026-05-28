@@ -23,8 +23,7 @@ export default function HeroSection({ onBookClick }: HeroSectionProps) {
               ОНЛАЙН БРОНИРОВАНИЕ ДОСТУПНО
             </div>
             <h1 className="font-display text-6xl md:text-7xl lg:text-8xl font-bold leading-none tracking-tight mb-6 animate-fade-up" style={{ animationDelay: "0.1s" }}>
-              НАШЕ<br />
-              for <span style={{ background: 'linear-gradient(to right, #ffffff, #003087, #CC0000)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Russia</span> Transfer
+              <span style={{ background: 'linear-gradient(to bottom, #ffffff 0%, #003087 50%, #CC0000 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', display: 'inline-block' }}>НАШЕ<br />for Russia</span> Transfer
             </h1>
             <p className="text-lg text-muted-foreground mb-10 leading-relaxed max-w-lg animate-fade-up" style={{ animationDelay: "0.2s" }}>
               Поездки по России без агрегаторов — дёшево и с комфортом!

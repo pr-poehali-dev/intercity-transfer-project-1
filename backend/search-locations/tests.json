@@ -1,0 +1,19 @@
+{
+  "tests": [
+    {
+      "name": "OPTIONS preflight",
+      "method": "OPTIONS",
+      "path": "/",
+      "expectedStatus": 200
+    },
+    {
+      "name": "Empty query returns empty",
+      "method": "POST",
+      "path": "/",
+      "body": {"query": ""},
+      "expectedStatus": 200,
+      "expectedBody": {"suggestions": "array"},
+      "bodyMatcher": "partial"
+    }
+  ]
+}

@@ -77,6 +77,7 @@ export default function Index() {
         price={price}
         calculated={calculated}
         onCalculate={calculate}
+        onClose={() => setCalculated(false)}
         onRouteSelect={handleRouteSelect}
         sectionRef={bookRef}
       />

@@ -19,6 +19,7 @@ interface CalculatorSectionProps {
   price: number | null;
   calculated: boolean;
   onCalculate: () => void;
+  onClose: () => void;
   onRouteSelect: (from: string, to: string) => void;
   sectionRef: React.RefObject<HTMLDivElement>;
 }
@@ -29,7 +30,7 @@ export default function CalculatorSection({
   passengers, setPassengers,
   date, setDate,
   price, calculated,
-  onCalculate, onRouteSelect,
+  onCalculate, onClose, onRouteSelect,
   sectionRef,
 }: CalculatorSectionProps) {
   const [name, setName] = useState("");
@@ -78,7 +79,7 @@ export default function CalculatorSection({
             <div className="inline-block font-display text-neon text-sm tracking-widest mb-3">БРОНИРОВАНИЕ</div>
             <h2 className="font-display text-4xl md:text-5xl font-bold">РАССЧИТАЙТЕ<br />СТОИМОСТЬ ПОЕЗДКИ</h2>
           </div>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="max-w-3xl mx-auto">
             {/* Form */}
             <div className="reveal bg-surface border border-border rounded-2xl p-8">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
@@ -149,72 +150,93 @@ export default function CalculatorSection({
                 РАССЧИТАТЬ СТОИМОСТЬ
               </button>
             </div>
-
-            {/* Result + routes */}
-            <div className="flex flex-col gap-4">
-              <div className={`reveal border rounded-2xl p-8 transition-all duration-500 ${
-                calculated ? "border-neon/40 bg-neon/5" : "border-border bg-surface"
-              }`}>
-                {calculated && price ? (
-                  <div className="animate-fade-up">
-                    <div className="text-xs font-display text-neon tracking-widest mb-4">СТОИМОСТЬ ПОЕЗДКИ</div>
-                    <div className="flex items-baseline gap-2 mb-2">
-                      <span className="font-display text-6xl font-bold text-neon glow-neon-text">
-                        {price.toLocaleString("ru-RU")}
-                      </span>
-                      <span className="font-display text-2xl text-muted-foreground">₽</span>
-                    </div>
-                    <div className="text-sm text-muted-foreground mb-6">
-                      {from} → {to} · {TARIFFS[tariff].name} · {passengers} пасс.
-                    </div>
-                    {sent ? (
-                      <div className="text-center py-6">
-                        <Icon name="CheckCircle2" size={48} className="text-neon mx-auto mb-3" />
-                        <div className="font-display text-lg font-bold mb-1">Заявка принята!</div>
-                        <p className="text-sm text-muted-foreground">Мы перезвоним вам в течение 15 минут</p>
-                      </div>
-                    ) : (
-                      <>
-                        <div className="space-y-3 mb-4">
-                          <input
-                            type="text"
-                            value={name}
-                            onChange={(e) => setName(e.target.value)}
-                            placeholder="Ваше имя"
-                            className="w-full bg-background border border-border rounded-lg px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/60"
-                          />
-                          <input
-                            type="tel"
-                            value={phone}
-                            onChange={(e) => setPhone(e.target.value)}
-                            placeholder="Телефон, например +7 999 123-45-67"
-                            className="w-full bg-background border border-border rounded-lg px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/60"
-                          />
-                        </div>
-                        {error && <div className="text-sm text-red-400 mb-3">{error}</div>}
-                        <button
-                          onClick={handleBook}
-                          disabled={sending}
-                          className="w-full bg-neon text-background font-display font-bold py-4 rounded-xl hover:opacity-90 transition-all glow-neon disabled:opacity-50"
-                        >
-                          {sending ? "ОТПРАВЛЯЕМ..." : `ЗАБРОНИРОВАТЬ ЗА ${price.toLocaleString("ru-RU")} ₽`}
-                        </button>
-                      </>
-                    )}
-                  </div>
-                ) : (
-                  <div className="flex flex-col items-center justify-center h-52 text-center">
-                    <Icon name="Calculator" size={40} className="text-muted-foreground/30 mb-4" />
-                    <p className="text-muted-foreground text-sm">Заполните форму и нажмите<br />"Рассчитать стоимость"</p>
-                  </div>
-                )}
-              </div>
-
-
-            </div>
           </div>
         </div>
       </section>
+
+      {/* MODAL with price */}
+      {calculated && price && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-up overflow-y-auto"
+          onClick={() => { setSent(false); setError(""); onClose(); }}
+        >
+          <div
+            className="bg-surface border border-neon/40 rounded-2xl p-8 max-w-lg w-full relative shadow-2xl my-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => { setSent(false); setError(""); onClose(); }}
+              className="absolute top-4 right-4 w-9 h-9 rounded-full bg-background hover:bg-neon/20 transition-colors flex items-center justify-center"
+              aria-label="Закрыть"
+            >
+              <Icon name="ChevronRight" size={18} className="rotate-45 text-muted-foreground" />
+            </button>
+
+            {sent ? (
+              <div className="text-center py-6">
+                <Icon name="CheckCircle2" size={64} className="text-neon mx-auto mb-4" />
+                <div className="font-display text-2xl font-bold mb-2">Заявка принята!</div>
+                <p className="text-sm text-muted-foreground mb-6">Мы перезвоним вам в течение 15 минут</p>
+                <button
+                  onClick={() => { setSent(false); setName(""); setPhone(""); onClose(); }}
+                  className="bg-neon text-background font-display font-bold px-8 py-3 rounded-xl hover:opacity-90 transition-all"
+                >
+                  ХОРОШО
+                </button>
+              </div>
+            ) : (
+              <>
+                <div className="text-xs font-display text-neon tracking-widest mb-4">СТОИМОСТЬ ПОЕЗДКИ</div>
+                <div className="flex items-baseline gap-2 mb-2">
+                  <span className="font-display text-6xl font-bold text-neon glow-neon-text">
+                    {price.toLocaleString("ru-RU")}
+                  </span>
+                  <span className="font-display text-2xl text-muted-foreground">₽</span>
+                </div>
+                <div className="text-sm text-muted-foreground mb-6">
+                  {from} → {to} · {TARIFFS[tariff].name} · {passengers} пасс.
+                </div>
+                <div className="space-y-2 text-sm mb-6">
+                  {[
+                    "Фиксированная цена, без доплат",
+                    "Встреча по адресу или в аэропорту",
+                    "Бесплатное ожидание 30 минут",
+                  ].map((text, i) => (
+                    <div key={i} className="flex items-center gap-2 text-muted-foreground">
+                      <Icon name="CheckCircle" size={14} className="text-neon flex-shrink-0" />
+                      {text}
+                    </div>
+                  ))}
+                </div>
+                <div className="space-y-3 mb-4">
+                  <input
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="Ваше имя"
+                    className="w-full bg-background border border-border rounded-lg px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/60"
+                  />
+                  <input
+                    type="tel"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    placeholder="Телефон, например +7 999 123-45-67"
+                    className="w-full bg-background border border-border rounded-lg px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/60"
+                  />
+                </div>
+                {error && <div className="text-sm text-red-400 mb-3">{error}</div>}
+                <button
+                  onClick={handleBook}
+                  disabled={sending}
+                  className="w-full bg-neon text-background font-display font-bold py-4 rounded-xl hover:opacity-90 transition-all glow-neon disabled:opacity-50"
+                >
+                  {sending ? "ОТПРАВЛЯЕМ..." : `ЗАБРОНИРОВАТЬ ЗА ${price.toLocaleString("ru-RU")} ₽`}
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* HOW IT WORKS */}
       <section className="py-24 max-w-7xl mx-auto px-6">

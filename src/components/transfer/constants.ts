@@ -9,7 +9,7 @@ export const CITIES = [
 export const TARIFFS = [
   { name: "Эконом", pricePerKm: 32, icon: "Car", desc: "Комфортный седан" },
   { name: "Комфорт", pricePerKm: 37, icon: "Star", desc: "Бизнес-класс" },
-  { name: "Минивэн", pricePerKm: 8.0, icon: "Users", desc: "До 7 пассажиров" },
+  { name: "Минивэн", pricePerKm: 55, icon: "Users", desc: "До 7 пассажиров" },
 ];
 
 export const DISTANCES: Record<string, Record<string, number>> = {

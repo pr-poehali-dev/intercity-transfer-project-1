@@ -143,11 +143,11 @@ export default function Index() {
                 РАССЧИТАТЬ СТОИМОСТЬ
               </button>
               <a
-                href="tel:+78001234567"
+                href="tel:+79961606567"
                 className="flex items-center gap-2 border border-white/20 text-foreground font-display font-semibold text-base px-8 py-4 rounded-md hover:border-neon/50 hover:text-neon transition-all"
               >
                 <Icon name="Phone" size={18} />
-                8 800 123-45-67
+                +7 996 160-65-67
               </a>
             </div>
           </div>
@@ -395,10 +395,9 @@ export default function Index() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <div className="reveal space-y-4">
               {[
-                { icon: "Phone", label: "Телефон (бесплатно)", value: "8 800 123-45-67", href: "tel:+78001234567", highlight: true },
-                { icon: "MessageCircle", label: "WhatsApp", value: "+7 999 123-45-67", href: "https://wa.me/79991234567", highlight: false },
-                { icon: "Send", label: "Telegram", value: "@transferexpress", href: "https://t.me/transferexpress", highlight: false },
-                { icon: "Mail", label: "Email", value: "info@transfer.ru", href: "mailto:info@transfer.ru", highlight: false },
+                { icon: "Phone", label: "Максим", value: "+7 996 160-65-67", href: "tel:+79961606567", highlight: true },
+                { icon: "MessageCircle", label: "WhatsApp", value: "+7 996 160-65-67", href: "https://wa.me/79961606567", highlight: false },
+                { icon: "Send", label: "Telegram", value: "+7 996 160-65-67", href: "https://t.me/+79961606567", highlight: false },
               ].map((c, i) => (
                 <a
                   key={i}

@@ -24,7 +24,7 @@ export default function HeroSection({ onBookClick }: HeroSectionProps) {
             </div>
             <h1 className="font-display text-6xl md:text-7xl lg:text-8xl font-bold leading-none tracking-tight mb-6 animate-fade-up" style={{ animationDelay: "0.1s" }}>
               НАШЕ<br />
-              for <span style={{ color: '#003087' }}>Russia</span> Transfer
+              for <span style={{ background: 'linear-gradient(to right, #ffffff, #003087, #CC0000)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Russia</span> Transfer
             </h1>
             <p className="text-lg text-muted-foreground mb-10 leading-relaxed max-w-lg animate-fade-up" style={{ animationDelay: "0.2s" }}>
               Поездки по России без агрегаторов — дёшево и с комфортом!

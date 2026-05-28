@@ -1,15 +1,14 @@
-User-agent: *
-Allow: /
-Disallow: /api/
-
-User-agent: Yandex
-Allow: /
-
 User-agent: Googlebot
 Allow: /
 
 User-agent: Bingbot
 Allow: /
 
-Host: https://nashe-for-russia-transfer.ru
-Sitemap: https://nashe-for-russia-transfer.ru/sitemap.xml
+User-agent: Twitterbot
+Allow: /
+
+User-agent: facebookexternalhit
+Allow: /
+
+User-agent: *
+Allow: /

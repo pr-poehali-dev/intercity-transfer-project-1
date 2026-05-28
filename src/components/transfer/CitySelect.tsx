@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 import Icon from "@/components/ui/icon";
 import { FEDERAL_DISTRICTS } from "./regions";
+import func2url from "../../../backend/func2url.json";
 
 interface CitySelectProps {
   value: string;
@@ -9,10 +10,18 @@ interface CitySelectProps {
   exclude?: string;
 }
 
+interface RemoteCity {
+  name: string;
+  region: string;
+  full: string;
+}
+
 export default function CitySelect({ value, onChange, iconName, exclude }: CitySelectProps) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [activeDistrict, setActiveDistrict] = useState<string>(FEDERAL_DISTRICTS[0].name);
+  const [remoteResults, setRemoteResults] = useState<RemoteCity[]>([]);
+  const [searching, setSearching] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -23,15 +32,40 @@ export default function CitySelect({ value, onChange, iconName, exclude }: CityS
     return () => document.removeEventListener("mousedown", onClick);
   }, []);
 
+  useEffect(() => {
+    const q = search.trim();
+    if (q.length < 2) {
+      setRemoteResults([]);
+      return;
+    }
+    setSearching(true);
+    const timer = setTimeout(async () => {
+      try {
+        const res = await fetch(func2url["search-locations"], {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ query: q }),
+        });
+        const data = await res.json();
+        setRemoteResults((data.suggestions || []).filter((c: RemoteCity) => c.name !== exclude));
+      } catch {
+        setRemoteResults([]);
+      } finally {
+        setSearching(false);
+      }
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [search, exclude]);
+
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     if (q) {
-      const matches = FEDERAL_DISTRICTS.flatMap((d) =>
+      const localMatches = FEDERAL_DISTRICTS.flatMap((d) =>
         d.cities
           .filter((c) => c.name.toLowerCase().includes(q) || c.region.toLowerCase().includes(q))
           .map((c) => ({ ...c, district: d.name }))
       ).filter((c) => c.name !== exclude);
-      return { isSearch: true, matches };
+      return { isSearch: true, matches: localMatches };
     }
     const district = FEDERAL_DISTRICTS.find((d) => d.name === activeDistrict);
     const cities = district ? district.cities.filter((c) => c.name !== exclude) : [];
@@ -103,25 +137,53 @@ export default function CitySelect({ value, onChange, iconName, exclude }: CityS
           )}
 
           <div className="max-h-72 overflow-y-auto">
-            {filtered.matches.length === 0 ? (
+            {filtered.matches.length === 0 && !filtered.isSearch ? (
               <div className="px-4 py-8 text-center text-sm text-muted-foreground">
                 Ничего не найдено
               </div>
             ) : filtered.isSearch ? (
-              filtered.matches.map((c) => (
-                <button
-                  key={`${c.name}-${c.region}`}
-                  type="button"
-                  onClick={() => pick(c.name)}
-                  className="w-full text-left px-4 py-2.5 text-sm hover:bg-neon/10 transition-colors flex items-center justify-between group"
-                >
-                  <div>
-                    <div className="text-foreground font-medium">{c.name}</div>
-                    <div className="text-xs text-muted-foreground">{c.region}</div>
+              <>
+                {filtered.matches.length > 0 && (
+                  <div className="px-4 py-1.5 text-[10px] font-display tracking-widest text-neon border-b border-border uppercase bg-surface/95">
+                    Популярные города
                   </div>
-                  <div className="text-[10px] text-muted-foreground/70">{"district" in c ? (c as { district: string }).district : ""}</div>
-                </button>
-              ))
+                )}
+                {filtered.matches.map((c) => (
+                  <button
+                    key={`local-${c.name}-${c.region}`}
+                    type="button"
+                    onClick={() => pick(c.name)}
+                    className="w-full text-left px-4 py-2.5 text-sm hover:bg-neon/10 transition-colors flex items-center justify-between group"
+                  >
+                    <div>
+                      <div className="text-foreground font-medium">{c.name}</div>
+                      <div className="text-xs text-muted-foreground">{c.region}</div>
+                    </div>
+                  </button>
+                ))}
+                {(searching || remoteResults.length > 0) && (
+                  <div className="px-4 py-1.5 text-[10px] font-display tracking-widest text-neon border-y border-border uppercase bg-surface/95 flex items-center gap-2">
+                    Все нас. пункты России
+                    {searching && <span className="text-muted-foreground normal-case font-normal text-[10px]">поиск...</span>}
+                  </div>
+                )}
+                {remoteResults.map((c, i) => (
+                  <button
+                    key={`remote-${i}-${c.name}`}
+                    type="button"
+                    onClick={() => pick(c.name)}
+                    className="w-full text-left px-4 py-2.5 text-sm hover:bg-neon/10 transition-colors"
+                  >
+                    <div className="text-foreground font-medium">{c.name}</div>
+                    <div className="text-xs text-muted-foreground">{c.region || c.full}</div>
+                  </button>
+                ))}
+                {!searching && filtered.matches.length === 0 && remoteResults.length === 0 && search.trim().length >= 2 && (
+                  <div className="px-4 py-8 text-center text-sm text-muted-foreground">
+                    Ничего не найдено
+                  </div>
+                )}
+              </>
             ) : (
               (() => {
                 const groups: Record<string, typeof filtered.matches> = {};

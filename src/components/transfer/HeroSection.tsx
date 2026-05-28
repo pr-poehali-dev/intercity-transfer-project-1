@@ -60,28 +60,7 @@ export default function HeroSection({ onBookClick }: HeroSectionProps) {
         </div>
       </section>
 
-      {/* FEATURES */}
-      <section id="routes" className="py-24 max-w-7xl mx-auto px-6">
-        <div className="reveal mb-16">
-          <div className="inline-block font-display text-neon text-sm tracking-widest mb-3">ПОЧЕМУ МЫ</div>
-          <h2 className="font-display text-4xl md:text-5xl font-bold">ВАШЕ УДОБСТВО —<br />НАШ ПРИОРИТЕТ</h2>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {FEATURES.map((f, i) => (
-            <div
-              key={i}
-              className="reveal group bg-surface border border-border rounded-xl p-6 hover:border-neon/40 transition-all hover:-translate-y-1"
-              style={{ transitionDelay: `${i * 0.05}s` }}
-            >
-              <div className="w-12 h-12 bg-neon/10 rounded-lg flex items-center justify-center mb-4 group-hover:bg-neon/20 transition-colors">
-                <Icon name={f.icon as IconName} size={22} className="text-neon" />
-              </div>
-              <h3 className="font-display font-semibold text-lg mb-2">{f.title}</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">{f.desc}</p>
-            </div>
-          ))}
-        </div>
-      </section>
+
     </>
   );
 }

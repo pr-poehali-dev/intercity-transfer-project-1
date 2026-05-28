@@ -185,7 +185,7 @@ export default function CalculatorSection({
         <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
           {[
             { num: "1", icon: "MapPin", title: "Выберите маршрут", desc: "Укажите откуда и куда, дату и количество пассажиров" },
-            { num: "2", icon: "CreditCard", title: "Оплатите онлайн", desc: "Безопасная оплата картой. Цена фиксирована и не меняется" },
+            { num: "2", icon: "CreditCard", title: "Оплатите водителю", desc: "Наличными или переводом. Цена фиксирована и не меняется" },
             { num: "3", icon: "Car", title: "Поедем!", desc: "Водитель встретит вас точно в назначенное время" },
           ].map((step, i) => (
             <div key={i} className="reveal text-center">

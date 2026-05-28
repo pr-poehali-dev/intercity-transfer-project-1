@@ -7,8 +7,8 @@ export const CITIES = [
 ];
 
 export const TARIFFS = [
-  { name: "Эконом", pricePerKm: 4.5, icon: "Car", desc: "Комфортный седан" },
-  { name: "Комфорт", pricePerKm: 6.5, icon: "Star", desc: "Бизнес-класс" },
+  { name: "Эконом", pricePerKm: 32, icon: "Car", desc: "Комфортный седан" },
+  { name: "Комфорт", pricePerKm: 37, icon: "Star", desc: "Бизнес-класс" },
   { name: "Минивэн", pricePerKm: 8.0, icon: "Users", desc: "До 7 пассажиров" },
 ];
 

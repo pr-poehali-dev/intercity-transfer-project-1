@@ -1,7 +1,50 @@
+import { useState } from "react";
 import Icon from "@/components/ui/icon";
 import type { IconName } from "./constants";
+import func2url from "../../../backend/func2url.json";
 
 export default function ContactsSection() {
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [message, setMessage] = useState("");
+  const [sending, setSending] = useState(false);
+  const [sent, setSent] = useState(false);
+  const [error, setError] = useState("");
+
+  async function handleSubmit() {
+    if (!name.trim() || !phone.trim()) {
+      setError("Заполните имя и телефон");
+      return;
+    }
+    setError("");
+    setSending(true);
+    try {
+      const res = await fetch(func2url["send-booking"], {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name,
+          phone,
+          from_city: "—",
+          to_city: "—",
+          date: "—",
+          passengers: "—",
+          tariff: "Заявка с формы контактов",
+          price: message || "—",
+        }),
+      });
+      if (!res.ok) throw new Error();
+      setSent(true);
+      setName("");
+      setPhone("");
+      setMessage("");
+    } catch {
+      setError("Ошибка отправки. Попробуйте позже");
+    } finally {
+      setSending(false);
+    }
+  }
+
   return (
     <>
       {/* CONTACTS */}
@@ -46,35 +89,54 @@ export default function ContactsSection() {
             <div className="reveal">
               <div className="bg-surface border border-border rounded-2xl p-8 h-full">
                 <h3 className="font-display text-xl font-bold mb-6">ОСТАВЬТЕ ЗАЯВКУ</h3>
-                <div className="space-y-4">
-                  <div>
-                    <label className="text-xs font-display text-muted-foreground tracking-wider mb-2 block">ИМЯ</label>
-                    <input
-                      type="text"
-                      placeholder="Ваше имя"
-                      className="w-full bg-background border border-border rounded-lg px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/50"
-                    />
+                {sent ? (
+                  <div className="text-center py-10">
+                    <Icon name="CheckCircle2" size={56} className="text-neon mx-auto mb-4" />
+                    <div className="font-display text-xl font-bold mb-2">Заявка отправлена!</div>
+                    <p className="text-sm text-muted-foreground">Мы свяжемся с вами в ближайшее время</p>
                   </div>
-                  <div>
-                    <label className="text-xs font-display text-muted-foreground tracking-wider mb-2 block">ТЕЛЕФОН</label>
-                    <input
-                      type="tel"
-                      placeholder="+7 (___) ___-__-__"
-                      className="w-full bg-background border border-border rounded-lg px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/50"
-                    />
+                ) : (
+                  <div className="space-y-4">
+                    <div>
+                      <label className="text-xs font-display text-muted-foreground tracking-wider mb-2 block">ИМЯ</label>
+                      <input
+                        type="text"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        placeholder="Ваше имя"
+                        className="w-full bg-background border border-border rounded-lg px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/50"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs font-display text-muted-foreground tracking-wider mb-2 block">ТЕЛЕФОН</label>
+                      <input
+                        type="tel"
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                        placeholder="+7 (___) ___-__-__"
+                        className="w-full bg-background border border-border rounded-lg px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/50"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs font-display text-muted-foreground tracking-wider mb-2 block">СООБЩЕНИЕ</label>
+                      <textarea
+                        rows={3}
+                        value={message}
+                        onChange={(e) => setMessage(e.target.value)}
+                        placeholder="Ваш маршрут или вопрос..."
+                        className="w-full bg-background border border-border rounded-lg px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/50 resize-none"
+                      />
+                    </div>
+                    {error && <div className="text-sm text-red-400">{error}</div>}
+                    <button
+                      onClick={handleSubmit}
+                      disabled={sending}
+                      className="w-full bg-neon text-background font-display font-bold py-4 rounded-xl hover:opacity-90 transition-all glow-neon disabled:opacity-50"
+                    >
+                      {sending ? "ОТПРАВЛЯЕМ..." : "ОТПРАВИТЬ ЗАЯВКУ"}
+                    </button>
                   </div>
-                  <div>
-                    <label className="text-xs font-display text-muted-foreground tracking-wider mb-2 block">СООБЩЕНИЕ</label>
-                    <textarea
-                      rows={3}
-                      placeholder="Ваш маршрут или вопрос..."
-                      className="w-full bg-background border border-border rounded-lg px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/50 resize-none"
-                    />
-                  </div>
-                  <button className="w-full bg-neon text-background font-display font-bold py-4 rounded-xl hover:opacity-90 transition-all glow-neon">
-                    ОТПРАВИТЬ ЗАЯВКУ
-                  </button>
-                </div>
+                )}
               </div>
             </div>
           </div>

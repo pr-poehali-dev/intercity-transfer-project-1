@@ -15,8 +15,6 @@ export default function ContactsSection() {
             <div className="reveal space-y-4">
               {[
                 { icon: "Phone", label: "Максим", value: "+7 996 160-65-67", href: "tel:+79961606567", highlight: true },
-                { icon: "MessageCircle", label: "WhatsApp", value: "+7 996 160-65-67", href: "https://wa.me/79961606567", highlight: false },
-                { icon: "Send", label: "Telegram", value: "+7 996 160-65-67", href: "https://t.me/+79961606567", highlight: false },
               ].map((c, i) => (
                 <a
                   key={i}

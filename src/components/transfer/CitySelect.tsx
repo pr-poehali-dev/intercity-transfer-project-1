@@ -107,7 +107,7 @@ export default function CitySelect({ value, onChange, iconName, exclude }: CityS
               <div className="px-4 py-8 text-center text-sm text-muted-foreground">
                 Ничего не найдено
               </div>
-            ) : (
+            ) : filtered.isSearch ? (
               filtered.matches.map((c) => (
                 <button
                   key={`${c.name}-${c.region}`}
@@ -119,11 +119,34 @@ export default function CitySelect({ value, onChange, iconName, exclude }: CityS
                     <div className="text-foreground font-medium">{c.name}</div>
                     <div className="text-xs text-muted-foreground">{c.region}</div>
                   </div>
-                  {filtered.isSearch && (
-                    <div className="text-[10px] text-muted-foreground/70">{"district" in c ? (c as { district: string }).district : ""}</div>
-                  )}
+                  <div className="text-[10px] text-muted-foreground/70">{"district" in c ? (c as { district: string }).district : ""}</div>
                 </button>
               ))
+            ) : (
+              (() => {
+                const groups: Record<string, typeof filtered.matches> = {};
+                filtered.matches.forEach((c) => {
+                  if (!groups[c.region]) groups[c.region] = [];
+                  groups[c.region].push(c);
+                });
+                return Object.entries(groups).map(([region, cities]) => (
+                  <div key={region}>
+                    <div className="sticky top-0 bg-surface/95 backdrop-blur px-4 py-1.5 text-[10px] font-display tracking-widest text-neon border-b border-border uppercase">
+                      {region}
+                    </div>
+                    {cities.map((c) => (
+                      <button
+                        key={`${c.name}-${c.region}`}
+                        type="button"
+                        onClick={() => pick(c.name)}
+                        className="w-full text-left px-4 py-2.5 text-sm hover:bg-neon/10 transition-colors"
+                      >
+                        <span className="text-foreground font-medium">{c.name}</span>
+                      </button>
+                    ))}
+                  </div>
+                ));
+              })()
             )}
           </div>
         </div>

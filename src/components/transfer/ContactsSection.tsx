@@ -90,7 +90,7 @@ export default function ContactsSection() {
             </div>
             <div className="flex flex-col leading-none">
               <span className="font-display text-lg font-bold">
-                НАШЕ<span className="text-neon"> for Russia</span>
+                НАШЕ<span className="text-neon"> for </span><span style={{ color: '#003087' }}>Russia</span>
               </span>
               <span className="text-[10px] text-muted-foreground tracking-widest">TRANSFER</span>
             </div>

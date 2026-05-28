@@ -52,6 +52,7 @@ export default function CalculatorSection({
                       onChange={(e) => { setFrom(e.target.value); }}
                       className="w-full bg-background border border-border rounded-lg pl-9 pr-4 py-3 text-sm appearance-none cursor-pointer text-foreground"
                     >
+                      <option value="Скажу по телефону">Скажу по телефону</option>
                       {CITIES.map((c) => <option key={c} value={c}>{c}</option>)}
                     </select>
                   </div>
@@ -65,6 +66,7 @@ export default function CalculatorSection({
                       onChange={(e) => { setTo(e.target.value); }}
                       className="w-full bg-background border border-border rounded-lg pl-9 pr-4 py-3 text-sm appearance-none cursor-pointer text-foreground"
                     >
+                      <option value="Скажу по телефону">Скажу по телефону</option>
                       {CITIES.filter((c) => c !== from).map((c) => <option key={c} value={c}>{c}</option>)}
                     </select>
                   </div>

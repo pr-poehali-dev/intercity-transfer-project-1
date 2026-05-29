@@ -115,8 +115,8 @@ export default function CalculatorSection({
                       }`}
                     >
                       <Icon name={t.icon as IconName} size={18} className={`mx-auto mb-1 ${tariff === i ? "text-neon" : ""}`} />
-                      <div className="font-display text-xs sm:text-sm font-semibold truncate">{t.name}</div>
-                      <div className="text-[10px] sm:text-xs opacity-70 truncate">{t.desc}</div>
+                      <div className="font-display text-xs sm:text-sm font-semibold leading-tight">{t.name}</div>
+                      <div className="text-[9px] sm:text-[10px] opacity-70 leading-tight mt-0.5">{t.desc}</div>
                     </button>
                   ))}
                 </div>

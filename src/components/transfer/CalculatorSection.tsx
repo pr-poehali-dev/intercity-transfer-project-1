@@ -18,6 +18,7 @@ interface CalculatorSectionProps {
   setDate: (v: string) => void;
   price: number | null;
   calculated: boolean;
+  calculating: boolean;
   onCalculate: () => void;
   onClose: () => void;
   onRouteSelect: (from: string, to: string) => void;
@@ -29,7 +30,7 @@ export default function CalculatorSection({
   tariff, setTariff,
   passengers, setPassengers,
   date, setDate,
-  price, calculated,
+  price, calculated, calculating,
   onCalculate, onClose, onRouteSelect,
   sectionRef,
 }: CalculatorSectionProps) {
@@ -144,10 +145,17 @@ export default function CalculatorSection({
 
               <button
                 onClick={onCalculate}
-                disabled={from === to}
-                className="w-full bg-neon text-background font-display font-bold text-base py-4 rounded-xl hover:opacity-90 transition-all glow-neon hover:scale-[1.02] active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed"
+                disabled={from === to || calculating}
+                className="w-full bg-neon text-background font-display font-bold text-base py-4 rounded-xl hover:opacity-90 transition-all glow-neon hover:scale-[1.02] active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
-                РАССЧИТАТЬ СТОИМОСТЬ
+                {calculating ? (
+                  <>
+                    <Icon name="Loader2" size={18} className="animate-spin" />
+                    РАССЧИТЫВАЕМ...
+                  </>
+                ) : (
+                  "РАССЧИТАТЬ СТОИМОСТЬ"
+                )}
               </button>
             </div>
           </div>

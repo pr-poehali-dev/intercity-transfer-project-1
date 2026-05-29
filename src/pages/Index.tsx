@@ -5,6 +5,7 @@ import CalculatorSection from "@/components/transfer/CalculatorSection";
 import PopularRoutesSection from "@/components/transfer/PopularRoutesSection";
 import ContactsSection from "@/components/transfer/ContactsSection";
 import { TARIFFS, getDistance } from "@/components/transfer/constants";
+import func2url from "../../backend/func2url.json";
 
 export default function Index() {
   const [from, setFrom] = useState("Москва");
@@ -14,6 +15,7 @@ export default function Index() {
   const [date, setDate] = useState("");
   const [price, setPrice] = useState<number | null>(null);
   const [calculated, setCalculated] = useState(false);
+  const [calculating, setCalculating] = useState(false);
 
   const bookRef = useRef<HTMLDivElement>(null);
 
@@ -34,13 +36,32 @@ export default function Index() {
     return () => observer.disconnect();
   }, []);
 
-  function calculate() {
-    if (from === to) return;
-    const dist = getDistance(from, to);
+  function priceFromDistance(dist: number) {
     const base = dist * TARIFFS[tariff].pricePerKm;
     const mult = passengers > 1 ? 1 + (passengers - 1) * 0.15 : 1;
-    setPrice(Math.round((base * mult) / 50) * 50);
+    return Math.round((base * mult) / 50) * 50;
+  }
+
+  async function calculate() {
+    if (from === to || calculating) return;
+    setCalculating(true);
+    let dist = getDistance(from, to);
+    try {
+      const res = await fetch(func2url["calc-distance"], {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ from, to }),
+      });
+      const data = await res.json();
+      if (typeof data.distance === "number" && data.distance > 0) {
+        dist = data.distance;
+      }
+    } catch {
+      // fallback на локальную матрицу расстояний
+    }
+    setPrice(priceFromDistance(dist));
     setCalculated(true);
+    setCalculating(false);
   }
 
   function scrollToBook() {
@@ -76,6 +97,7 @@ export default function Index() {
         setDate={setDate}
         price={price}
         calculated={calculated}
+        calculating={calculating}
         onCalculate={calculate}
         onClose={() => setCalculated(false)}
         onRouteSelect={handleRouteSelect}

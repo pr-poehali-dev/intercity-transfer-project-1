@@ -13,8 +13,8 @@ export default function Navbar({ onBookClick }: NavbarProps) {
             <Icon name="MapPin" size={14} className="text-background" />
           </div>
           <div className="flex flex-col leading-none min-w-0">
-            <span className="font-display font-bold tracking-wide text-sm sm:text-base truncate" style={{ background: 'linear-gradient(to bottom, #ffffff 0%, #003087 50%, #CC0000 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', display: 'inline-block', maxWidth: '100%' }}>
-              НАШЕ for Russia Transfer
+            <span className="font-display font-bold tracking-wide text-sm sm:text-base">
+              НАШЕ<span className="text-neon"> for </span><span style={{ color: '#003087' }}>Russia</span> Transfer
             </span>
           </div>
         </div>

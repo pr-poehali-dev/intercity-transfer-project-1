@@ -42,6 +42,15 @@ export default function HeroSection({ onBookClick }: HeroSectionProps) {
                 <Icon name="Phone" size={18} />
                 +7 996 160-65-67
               </a>
+              <a
+                href="https://t.me/+79961606567"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 border border-white/20 text-foreground font-display font-semibold text-base px-8 py-4 rounded-md hover:border-neon/50 hover:text-neon transition-all"
+              >
+                <Icon name="Send" size={18} />
+                Telegram
+              </a>
             </div>
           </div>
         </div>

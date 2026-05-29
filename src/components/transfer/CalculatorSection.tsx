@@ -61,6 +61,7 @@ export default function CalculatorSection({
           passengers,
           tariff: TARIFFS[tariff].name,
           price,
+          distance,
         }),
       });
       if (!res.ok) throw new Error();

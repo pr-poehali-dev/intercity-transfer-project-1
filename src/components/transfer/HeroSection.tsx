@@ -53,13 +53,7 @@ export default function HeroSection({ onBookClick }: HeroSectionProps) {
                     key={i}
                     className="flex items-center gap-2 bg-surface/60 border border-white/10 rounded-lg px-3 py-2 backdrop-blur-sm"
                   >
-                    <span className="font-display text-sm font-semibold text-foreground w-20 flex-shrink-0">{m.name}</span>
-                    <a
-                      href={`tel:${m.tel}`}
-                      className="text-sm text-muted-foreground hover:text-neon transition-colors mr-auto"
-                    >
-                      {m.value}
-                    </a>
+                    <span className="font-display text-sm font-semibold text-foreground mr-auto">{m.name}</span>
                     <a
                       href={`tel:${m.tel}`}
                       aria-label={`Позвонить ${m.name}`}

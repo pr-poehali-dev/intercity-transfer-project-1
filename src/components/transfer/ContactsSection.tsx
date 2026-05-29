@@ -70,8 +70,8 @@ export default function ContactsSection() {
                     <Icon name="User" size={20} className="text-neon" />
                   </div>
                   <div>
-                    <div className="text-xs text-muted-foreground mb-1">{c.name}</div>
-                    <div className="font-display font-semibold text-lg text-foreground">{c.value}</div>
+                    <div className="text-xs text-muted-foreground mb-1">Менеджер</div>
+                    <div className="font-display font-semibold text-lg text-foreground">{c.name}</div>
                   </div>
                   <div className="ml-auto flex items-center gap-2">
                     <a

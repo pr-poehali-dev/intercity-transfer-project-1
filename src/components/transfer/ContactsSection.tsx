@@ -47,11 +47,11 @@ export default function ContactsSection() {
   return (
     <>
       {/* CONTACTS */}
-      <section id="contacts" className="py-24 bg-surface/30 border-t border-border">
+      <section id="contacts" className="py-16 bg-surface/30 border-t border-border">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="reveal mb-12">
-            <div className="inline-block font-display text-neon text-sm tracking-widest mb-3">КОНТАКТЫ</div>
-            <h2 className="font-display text-4xl md:text-5xl font-bold">СВЯЖИТЕСЬ С НАМИ</h2>
+          <div className="reveal mb-8">
+            <div className="inline-block font-display text-neon text-sm tracking-widest mb-2">КОНТАКТЫ</div>
+            <h2 className="font-display text-3xl md:text-4xl font-bold">СВЯЖИТЕСЬ С НАМИ</h2>
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <div className="reveal space-y-4">

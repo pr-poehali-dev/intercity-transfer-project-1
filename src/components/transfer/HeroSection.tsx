@@ -1,18 +1,9 @@
 import Icon from "@/components/ui/icon";
-import { HERO_IMAGE, STATS, FEATURES } from "./constants";
-import type { IconName } from "./constants";
+import { HERO_IMAGE, STATS } from "./constants";
 
 interface HeroSectionProps {
   onBookClick: () => void;
 }
-
-const MANAGERS = [
-  { name: "Максим", value: "+7 996 160-65-67", tel: "+79961606567" },
-  { name: "Иван", value: "+7 936 525-00-50", tel: "+79365250050" },
-  { name: "Виктор", value: "+7 906 665-10-64", tel: "+79066651064" },
-  { name: "Дмитрий", value: "+7 930 867-56-66", tel: "+79308675666" },
-  { name: "Владимир", value: "+7 995 899-80-65", tel: "+79958998065" },
-];
 
 export default function HeroSection({ onBookClick }: HeroSectionProps) {
   return (
@@ -24,55 +15,32 @@ export default function HeroSection({ onBookClick }: HeroSectionProps) {
         <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent" />
         <div className="absolute top-0 right-0 w-1/3 h-1 bg-neon" />
 
-        <div className="relative z-10 max-w-7xl mx-auto px-6 py-24 pb-40">
+        <div className="relative z-10 max-w-7xl mx-auto px-6 py-20 pb-36">
           <div className="max-w-2xl">
-            <div className="inline-flex items-center gap-2 bg-neon/10 border border-neon/30 text-neon text-xs font-display tracking-widest px-4 py-2 rounded-full mb-6 animate-fade-up">
+            <div className="inline-flex items-center gap-2 bg-neon/10 border border-neon/30 text-neon text-xs font-display tracking-widest px-4 py-2 rounded-full mb-5 animate-fade-up">
               <span className="w-2 h-2 bg-neon rounded-full animate-pulse" />
               ОНЛАЙН БРОНИРОВАНИЕ ДОСТУПНО
             </div>
-            <h1 className="font-display text-6xl md:text-7xl lg:text-8xl font-bold leading-none tracking-tight mb-6 animate-fade-up" style={{ animationDelay: "0.1s" }}>
+            <h1 className="font-display text-5xl md:text-7xl font-bold leading-none tracking-tight mb-5 animate-fade-up" style={{ animationDelay: "0.1s" }}>
               <span style={{ background: 'linear-gradient(to bottom, #ffffff 0%, #003087 50%, #CC0000 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', display: 'inline-block' }}>НАШЕ<br />for Russia Transfer</span>
             </h1>
-            <p className="text-lg text-muted-foreground mb-10 leading-relaxed max-w-lg animate-fade-up" style={{ animationDelay: "0.2s" }}>
+            <p className="text-lg text-muted-foreground mb-8 leading-relaxed max-w-lg animate-fade-up" style={{ animationDelay: "0.2s" }}>
               Поездки по России без агрегаторов — дёшево и с комфортом!
             </p>
-            <div className="flex flex-wrap gap-4 animate-fade-up" style={{ animationDelay: "0.3s" }}>
+            <div className="flex flex-wrap gap-3 animate-fade-up" style={{ animationDelay: "0.3s" }}>
               <button
                 onClick={onBookClick}
                 className="bg-neon text-background font-display font-bold text-base px-8 py-4 rounded-md hover:opacity-90 transition-all glow-neon hover:scale-105 active:scale-95"
               >
                 РАССЧИТАТЬ СТОИМОСТЬ
               </button>
-            </div>
-
-            <div className="mt-8 animate-fade-up" style={{ animationDelay: "0.4s" }}>
-              <div className="text-xs font-display text-muted-foreground tracking-widest mb-3">НАШИ МЕНЕДЖЕРЫ</div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                {MANAGERS.map((m, i) => (
-                  <div
-                    key={i}
-                    className="flex items-center gap-2 bg-surface/60 border border-white/10 rounded-lg px-3 py-2 backdrop-blur-sm"
-                  >
-                    <span className="font-display text-sm font-semibold text-foreground mr-auto">{m.name}</span>
-                    <a
-                      href={`tel:${m.tel}`}
-                      aria-label={`Позвонить ${m.name}`}
-                      className="w-8 h-8 rounded-md bg-neon/10 flex items-center justify-center text-neon hover:bg-neon hover:text-background transition-all"
-                    >
-                      <Icon name="Phone" size={15} />
-                    </a>
-                    <a
-                      href={`https://t.me/${m.tel}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      aria-label={`Telegram ${m.name}`}
-                      className="w-8 h-8 rounded-md bg-neon/10 flex items-center justify-center text-neon hover:bg-neon hover:text-background transition-all"
-                    >
-                      <Icon name="Send" size={15} />
-                    </a>
-                  </div>
-                ))}
-              </div>
+              <a
+                href="#contacts"
+                className="flex items-center gap-2 border border-white/20 text-foreground font-display font-semibold text-base px-8 py-4 rounded-md hover:border-neon/50 hover:text-neon transition-all"
+              >
+                <Icon name="Phone" size={18} />
+                СВЯЗАТЬСЯ
+              </a>
             </div>
           </div>
         </div>

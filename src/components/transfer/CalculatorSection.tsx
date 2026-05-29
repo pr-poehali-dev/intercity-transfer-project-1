@@ -80,11 +80,11 @@ export default function CalculatorSection({
   return (
     <>
       {/* CALCULATOR */}
-      <section id="calc" ref={sectionRef} className="py-24 bg-surface/30 border-y border-border">
+      <section id="calc" ref={sectionRef} className="py-16 bg-surface/30 border-y border-border">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="reveal mb-12">
-            <div className="inline-block font-display text-neon text-sm tracking-widest mb-3">БРОНИРОВАНИЕ</div>
-            <h2 className="font-display text-4xl md:text-5xl font-bold">РАССЧИТАЙТЕ<br />СТОИМОСТЬ ПОЕЗДКИ</h2>
+          <div className="reveal mb-8">
+            <div className="inline-block font-display text-neon text-sm tracking-widest mb-2">БРОНИРОВАНИЕ</div>
+            <h2 className="font-display text-3xl md:text-4xl font-bold">РАССЧИТАЙТЕ СТОИМОСТЬ ПОЕЗДКИ</h2>
           </div>
           <div className="max-w-3xl mx-auto">
             {/* Form */}

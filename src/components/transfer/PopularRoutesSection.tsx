@@ -4,10 +4,10 @@ import { ROUTES } from "./routesData";
 
 export default function PopularRoutesSection() {
   return (
-    <section className="py-24 max-w-7xl mx-auto px-6">
-      <div className="reveal mb-12 text-center">
-        <div className="inline-block font-display text-neon text-sm tracking-widest mb-3">ПОПУЛЯРНЫЕ НАПРАВЛЕНИЯ</div>
-        <h2 className="font-display text-4xl md:text-5xl font-bold">МАРШРУТЫ ПО РОССИИ</h2>
+    <section className="py-16 max-w-7xl mx-auto px-6">
+      <div className="reveal mb-8 text-center">
+        <div className="inline-block font-display text-neon text-sm tracking-widest mb-2">ПОПУЛЯРНЫЕ НАПРАВЛЕНИЯ</div>
+        <h2 className="font-display text-3xl md:text-4xl font-bold">МАРШРУТЫ ПО РОССИИ</h2>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {ROUTES.map((r) => (

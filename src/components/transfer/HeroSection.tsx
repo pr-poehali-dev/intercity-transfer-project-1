@@ -1,11 +1,10 @@
-import Icon from "@/components/ui/icon";
 import { HERO_IMAGE, STATS } from "./constants";
 
 interface HeroSectionProps {
   onBookClick: () => void;
 }
 
-export default function HeroSection({ onBookClick }: HeroSectionProps) {
+export default function HeroSection({ onBookClick: _ }: HeroSectionProps) {
   return (
     <>
       {/* HERO */}
@@ -24,24 +23,9 @@ export default function HeroSection({ onBookClick }: HeroSectionProps) {
             <h1 className="font-display text-6xl sm:text-7xl md:text-9xl font-bold leading-none tracking-tight mb-4 animate-fade-up" style={{ animationDelay: "0.1s" }}>
               <span style={{ background: 'linear-gradient(to bottom, #ffffff 0%, #003087 50%, #CC0000 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', display: 'inline-block' }}>НАШЕ<br />for Russia Transfer</span>
             </h1>
-            <p className="text-sm sm:text-base text-muted-foreground mb-6 leading-relaxed animate-fade-up" style={{ animationDelay: "0.2s" }}>
+            <p className="text-sm sm:text-base text-muted-foreground leading-relaxed animate-fade-up" style={{ animationDelay: "0.2s" }}>
               Поездки по России без агрегаторов — дёшево и с комфортом!
             </p>
-            <div className="flex flex-wrap gap-2 animate-fade-up" style={{ animationDelay: "0.3s" }}>
-              <button
-                onClick={onBookClick}
-                className="bg-neon text-background font-display font-bold text-sm sm:text-base px-5 sm:px-8 py-3 sm:py-4 rounded-md hover:opacity-90 transition-all glow-neon hover:scale-105 active:scale-95"
-              >
-                РАССЧИТАТЬ СТОИМОСТЬ
-              </button>
-              <a
-                href="#contacts"
-                className="flex items-center gap-2 border border-white/20 text-foreground font-display font-semibold text-sm sm:text-base px-5 sm:px-8 py-3 sm:py-4 rounded-md hover:border-neon/50 hover:text-neon transition-all"
-              >
-                <Icon name="Phone" size={16} />
-                СВЯЗАТЬСЯ
-              </a>
-            </div>
           </div>
         </div>
 

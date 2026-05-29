@@ -4,7 +4,7 @@ import HeroSection from "@/components/transfer/HeroSection";
 import CalculatorSection from "@/components/transfer/CalculatorSection";
 import PopularRoutesSection from "@/components/transfer/PopularRoutesSection";
 import ContactsSection from "@/components/transfer/ContactsSection";
-import { TARIFFS, getDistance, getDistanceSurcharge } from "@/components/transfer/constants";
+import { TARIFFS, getDistance, getDistanceSurcharge, CHILD_SEAT_PRICE, PET_OPTIONS } from "@/components/transfer/constants";
 import func2url from "../../backend/func2url.json";
 
 export default function Index() {
@@ -13,6 +13,10 @@ export default function Index() {
   const [tariff, setTariff] = useState(0);
   const [passengers, setPassengers] = useState(1);
   const [date, setDate] = useState("");
+  const [withChildren, setWithChildren] = useState(false);
+  const [childrenCount, setChildrenCount] = useState(1);
+  const [withPet, setWithPet] = useState(false);
+  const [petOption, setPetOption] = useState(0);
   const [price, setPrice] = useState<number | null>(null);
   const [distance, setDistance] = useState<number | null>(null);
   const [calculated, setCalculated] = useState(false);
@@ -37,11 +41,20 @@ export default function Index() {
     return () => observer.disconnect();
   }, []);
 
+  const maxChildren = TARIFFS[tariff].name === "Минивэн" ? 5 : 3;
+
+  function extrasTotal() {
+    let sum = 0;
+    if (withChildren) sum += childrenCount * CHILD_SEAT_PRICE;
+    if (withPet) sum += PET_OPTIONS[petOption].price;
+    return sum;
+  }
+
   function priceFromDistance(dist: number) {
     const base = dist * TARIFFS[tariff].pricePerKm;
     const mult = passengers > 1 ? 1 + (passengers - 1) * 0.15 : 1;
     const surcharge = getDistanceSurcharge(dist);
-    return Math.round((base * mult * surcharge) / 50) * 50;
+    return Math.round((base * mult * surcharge) / 50) * 50 + extrasTotal();
   }
 
   async function calculate() {
@@ -83,8 +96,15 @@ export default function Index() {
   function handleSetTariff(v: number) {
     setTariff(v);
     setPassengers((p) => Math.min(p, TARIFFS[v].maxPassengers));
+    const newMax = TARIFFS[v].name === "Минивэн" ? 5 : 3;
+    setChildrenCount((c) => Math.min(c, newMax));
+    setCalculated(false);
   }
   function handleSetPassengers(v: number) { setPassengers(v); setCalculated(false); }
+  function handleSetWithChildren(v: boolean) { setWithChildren(v); setCalculated(false); }
+  function handleSetChildrenCount(v: number) { setChildrenCount(v); setCalculated(false); }
+  function handleSetWithPet(v: boolean) { setWithPet(v); setCalculated(false); }
+  function handleSetPetOption(v: number) { setPetOption(v); setCalculated(false); }
 
   return (
     <div className="min-h-screen bg-background text-foreground font-golos overflow-x-hidden">
@@ -99,6 +119,15 @@ export default function Index() {
         setTariff={handleSetTariff}
         passengers={passengers}
         setPassengers={handleSetPassengers}
+        withChildren={withChildren}
+        setWithChildren={handleSetWithChildren}
+        childrenCount={childrenCount}
+        setChildrenCount={handleSetChildrenCount}
+        maxChildren={maxChildren}
+        withPet={withPet}
+        setWithPet={handleSetWithPet}
+        petOption={petOption}
+        setPetOption={handleSetPetOption}
         date={date}
         setDate={setDate}
         price={price}

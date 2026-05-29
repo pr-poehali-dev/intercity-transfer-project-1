@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import Icon from "@/components/ui/icon";
-import { TARIFFS, getDistanceSurcharge } from "./constants";
+import { TARIFFS, getDistanceSurcharge, CHILD_SEAT_PRICE, PET_OPTIONS } from "./constants";
 import type { IconName } from "./constants";
 import CitySelect from "./CitySelect";
 import func2url from "../../../backend/func2url.json";
@@ -14,6 +14,15 @@ interface CalculatorSectionProps {
   setTariff: (v: number) => void;
   passengers: number;
   setPassengers: (v: number) => void;
+  withChildren: boolean;
+  setWithChildren: (v: boolean) => void;
+  childrenCount: number;
+  setChildrenCount: (v: number) => void;
+  maxChildren: number;
+  withPet: boolean;
+  setWithPet: (v: boolean) => void;
+  petOption: number;
+  setPetOption: (v: number) => void;
   date: string;
   setDate: (v: string) => void;
   price: number | null;
@@ -30,6 +39,9 @@ export default function CalculatorSection({
   from, setFrom, to, setTo,
   tariff, setTariff,
   passengers, setPassengers,
+  withChildren, setWithChildren,
+  childrenCount, setChildrenCount, maxChildren,
+  withPet, setWithPet, petOption, setPetOption,
   date, setDate,
   price, distance, calculated, calculating,
   onCalculate, onClose, onRouteSelect,
@@ -49,9 +61,13 @@ export default function CalculatorSection({
     setError("");
     setSending(true);
     const mult = passengers > 1 ? 1 + (passengers - 1) * 0.15 : 1;
+    const extras = (withChildren ? childrenCount * CHILD_SEAT_PRICE : 0) + (withPet ? PET_OPTIONS[petOption].price : 0);
     const finalPrice = distance
-      ? Math.round((distance * TARIFFS[tariff].pricePerKm * mult * getDistanceSurcharge(distance)) / 50) * 50
+      ? Math.round((distance * TARIFFS[tariff].pricePerKm * mult * getDistanceSurcharge(distance)) / 50) * 50 + extras
       : price;
+    const services: string[] = [];
+    if (withChildren) services.push(`С детьми до 6 лет: ${childrenCount} (+${childrenCount * CHILD_SEAT_PRICE} ₽)`);
+    if (withPet) services.push(`Перевозка животного ${PET_OPTIONS[petOption].label} (+${PET_OPTIONS[petOption].price} ₽)`);
     try {
       const res = await fetch(func2url["send-booking"], {
         method: "POST",
@@ -66,6 +82,7 @@ export default function CalculatorSection({
           tariff: TARIFFS[tariff].name,
           price: finalPrice,
           distance,
+          services: services.length ? services.join("; ") : "—",
         }),
       });
       if (!res.ok) throw new Error();
@@ -152,6 +169,80 @@ export default function CalculatorSection({
                 </div>
               </div>
 
+              {/* Extra services */}
+              <div className="mb-6">
+                <label className="text-sm font-display text-muted-foreground tracking-wider mb-3 block">ДОПОЛНИТЕЛЬНЫЕ УСЛУГИ</label>
+                <div className="space-y-3">
+                  {/* Children */}
+                  <div className={`border rounded-xl p-3 transition-all ${withChildren ? "border-neon bg-neon/5" : "border-border bg-background"}`}>
+                    <button
+                      type="button"
+                      onClick={() => setWithChildren(!withChildren)}
+                      className="w-full flex items-center gap-3"
+                    >
+                      <div className={`w-5 h-5 rounded border flex items-center justify-center flex-shrink-0 ${withChildren ? "bg-neon border-neon" : "border-muted-foreground"}`}>
+                        {withChildren && <Icon name="Check" size={14} className="text-background" />}
+                      </div>
+                      <Icon name="Baby" size={18} className={withChildren ? "text-neon" : "text-muted-foreground"} />
+                      <div className="text-left flex-1 min-w-0">
+                        <div className="font-display text-sm font-semibold text-foreground">С детьми до 6 лет</div>
+                        <div className="text-xs text-muted-foreground">+{CHILD_SEAT_PRICE} ₽ за каждого ребёнка</div>
+                      </div>
+                    </button>
+                    {withChildren && (
+                      <div className="flex items-center gap-2 mt-3 pl-8">
+                        <span className="text-sm text-muted-foreground">Детей:</span>
+                        <button
+                          type="button"
+                          onClick={() => setChildrenCount(Math.max(1, childrenCount - 1))}
+                          className="w-7 h-7 rounded-full bg-surface-hover flex items-center justify-center hover:bg-neon/20 transition-colors text-foreground font-bold text-lg leading-none"
+                        >–</button>
+                        <span className="w-8 text-center font-display font-bold text-foreground">{childrenCount}</span>
+                        <button
+                          type="button"
+                          onClick={() => setChildrenCount(Math.min(maxChildren, childrenCount + 1))}
+                          className="w-7 h-7 rounded-full bg-surface-hover flex items-center justify-center hover:bg-neon/20 transition-colors text-foreground font-bold text-lg leading-none"
+                        >+</button>
+                        <span className="text-xs text-muted-foreground ml-1">макс. {maxChildren}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Pet */}
+                  <div className={`border rounded-xl p-3 transition-all ${withPet ? "border-neon bg-neon/5" : "border-border bg-background"}`}>
+                    <button
+                      type="button"
+                      onClick={() => setWithPet(!withPet)}
+                      className="w-full flex items-center gap-3"
+                    >
+                      <div className={`w-5 h-5 rounded border flex items-center justify-center flex-shrink-0 ${withPet ? "bg-neon border-neon" : "border-muted-foreground"}`}>
+                        {withPet && <Icon name="Check" size={14} className="text-background" />}
+                      </div>
+                      <Icon name="Dog" size={18} className={withPet ? "text-neon" : "text-muted-foreground"} />
+                      <div className="text-left flex-1 min-w-0">
+                        <div className="font-display text-sm font-semibold text-foreground">Перевозка животного</div>
+                        <div className="text-xs text-muted-foreground">Выберите вес питомца</div>
+                      </div>
+                    </button>
+                    {withPet && (
+                      <div className="grid grid-cols-3 gap-2 mt-3 pl-8">
+                        {PET_OPTIONS.map((p, i) => (
+                          <button
+                            key={i}
+                            type="button"
+                            onClick={() => setPetOption(i)}
+                            className={`border rounded-lg p-2 text-center transition-all ${petOption === i ? "border-neon bg-neon/10 text-foreground" : "border-border bg-surface text-muted-foreground hover:border-white/30"}`}
+                          >
+                            <div className="font-display text-sm font-semibold leading-tight">{p.label}</div>
+                            <div className="text-xs opacity-70 mt-0.5">+{p.price} ₽</div>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
               <button
                 onClick={onCalculate}
                 disabled={from === to || calculating}
@@ -205,8 +296,9 @@ export default function CalculatorSection({
               <>
                 {(() => {
                   const mult = passengers > 1 ? 1 + (passengers - 1) * 0.15 : 1;
+                  const extras = (withChildren ? childrenCount * CHILD_SEAT_PRICE : 0) + (withPet ? PET_OPTIONS[petOption].price : 0);
                   const shownPrice = distance
-                    ? Math.round((distance * TARIFFS[tariff].pricePerKm * mult * getDistanceSurcharge(distance)) / 50) * 50
+                    ? Math.round((distance * TARIFFS[tariff].pricePerKm * mult * getDistanceSurcharge(distance)) / 50) * 50 + extras
                     : price;
                   return (
                     <>
@@ -228,6 +320,22 @@ export default function CalculatorSection({
                 <div className="text-sm text-muted-foreground mb-3">
                   {from} → {to} · {TARIFFS[tariff].name} · {passengers} пасс.
                 </div>
+                {(withChildren || withPet) && (
+                  <div className="mb-3 space-y-1.5">
+                    {withChildren && (
+                      <div className="flex items-center gap-2 text-sm text-foreground">
+                        <Icon name="Baby" size={14} className="text-neon flex-shrink-0" />
+                        С детьми до 6 лет: {childrenCount} (+{(childrenCount * CHILD_SEAT_PRICE).toLocaleString("ru-RU")} ₽)
+                      </div>
+                    )}
+                    {withPet && (
+                      <div className="flex items-center gap-2 text-sm text-foreground">
+                        <Icon name="Dog" size={14} className="text-neon flex-shrink-0" />
+                        Перевозка животного {PET_OPTIONS[petOption].label} (+{PET_OPTIONS[petOption].price.toLocaleString("ru-RU")} ₽)
+                      </div>
+                    )}
+                  </div>
+                )}
                 {distance && (
                   <div className="inline-flex items-center gap-2 bg-background border border-border rounded-lg px-3 py-2 mb-6">
                     <Icon name="Navigation" size={14} className="text-neon" />
@@ -242,7 +350,8 @@ export default function CalculatorSection({
                     <div className="space-y-2">
                       {TARIFFS.map((t, i) => {
                         const mult = passengers > 1 ? 1 + (passengers - 1) * 0.15 : 1;
-                        const tPrice = Math.round((distance * t.pricePerKm * mult * getDistanceSurcharge(distance)) / 50) * 50;
+                        const extras = (withChildren ? childrenCount * CHILD_SEAT_PRICE : 0) + (withPet ? PET_OPTIONS[petOption].price : 0);
+                        const tPrice = Math.round((distance * t.pricePerKm * mult * getDistanceSurcharge(distance)) / 50) * 50 + extras;
                         return (
                           <button
                             key={i}

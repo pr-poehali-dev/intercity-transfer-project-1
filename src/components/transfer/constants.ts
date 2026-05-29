@@ -9,7 +9,16 @@ export const CITIES = [
 export const TARIFFS = [
   { name: "Эконом", pricePerKm: 32, icon: "Car", desc: "Комфортный седан", maxPassengers: 4 },
   { name: "Комфорт", pricePerKm: 37, icon: "Star", desc: "Повышенный комфорт", maxPassengers: 4 },
+  { name: "Универсал", pricePerKm: 40, icon: "Truck", desc: "Везите больше", maxPassengers: 4 },
   { name: "Минивэн", pricePerKm: 55, icon: "Users", desc: "До 10 пассажиров", maxPassengers: 10 },
+];
+
+export const CHILD_SEAT_PRICE = 500;
+
+export const PET_OPTIONS = [
+  { label: "До 5 кг", price: 500 },
+  { label: "До 10 кг", price: 1000 },
+  { label: "До 20 кг", price: 1500 },
 ];
 
 export const DISTANCES: Record<string, Record<string, number>> = {
@@ -105,7 +114,7 @@ export function getDistance(from: string, to: string): number {
 }
 
 export type IconName =
-  | "MapPin" | "Navigation" | "Car" | "Star" | "Users"
+  | "MapPin" | "Navigation" | "Car" | "Star" | "Users" | "Truck" | "Baby" | "Dog"
   | "Shield" | "Clock" | "CreditCard" | "Headphones" | "Phone"
-  | "Calculator" | "CheckCircle" | "ArrowRight" | "MessageCircle"
+  | "Calculator" | "CheckCircle" | "Check" | "ArrowRight" | "MessageCircle"
   | "Send" | "Mail" | "ChevronRight";

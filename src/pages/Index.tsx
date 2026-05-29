@@ -110,8 +110,8 @@ export default function Index() {
         onRouteSelect={handleRouteSelect}
         sectionRef={bookRef}
       />
-      <PopularRoutesSection />
       <ContactsSection />
+      <PopularRoutesSection />
 
       <style>{`
         .font-display { font-family: 'Oswald', sans-serif; }

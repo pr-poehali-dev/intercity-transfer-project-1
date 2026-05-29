@@ -81,14 +81,14 @@ export default function CalculatorSection({
     <>
       {/* CALCULATOR */}
       <section id="calc" ref={sectionRef} className="py-16 bg-surface/30 border-y border-border">
-        <div className="max-w-7xl mx-auto px-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="reveal mb-8">
             <div className="inline-block font-display text-neon text-sm tracking-widest mb-2">БРОНИРОВАНИЕ</div>
-            <h2 className="font-display text-3xl md:text-4xl font-bold">РАССЧИТАЙТЕ СТОИМОСТЬ ПОЕЗДКИ</h2>
+            <h2 className="font-display text-2xl sm:text-3xl md:text-4xl font-bold">РАССЧИТАЙТЕ СТОИМОСТЬ ПОЕЗДКИ</h2>
           </div>
           <div className="max-w-3xl mx-auto">
             {/* Form */}
-            <div className="reveal bg-surface border border-border rounded-2xl p-8">
+            <div className="reveal bg-surface border border-border rounded-2xl p-4 sm:p-8">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
                 <div>
                   <label className="text-xs font-display text-muted-foreground tracking-wider mb-2 block">ОТКУДА</label>
@@ -108,15 +108,15 @@ export default function CalculatorSection({
                     <button
                       key={i}
                       onClick={() => { setTariff(i); }}
-                      className={`border rounded-xl p-3 text-center transition-all ${
+                      className={`border rounded-xl p-2 sm:p-3 text-center transition-all overflow-hidden min-w-0 ${
                         tariff === i
                           ? "border-neon bg-neon/10 text-foreground"
                           : "border-border bg-background text-muted-foreground hover:border-white/30"
                       }`}
                     >
-                      <Icon name={t.icon as IconName} size={20} className={`mx-auto mb-1 ${tariff === i ? "text-neon" : ""}`} />
-                      <div className="font-display text-sm font-semibold">{t.name}</div>
-                      <div className="text-xs opacity-70">{t.desc}</div>
+                      <Icon name={t.icon as IconName} size={18} className={`mx-auto mb-1 ${tariff === i ? "text-neon" : ""}`} />
+                      <div className="font-display text-xs sm:text-sm font-semibold truncate">{t.name}</div>
+                      <div className="text-[10px] sm:text-xs opacity-70 truncate">{t.desc}</div>
                     </button>
                   ))}
                 </div>

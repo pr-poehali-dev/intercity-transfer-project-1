@@ -221,6 +221,10 @@ export default function CalculatorSection({
                     </>
                   );
                 })()}
+                <div className="text-xs text-muted-foreground/80 mb-3 flex items-center gap-1.5">
+                  <Icon name="Info" size={12} className="flex-shrink-0" />
+                  Точную стоимость подтвердит диспетчер
+                </div>
                 <div className="text-sm text-muted-foreground mb-3">
                   {from} → {to} · {TARIFFS[tariff].name} · {passengers} пасс.
                 </div>

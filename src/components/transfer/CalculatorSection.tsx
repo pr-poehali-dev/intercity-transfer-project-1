@@ -212,6 +212,7 @@ export default function CalculatorSection({
                     <>
                       <div className="text-xs font-display text-neon tracking-widest mb-4">СТОИМОСТЬ ПОЕЗДКИ</div>
                       <div className="flex items-baseline gap-2 mb-2">
+                        <span className="font-display text-2xl text-muted-foreground">от</span>
                         <span className="font-display text-6xl font-bold text-neon glow-neon-text">
                           {(shownPrice ?? 0).toLocaleString("ru-RU")}
                         </span>
@@ -257,7 +258,7 @@ export default function CalculatorSection({
                               </div>
                             </div>
                             <div className="font-display font-bold text-foreground">
-                              {tPrice.toLocaleString("ru-RU")} ₽
+                              от {tPrice.toLocaleString("ru-RU")} ₽
                             </div>
                           </button>
                         );

@@ -4,14 +4,6 @@ interface NavbarProps {
   onBookClick: () => void;
 }
 
-const MANAGERS = [
-  { name: "Максим", value: "+7 996 160-65-67", tel: "+79961606567" },
-  { name: "Иван", value: "+7 936 525-00-50", tel: "+79365250050" },
-  { name: "Виктор", value: "+7 906 665-10-64", tel: "+79066651064" },
-  { name: "Дмитрий", value: "+7 930 867-56-66", tel: "+79308675666" },
-  { name: "Владимир", value: "+7 995 899-80-65", tel: "+79958998065" },
-];
-
 export default function Navbar({ onBookClick }: NavbarProps) {
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 glass border-b border-white/5">
@@ -36,21 +28,6 @@ export default function Navbar({ onBookClick }: NavbarProps) {
         >
           ЗАБРОНИРОВАТЬ
         </button>
-      </div>
-      <div className="border-t border-white/5 bg-background/40">
-        <div className="max-w-7xl mx-auto px-6 py-2 flex flex-wrap items-center justify-center gap-x-5 gap-y-1">
-          {MANAGERS.map((m, i) => (
-            <a
-              key={i}
-              href={`tel:${m.tel}`}
-              className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-neon transition-colors whitespace-nowrap"
-            >
-              <Icon name="Phone" size={12} className="text-neon flex-shrink-0" />
-              <span className="font-medium text-foreground">{m.name}</span>
-              <span>{m.value}</span>
-            </a>
-          ))}
-        </div>
       </div>
     </nav>
   );

@@ -6,6 +6,14 @@ interface HeroSectionProps {
   onBookClick: () => void;
 }
 
+const MANAGERS = [
+  { name: "Максим", value: "+7 996 160-65-67", tel: "+79961606567" },
+  { name: "Иван", value: "+7 936 525-00-50", tel: "+79365250050" },
+  { name: "Виктор", value: "+7 906 665-10-64", tel: "+79066651064" },
+  { name: "Дмитрий", value: "+7 930 867-56-66", tel: "+79308675666" },
+  { name: "Владимир", value: "+7 995 899-80-65", tel: "+79958998065" },
+];
+
 export default function HeroSection({ onBookClick }: HeroSectionProps) {
   return (
     <>
@@ -35,22 +43,42 @@ export default function HeroSection({ onBookClick }: HeroSectionProps) {
               >
                 РАССЧИТАТЬ СТОИМОСТЬ
               </button>
-              <a
-                href="tel:+79961606567"
-                className="flex items-center gap-2 border border-white/20 text-foreground font-display font-semibold text-base px-8 py-4 rounded-md hover:border-neon/50 hover:text-neon transition-all"
-              >
-                <Icon name="Phone" size={18} />
-                +7 996 160-65-67
-              </a>
-              <a
-                href="https://t.me/+79961606567"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 border border-white/20 text-foreground font-display font-semibold text-base px-8 py-4 rounded-md hover:border-neon/50 hover:text-neon transition-all"
-              >
-                <Icon name="Send" size={18} />
-                Telegram
-              </a>
+            </div>
+
+            <div className="mt-8 animate-fade-up" style={{ animationDelay: "0.4s" }}>
+              <div className="text-xs font-display text-muted-foreground tracking-widest mb-3">НАШИ МЕНЕДЖЕРЫ</div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {MANAGERS.map((m, i) => (
+                  <div
+                    key={i}
+                    className="flex items-center gap-2 bg-surface/60 border border-white/10 rounded-lg px-3 py-2 backdrop-blur-sm"
+                  >
+                    <span className="font-display text-sm font-semibold text-foreground w-20 flex-shrink-0">{m.name}</span>
+                    <a
+                      href={`tel:${m.tel}`}
+                      className="text-sm text-muted-foreground hover:text-neon transition-colors mr-auto"
+                    >
+                      {m.value}
+                    </a>
+                    <a
+                      href={`tel:${m.tel}`}
+                      aria-label={`Позвонить ${m.name}`}
+                      className="w-8 h-8 rounded-md bg-neon/10 flex items-center justify-center text-neon hover:bg-neon hover:text-background transition-all"
+                    >
+                      <Icon name="Phone" size={15} />
+                    </a>
+                    <a
+                      href={`https://t.me/${m.tel}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={`Telegram ${m.name}`}
+                      className="w-8 h-8 rounded-md bg-neon/10 flex items-center justify-center text-neon hover:bg-neon hover:text-background transition-all"
+                    >
+                      <Icon name="Send" size={15} />
+                    </a>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>

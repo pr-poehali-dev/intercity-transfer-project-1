@@ -48,7 +48,7 @@ export default function ContactsSection() {
     <>
       {/* CONTACTS */}
       <section id="contacts" className="py-16 bg-surface/30 border-t border-border">
-        <div className="max-w-7xl mx-auto px-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="reveal mb-8">
             <div className="inline-block font-display text-neon text-sm tracking-widest mb-2">КОНТАКТЫ</div>
             <h2 className="font-display text-3xl md:text-4xl font-bold">СВЯЖИТЕСЬ С НАМИ</h2>
@@ -64,7 +64,7 @@ export default function ContactsSection() {
               ].map((c, i) => (
                 <div
                   key={i}
-                  className="flex items-center gap-4 p-5 rounded-xl border border-border bg-surface transition-all hover:border-white/20"
+                  className="flex items-center gap-3 p-3 sm:p-5 rounded-xl border border-border bg-surface transition-all hover:border-white/20 min-w-0"
                 >
                   <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 bg-neon/10">
                     <Icon name="User" size={20} className="text-neon" />
@@ -73,7 +73,7 @@ export default function ContactsSection() {
                     <div className="text-xs text-muted-foreground mb-1">Менеджер</div>
                     <div className="font-display font-semibold text-lg text-foreground">{c.name}</div>
                   </div>
-                  <div className="ml-auto flex items-center gap-2">
+                  <div className="ml-auto flex items-center gap-2 flex-shrink-0">
                     <a
                       href={`tel:${c.tel}`}
                       aria-label={`Позвонить ${c.name}`}
@@ -96,7 +96,7 @@ export default function ContactsSection() {
             </div>
 
             <div className="reveal">
-              <div className="bg-surface border border-border rounded-2xl p-8 h-full">
+              <div className="bg-surface border border-border rounded-2xl p-4 sm:p-8 h-full">
                 <h3 className="font-display text-xl font-bold mb-6">ОСТАВЬТЕ ЗАЯВКУ</h3>
                 {sent ? (
                   <div className="text-center py-10">
@@ -154,7 +154,7 @@ export default function ContactsSection() {
 
       {/* FOOTER */}
       <footer className="border-t border-border py-10">
-        <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <div className="w-7 h-7 bg-neon rounded-sm flex items-center justify-center">
               <Icon name="MapPin" size={14} className="text-background" />

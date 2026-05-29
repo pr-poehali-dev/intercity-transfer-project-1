@@ -91,7 +91,7 @@ export default function CitySelect({ value, onChange, iconName, exclude }: CityS
       </button>
 
       {open && (
-        <div className="absolute z-50 mt-2 w-full sm:w-[440px] bg-surface border border-border rounded-xl shadow-2xl overflow-hidden">
+        <div className="absolute z-50 mt-2 w-full sm:min-w-[360px] sm:max-w-[440px] bg-surface border border-border rounded-xl shadow-2xl overflow-hidden">
           <div className="p-3 border-b border-border">
             <div className="relative">
               <Icon name="Calculator" size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />

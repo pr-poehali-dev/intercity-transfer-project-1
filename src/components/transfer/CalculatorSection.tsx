@@ -135,7 +135,7 @@ export default function CalculatorSection({
                 </div>
                 <div>
                   <label className="text-xs font-display text-muted-foreground tracking-wider mb-2 block">ПАССАЖИРЫ</label>
-                  <div className="flex items-center gap-3 bg-background border border-border rounded-lg px-4 py-3">
+                  <div className="flex items-center gap-2 bg-background border border-border rounded-lg px-2 sm:px-4 py-3">
                     <button
                       onClick={() => { setPassengers(Math.max(1, passengers - 1)); }}
                       className="w-7 h-7 rounded-full bg-surface-hover flex items-center justify-center hover:bg-neon/20 transition-colors text-foreground font-bold text-lg leading-none"
@@ -178,7 +178,7 @@ export default function CalculatorSection({
           onClick={() => { setSent(false); setError(""); onClose(); }}
         >
           <div
-            className="bg-surface border border-neon/40 rounded-2xl p-8 max-w-lg w-full relative shadow-2xl my-auto"
+            className="bg-surface border border-neon/40 rounded-2xl p-4 sm:p-8 max-w-lg w-full relative shadow-2xl my-auto"
             onClick={(e) => e.stopPropagation()}
           >
             <button
@@ -211,12 +211,12 @@ export default function CalculatorSection({
                   return (
                     <>
                       <div className="text-xs font-display text-neon tracking-widest mb-4">СТОИМОСТЬ ПОЕЗДКИ</div>
-                      <div className="flex items-baseline gap-2 mb-2">
-                        <span className="font-display text-2xl text-muted-foreground">от</span>
-                        <span className="font-display text-6xl font-bold text-neon glow-neon-text">
+                      <div className="flex items-baseline gap-2 mb-2 flex-wrap">
+                        <span className="font-display text-lg sm:text-2xl text-muted-foreground">от</span>
+                        <span className="font-display text-4xl sm:text-6xl font-bold text-neon glow-neon-text">
                           {(shownPrice ?? 0).toLocaleString("ru-RU")}
                         </span>
-                        <span className="font-display text-2xl text-muted-foreground">₽</span>
+                        <span className="font-display text-lg sm:text-2xl text-muted-foreground">₽</span>
                       </div>
                     </>
                   );
@@ -313,12 +313,12 @@ export default function CalculatorSection({
       )}
 
       {/* HOW IT WORKS */}
-      <section className="py-24 max-w-7xl mx-auto px-6">
-        <div className="reveal mb-16 text-center">
-          <div className="inline-block font-display text-neon text-sm tracking-widest mb-3">КАК ЭТО РАБОТАЕТ</div>
-          <h2 className="font-display text-4xl md:text-5xl font-bold">3 ШАГА ДО ПОЕЗДКИ</h2>
+      <section className="py-12 sm:py-16 max-w-7xl mx-auto px-4 sm:px-6">
+        <div className="reveal mb-8 text-center">
+          <div className="inline-block font-display text-neon text-sm tracking-widest mb-2">КАК ЭТО РАБОТАЕТ</div>
+          <h2 className="font-display text-2xl sm:text-3xl md:text-4xl font-bold">3 ШАГА ДО ПОЕЗДКИ</h2>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-10">
           {[
             { num: "1", icon: "MapPin", title: "Выберите маршрут", desc: "Укажите откуда и куда, дату и количество пассажиров" },
             { num: "2", icon: "CreditCard", title: "Оплатите водителю", desc: "Наличными или переводом. Цена фиксирована и не меняется" },

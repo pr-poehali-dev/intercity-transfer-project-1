@@ -7,7 +7,7 @@ interface NavbarProps {
 export default function Navbar({ onBookClick }: NavbarProps) {
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 glass border-b border-white/5">
-      <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
         <div className="flex items-center gap-2 min-w-0">
           <div className="w-7 h-7 bg-neon rounded-sm flex items-center justify-center flex-shrink-0">
             <Icon name="MapPin" size={14} className="text-background" />

@@ -1,6 +1,5 @@
 import { useState } from "react";
 import Icon from "@/components/ui/icon";
-import type { IconName } from "./constants";
 import func2url from "../../../backend/func2url.json";
 
 export default function ContactsSection() {
@@ -57,32 +56,42 @@ export default function ContactsSection() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <div className="reveal space-y-4">
               {[
-                { icon: "Phone", label: "Максим", value: "+7 996 160-65-67", href: "tel:+79961606567", highlight: true },
-                { icon: "Phone", label: "Дополнительный", value: "+7 919 266-78-85", href: "tel:+79192667885", highlight: false },
-                { icon: "Send", label: "Telegram", value: "@Nashe_for_Russia", href: "https://t.me/Nashe_for_Russia", highlight: false },
+                { name: "Максим", value: "+7 996 160-65-67", tel: "+79961606567" },
+                { name: "Иван", value: "+7 936 525-00-50", tel: "+79365250050" },
+                { name: "Виктор", value: "+7 906 665-10-64", tel: "+79066651064" },
+                { name: "Дмитрий", value: "+7 930 867-56-66", tel: "+79308675666" },
+                { name: "Владимир", value: "+7 995 899-80-65", tel: "+79958998065" },
               ].map((c, i) => (
-                <a
+                <div
                   key={i}
-                  href={c.href}
-                  className={`flex items-center gap-4 p-5 rounded-xl border transition-all group hover:-translate-y-0.5 ${
-                    c.highlight
-                      ? "border-neon/40 bg-neon/5 hover:bg-neon/10"
-                      : "border-border bg-surface hover:border-white/20"
-                  }`}
+                  className="flex items-center gap-4 p-5 rounded-xl border border-border bg-surface transition-all hover:border-white/20"
                 >
-                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${
-                    c.highlight ? "bg-neon" : "bg-neon/10"
-                  }`}>
-                    <Icon name={c.icon as IconName} size={20} className={c.highlight ? "text-background" : "text-neon"} />
+                  <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 bg-neon/10">
+                    <Icon name="User" size={20} className="text-neon" />
                   </div>
                   <div>
-                    <div className="text-xs text-muted-foreground mb-1">{c.label}</div>
-                    <div className={`font-display font-semibold text-lg ${c.highlight ? "text-neon" : "text-foreground"}`}>
-                      {c.value}
-                    </div>
+                    <div className="text-xs text-muted-foreground mb-1">{c.name}</div>
+                    <div className="font-display font-semibold text-lg text-foreground">{c.value}</div>
                   </div>
-                  <Icon name="ChevronRight" size={16} className="ml-auto text-muted-foreground group-hover:text-neon transition-colors" />
-                </a>
+                  <div className="ml-auto flex items-center gap-2">
+                    <a
+                      href={`tel:${c.tel}`}
+                      aria-label={`Позвонить ${c.name}`}
+                      className="w-10 h-10 rounded-lg bg-neon/10 flex items-center justify-center text-neon hover:bg-neon hover:text-background transition-all"
+                    >
+                      <Icon name="Phone" size={18} />
+                    </a>
+                    <a
+                      href={`https://t.me/${c.tel}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={`Telegram ${c.name}`}
+                      className="w-10 h-10 rounded-lg bg-neon/10 flex items-center justify-center text-neon hover:bg-neon hover:text-background transition-all"
+                    >
+                      <Icon name="Send" size={18} />
+                    </a>
+                  </div>
+                </div>
               ))}
             </div>
 

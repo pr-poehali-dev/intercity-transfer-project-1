@@ -48,6 +48,10 @@ export default function CalculatorSection({
     }
     setError("");
     setSending(true);
+    const mult = passengers > 1 ? 1 + (passengers - 1) * 0.15 : 1;
+    const finalPrice = distance
+      ? Math.round((distance * TARIFFS[tariff].pricePerKm * mult) / 50) * 50
+      : price;
     try {
       const res = await fetch(func2url["send-booking"], {
         method: "POST",
@@ -60,7 +64,7 @@ export default function CalculatorSection({
           date,
           passengers,
           tariff: TARIFFS[tariff].name,
-          price,
+          price: finalPrice,
           distance,
         }),
       });
@@ -196,13 +200,23 @@ export default function CalculatorSection({
               </div>
             ) : (
               <>
-                <div className="text-xs font-display text-neon tracking-widest mb-4">СТОИМОСТЬ ПОЕЗДКИ</div>
-                <div className="flex items-baseline gap-2 mb-2">
-                  <span className="font-display text-6xl font-bold text-neon glow-neon-text">
-                    {price.toLocaleString("ru-RU")}
-                  </span>
-                  <span className="font-display text-2xl text-muted-foreground">₽</span>
-                </div>
+                {(() => {
+                  const mult = passengers > 1 ? 1 + (passengers - 1) * 0.15 : 1;
+                  const shownPrice = distance
+                    ? Math.round((distance * TARIFFS[tariff].pricePerKm * mult) / 50) * 50
+                    : price;
+                  return (
+                    <>
+                      <div className="text-xs font-display text-neon tracking-widest mb-4">СТОИМОСТЬ ПОЕЗДКИ</div>
+                      <div className="flex items-baseline gap-2 mb-2">
+                        <span className="font-display text-6xl font-bold text-neon glow-neon-text">
+                          {(shownPrice ?? 0).toLocaleString("ru-RU")}
+                        </span>
+                        <span className="font-display text-2xl text-muted-foreground">₽</span>
+                      </div>
+                    </>
+                  );
+                })()}
                 <div className="text-sm text-muted-foreground mb-3">
                   {from} → {to} · {TARIFFS[tariff].name} · {passengers} пасс.
                 </div>
@@ -212,6 +226,40 @@ export default function CalculatorSection({
                     <span className="text-sm text-foreground font-medium">
                       Расстояние: {distance.toLocaleString("ru-RU")} км по дорогам
                     </span>
+                  </div>
+                )}
+                {distance && (
+                  <div className="mb-6">
+                    <div className="text-xs font-display text-muted-foreground tracking-wider mb-3">ВЫБЕРИТЕ ТАРИФ</div>
+                    <div className="space-y-2">
+                      {TARIFFS.map((t, i) => {
+                        const mult = passengers > 1 ? 1 + (passengers - 1) * 0.15 : 1;
+                        const tPrice = Math.round((distance * t.pricePerKm * mult) / 50) * 50;
+                        return (
+                          <button
+                            key={i}
+                            type="button"
+                            onClick={() => setTariff(i)}
+                            className={`w-full flex items-center justify-between border rounded-xl px-4 py-3 transition-all ${
+                              tariff === i
+                                ? "border-neon bg-neon/10"
+                                : "border-border bg-background hover:border-white/30"
+                            }`}
+                          >
+                            <div className="flex items-center gap-3">
+                              <Icon name={t.icon as IconName} size={18} className={tariff === i ? "text-neon" : "text-muted-foreground"} />
+                              <div className="text-left">
+                                <div className="font-display text-sm font-semibold text-foreground">{t.name}</div>
+                                <div className="text-xs text-muted-foreground">{t.desc}</div>
+                              </div>
+                            </div>
+                            <div className="font-display font-bold text-foreground">
+                              {tPrice.toLocaleString("ru-RU")} ₽
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
                 )}
                 <div className="space-y-2 text-sm mb-6">

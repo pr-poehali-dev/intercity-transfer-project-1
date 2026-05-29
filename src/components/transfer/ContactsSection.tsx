@@ -50,7 +50,7 @@ export default function ContactsSection() {
       <section id="contacts" className="py-16 bg-surface/30 border-t border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="reveal mb-8">
-            <div className="inline-block font-display text-neon text-sm tracking-widest mb-2">КОНТАКТЫ</div>
+            <div className="inline-block font-display text-neon text-base tracking-widest mb-2">КОНТАКТЫ</div>
             <h2 className="font-display text-3xl md:text-4xl font-bold">СВЯЖИТЕСЬ С НАМИ</h2>
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -70,8 +70,8 @@ export default function ContactsSection() {
                     <Icon name="User" size={20} className="text-neon" />
                   </div>
                   <div>
-                    <div className="text-xs text-muted-foreground mb-1">Менеджер</div>
-                    <div className="font-display font-semibold text-lg text-foreground">{c.name}</div>
+                    <div className="text-sm text-muted-foreground mb-1">Менеджер</div>
+                    <div className="font-display font-semibold text-xl text-foreground">{c.name}</div>
                   </div>
                   <div className="ml-auto flex items-center gap-2 flex-shrink-0">
                     <a
@@ -102,41 +102,41 @@ export default function ContactsSection() {
                   <div className="text-center py-10">
                     <Icon name="CheckCircle2" size={56} className="text-neon mx-auto mb-4" />
                     <div className="font-display text-xl font-bold mb-2">Заявка отправлена!</div>
-                    <p className="text-sm text-muted-foreground">Мы свяжемся с вами в ближайшее время</p>
+                    <p className="text-base text-muted-foreground">Мы свяжемся с вами в ближайшее время</p>
                   </div>
                 ) : (
                   <div className="space-y-4">
                     <div>
-                      <label className="text-xs font-display text-muted-foreground tracking-wider mb-2 block">ИМЯ</label>
+                      <label className="text-sm font-display text-muted-foreground tracking-wider mb-2 block">ИМЯ</label>
                       <input
                         type="text"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
                         placeholder="Ваше имя"
-                        className="w-full bg-background border border-border rounded-lg px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/50"
+                        className="w-full bg-background border border-border rounded-lg px-4 py-3 text-base text-foreground placeholder:text-muted-foreground/50"
                       />
                     </div>
                     <div>
-                      <label className="text-xs font-display text-muted-foreground tracking-wider mb-2 block">ТЕЛЕФОН</label>
+                      <label className="text-sm font-display text-muted-foreground tracking-wider mb-2 block">ТЕЛЕФОН</label>
                       <input
                         type="tel"
                         value={phone}
                         onChange={(e) => setPhone(e.target.value)}
                         placeholder="+7 (___) ___-__-__"
-                        className="w-full bg-background border border-border rounded-lg px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/50"
+                        className="w-full bg-background border border-border rounded-lg px-4 py-3 text-base text-foreground placeholder:text-muted-foreground/50"
                       />
                     </div>
                     <div>
-                      <label className="text-xs font-display text-muted-foreground tracking-wider mb-2 block">СООБЩЕНИЕ</label>
+                      <label className="text-sm font-display text-muted-foreground tracking-wider mb-2 block">СООБЩЕНИЕ</label>
                       <textarea
                         rows={3}
                         value={message}
                         onChange={(e) => setMessage(e.target.value)}
                         placeholder="Ваш маршрут или вопрос..."
-                        className="w-full bg-background border border-border rounded-lg px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/50 resize-none"
+                        className="w-full bg-background border border-border rounded-lg px-4 py-3 text-base text-foreground placeholder:text-muted-foreground/50 resize-none"
                       />
                     </div>
-                    {error && <div className="text-sm text-red-400">{error}</div>}
+                    {error && <div className="text-base text-red-400">{error}</div>}
                     <button
                       onClick={handleSubmit}
                       disabled={sending}
@@ -166,7 +166,7 @@ export default function ContactsSection() {
               <span className="text-[10px] text-muted-foreground tracking-widest">TRANSFER</span>
             </div>
           </div>
-          <p className="text-xs text-muted-foreground text-center">
+          <p className="text-sm text-muted-foreground text-center">
             © 2024 НАШЕ for Russia Transfer. Поездки по России без агрегаторов.
           </p>
           <div className="flex items-center gap-2 text-xs text-muted-foreground">

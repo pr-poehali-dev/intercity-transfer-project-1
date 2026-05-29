@@ -83,7 +83,7 @@ export default function CalculatorSection({
       <section id="calc" ref={sectionRef} className="py-16 bg-surface/30 border-y border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="reveal mb-8">
-            <div className="inline-block font-display text-neon text-sm tracking-widest mb-2">БРОНИРОВАНИЕ</div>
+            <div className="inline-block font-display text-neon text-base tracking-widest mb-2">БРОНИРОВАНИЕ</div>
             <h2 className="font-display text-2xl sm:text-3xl md:text-4xl font-bold">РАССЧИТАЙТЕ СТОИМОСТЬ ПОЕЗДКИ</h2>
           </div>
           <div className="max-w-3xl mx-auto">
@@ -91,18 +91,18 @@ export default function CalculatorSection({
             <div className="reveal bg-surface border border-border rounded-2xl p-4 sm:p-8">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
                 <div>
-                  <label className="text-xs font-display text-muted-foreground tracking-wider mb-2 block">ОТКУДА</label>
+                  <label className="text-sm font-display text-muted-foreground tracking-wider mb-2 block">ОТКУДА</label>
                   <CitySelect value={from} onChange={setFrom} iconName="MapPin" exclude={to} />
                 </div>
                 <div>
-                  <label className="text-xs font-display text-muted-foreground tracking-wider mb-2 block">КУДА</label>
+                  <label className="text-sm font-display text-muted-foreground tracking-wider mb-2 block">КУДА</label>
                   <CitySelect value={to} onChange={setTo} iconName="Navigation" exclude={from} />
                 </div>
               </div>
 
               {/* Tariffs */}
               <div className="mb-6">
-                <label className="text-xs font-display text-muted-foreground tracking-wider mb-3 block">ТАРИФ</label>
+                <label className="text-sm font-display text-muted-foreground tracking-wider mb-3 block">ТАРИФ</label>
                 <div className="grid grid-cols-3 gap-3">
                   {TARIFFS.map((t, i) => (
                     <button
@@ -115,8 +115,8 @@ export default function CalculatorSection({
                       }`}
                     >
                       <Icon name={t.icon as IconName} size={18} className={`mx-auto mb-1 ${tariff === i ? "text-neon" : ""}`} />
-                      <div className="font-display text-xs sm:text-sm font-semibold leading-tight">{t.name}</div>
-                      <div className="text-[9px] sm:text-[10px] opacity-70 leading-tight mt-0.5">{t.desc}</div>
+                      <div className="font-display text-sm sm:text-base font-semibold leading-tight">{t.name}</div>
+                      <div className="text-[11px] sm:text-xs opacity-70 leading-tight mt-0.5">{t.desc}</div>
                     </button>
                   ))}
                 </div>
@@ -124,17 +124,17 @@ export default function CalculatorSection({
 
               <div className="grid grid-cols-2 gap-4 mb-6">
                 <div>
-                  <label className="text-xs font-display text-muted-foreground tracking-wider mb-2 block">ДАТА ПОЕЗДКИ</label>
+                  <label className="text-sm font-display text-muted-foreground tracking-wider mb-2 block">ДАТА ПОЕЗДКИ</label>
                   <input
                     type="date"
                     value={date}
                     min={new Date().toISOString().split("T")[0]}
                     onChange={(e) => setDate(e.target.value)}
-                    className="w-full bg-background border border-border rounded-lg px-4 py-3 text-sm text-foreground"
+                    className="w-full bg-background border border-border rounded-lg px-4 py-3 text-base text-foreground"
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-display text-muted-foreground tracking-wider mb-2 block">ПАССАЖИРЫ</label>
+                  <label className="text-sm font-display text-muted-foreground tracking-wider mb-2 block">ПАССАЖИРЫ</label>
                   <div className="flex items-center gap-2 bg-background border border-border rounded-lg px-2 sm:px-4 py-3">
                     <button
                       onClick={() => { setPassengers(Math.max(1, passengers - 1)); }}
@@ -146,7 +146,7 @@ export default function CalculatorSection({
                       className="w-7 h-7 rounded-full bg-surface-hover flex items-center justify-center hover:bg-neon/20 transition-colors text-foreground font-bold text-lg leading-none"
                     >+</button>
                   </div>
-                  <div className="text-[11px] text-muted-foreground mt-1.5">
+                  <div className="text-xs text-muted-foreground mt-1.5">
                     Макс. {TARIFFS[tariff].maxPassengers} для тарифа «{TARIFFS[tariff].name}»
                   </div>
                 </div>

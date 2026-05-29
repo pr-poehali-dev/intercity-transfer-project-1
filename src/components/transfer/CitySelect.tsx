@@ -83,7 +83,7 @@ export default function CitySelect({ value, onChange, iconName, exclude }: CityS
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className="w-full bg-background border border-border rounded-lg pl-9 pr-9 py-3 text-sm text-left text-foreground cursor-pointer hover:border-white/30 transition-colors flex items-center"
+        className="w-full bg-background border border-border rounded-lg pl-9 pr-9 py-3 text-base text-left text-foreground cursor-pointer hover:border-white/30 transition-colors flex items-center"
       >
         <Icon name={iconName} size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-neon pointer-events-none" />
         <span className="truncate">{value || "Выберите город"}</span>
@@ -101,7 +101,7 @@ export default function CitySelect({ value, onChange, iconName, exclude }: CityS
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Поиск города или региона..."
                 autoFocus
-                className="w-full bg-background border border-border rounded-lg pl-9 pr-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/60"
+                className="w-full bg-background border border-border rounded-lg pl-9 pr-3 py-2.5 text-base text-foreground placeholder:text-muted-foreground/60"
               />
             </div>
           </div>
@@ -113,7 +113,7 @@ export default function CitySelect({ value, onChange, iconName, exclude }: CityS
                   key={d.name}
                   type="button"
                   onClick={() => setActiveDistrict(d.name)}
-                  className={`text-xs px-3 py-1.5 rounded-full transition-all ${
+                  className={`text-sm px-3 py-1.5 rounded-full transition-all ${
                     activeDistrict === d.name
                       ? "bg-neon text-background font-semibold"
                       : "bg-background border border-border text-muted-foreground hover:border-neon/40"
@@ -127,7 +127,7 @@ export default function CitySelect({ value, onChange, iconName, exclude }: CityS
 
           <div className="max-h-72 overflow-y-auto">
             {filtered.matches.length === 0 && !filtered.isSearch ? (
-              <div className="px-4 py-8 text-center text-sm text-muted-foreground">
+              <div className="px-4 py-8 text-center text-base text-muted-foreground">
                 Ничего не найдено
               </div>
             ) : filtered.isSearch ? (
@@ -142,11 +142,11 @@ export default function CitySelect({ value, onChange, iconName, exclude }: CityS
                     key={`local-${c.name}-${c.region}`}
                     type="button"
                     onClick={() => pick(c.name)}
-                    className="w-full text-left px-4 py-2.5 text-sm hover:bg-neon/10 transition-colors flex items-center justify-between group"
+                    className="w-full text-left px-4 py-2.5 text-base hover:bg-neon/10 transition-colors flex items-center justify-between group"
                   >
                     <div>
                       <div className="text-foreground font-medium">{c.name}</div>
-                      <div className="text-xs text-muted-foreground">{c.region}</div>
+                      <div className="text-sm text-muted-foreground">{c.region}</div>
                     </div>
                   </button>
                 ))}
@@ -161,14 +161,14 @@ export default function CitySelect({ value, onChange, iconName, exclude }: CityS
                     key={`remote-${i}-${c.name}`}
                     type="button"
                     onClick={() => pick(c.name)}
-                    className="w-full text-left px-4 py-2.5 text-sm hover:bg-neon/10 transition-colors"
+                    className="w-full text-left px-4 py-2.5 text-base hover:bg-neon/10 transition-colors"
                   >
                     <div className="text-foreground font-medium">{c.name}</div>
-                    <div className="text-xs text-muted-foreground">{c.region || c.full}</div>
+                    <div className="text-sm text-muted-foreground">{c.region || c.full}</div>
                   </button>
                 ))}
                 {!searching && filtered.matches.length === 0 && remoteResults.length === 0 && search.trim().length >= 2 && (
-                  <div className="px-4 py-8 text-center text-sm text-muted-foreground">
+                  <div className="px-4 py-8 text-center text-base text-muted-foreground">
                     Ничего не найдено
                   </div>
                 )}
@@ -190,7 +190,7 @@ export default function CitySelect({ value, onChange, iconName, exclude }: CityS
                         key={`${c.name}-${c.region}`}
                         type="button"
                         onClick={() => pick(c.name)}
-                        className="w-full text-left px-4 py-2.5 text-sm hover:bg-neon/10 transition-colors"
+                        className="w-full text-left px-4 py-2.5 text-base hover:bg-neon/10 transition-colors"
                       >
                         <span className="text-foreground font-medium">{c.name}</span>
                       </button>

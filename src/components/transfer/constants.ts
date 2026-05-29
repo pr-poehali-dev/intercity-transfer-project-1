@@ -7,9 +7,9 @@ export const CITIES = [
 ];
 
 export const TARIFFS = [
-  { name: "Эконом", pricePerKm: 32, icon: "Car", desc: "Комфортный седан" },
-  { name: "Комфорт", pricePerKm: 37, icon: "Star", desc: "Повышенный комфорт" },
-  { name: "Минивэн", pricePerKm: 55, icon: "Users", desc: "До 10 пассажиров" },
+  { name: "Эконом", pricePerKm: 32, icon: "Car", desc: "Комфортный седан", maxPassengers: 4 },
+  { name: "Комфорт", pricePerKm: 37, icon: "Star", desc: "Повышенный комфорт", maxPassengers: 4 },
+  { name: "Минивэн", pricePerKm: 55, icon: "Users", desc: "До 10 пассажиров", maxPassengers: 10 },
 ];
 
 export const DISTANCES: Record<string, Record<string, number>> = {
@@ -87,6 +87,13 @@ function hashPair(a: string, b: string): number {
     hash |= 0;
   }
   return Math.abs(hash);
+}
+
+export function getDistanceSurcharge(distance: number): number {
+  if (distance <= 50) return 1.5;
+  if (distance <= 100) return 1.25;
+  if (distance <= 200) return 1.1;
+  return 1;
 }
 
 export function getDistance(from: string, to: string): number {

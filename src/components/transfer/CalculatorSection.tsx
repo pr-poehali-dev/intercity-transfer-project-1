@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import Icon from "@/components/ui/icon";
-import { TARIFFS } from "./constants";
+import { TARIFFS, getDistanceSurcharge } from "./constants";
 import type { IconName } from "./constants";
 import CitySelect from "./CitySelect";
 import func2url from "../../../backend/func2url.json";
@@ -50,7 +50,7 @@ export default function CalculatorSection({
     setSending(true);
     const mult = passengers > 1 ? 1 + (passengers - 1) * 0.15 : 1;
     const finalPrice = distance
-      ? Math.round((distance * TARIFFS[tariff].pricePerKm * mult) / 50) * 50
+      ? Math.round((distance * TARIFFS[tariff].pricePerKm * mult * getDistanceSurcharge(distance)) / 50) * 50
       : price;
     try {
       const res = await fetch(func2url["send-booking"], {
@@ -142,9 +142,12 @@ export default function CalculatorSection({
                     >–</button>
                     <span className="flex-1 text-center font-display font-bold text-foreground">{passengers}</span>
                     <button
-                      onClick={() => { setPassengers(Math.min(7, passengers + 1)); }}
+                      onClick={() => { setPassengers(Math.min(TARIFFS[tariff].maxPassengers, passengers + 1)); }}
                       className="w-7 h-7 rounded-full bg-surface-hover flex items-center justify-center hover:bg-neon/20 transition-colors text-foreground font-bold text-lg leading-none"
                     >+</button>
+                  </div>
+                  <div className="text-[11px] text-muted-foreground mt-1.5">
+                    Макс. {TARIFFS[tariff].maxPassengers} для тарифа «{TARIFFS[tariff].name}»
                   </div>
                 </div>
               </div>
@@ -203,7 +206,7 @@ export default function CalculatorSection({
                 {(() => {
                   const mult = passengers > 1 ? 1 + (passengers - 1) * 0.15 : 1;
                   const shownPrice = distance
-                    ? Math.round((distance * TARIFFS[tariff].pricePerKm * mult) / 50) * 50
+                    ? Math.round((distance * TARIFFS[tariff].pricePerKm * mult * getDistanceSurcharge(distance)) / 50) * 50
                     : price;
                   return (
                     <>
@@ -234,7 +237,7 @@ export default function CalculatorSection({
                     <div className="space-y-2">
                       {TARIFFS.map((t, i) => {
                         const mult = passengers > 1 ? 1 + (passengers - 1) * 0.15 : 1;
-                        const tPrice = Math.round((distance * t.pricePerKm * mult) / 50) * 50;
+                        const tPrice = Math.round((distance * t.pricePerKm * mult * getDistanceSurcharge(distance)) / 50) * 50;
                         return (
                           <button
                             key={i}

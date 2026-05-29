@@ -4,7 +4,7 @@ import HeroSection from "@/components/transfer/HeroSection";
 import CalculatorSection from "@/components/transfer/CalculatorSection";
 import PopularRoutesSection from "@/components/transfer/PopularRoutesSection";
 import ContactsSection from "@/components/transfer/ContactsSection";
-import { TARIFFS, getDistance } from "@/components/transfer/constants";
+import { TARIFFS, getDistance, getDistanceSurcharge } from "@/components/transfer/constants";
 import func2url from "../../backend/func2url.json";
 
 export default function Index() {
@@ -40,7 +40,8 @@ export default function Index() {
   function priceFromDistance(dist: number) {
     const base = dist * TARIFFS[tariff].pricePerKm;
     const mult = passengers > 1 ? 1 + (passengers - 1) * 0.15 : 1;
-    return Math.round((base * mult) / 50) * 50;
+    const surcharge = getDistanceSurcharge(dist);
+    return Math.round((base * mult * surcharge) / 50) * 50;
   }
 
   async function calculate() {
@@ -79,7 +80,10 @@ export default function Index() {
 
   function handleSetFrom(v: string) { setFrom(v); setCalculated(false); }
   function handleSetTo(v: string) { setTo(v); setCalculated(false); }
-  function handleSetTariff(v: number) { setTariff(v); setCalculated(false); }
+  function handleSetTariff(v: number) {
+    setTariff(v);
+    setPassengers((p) => Math.min(p, TARIFFS[v].maxPassengers));
+  }
   function handleSetPassengers(v: number) { setPassengers(v); setCalculated(false); }
 
   return (

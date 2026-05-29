@@ -38,68 +38,60 @@ export default function RoutePage() {
     <div className="min-h-screen bg-background text-foreground font-golos">
       <Navbar onBookClick={() => navigate("/#calc")} />
 
-      <section className="pt-32 pb-16 max-w-5xl mx-auto px-6">
-        <Link to="/" className="text-sm text-muted-foreground hover:text-neon transition-colors inline-flex items-center gap-1 mb-6">
+      <section className="pt-28 pb-12 max-w-5xl mx-auto px-4 sm:px-6 overflow-hidden">
+        <Link to="/" className="text-sm text-muted-foreground hover:text-neon transition-colors inline-flex items-center gap-1 mb-5">
           <Icon name="ChevronRight" size={14} className="rotate-180" />
           На главную
         </Link>
 
-        <div className="inline-block font-display text-neon text-sm tracking-widest mb-3">МЕЖДУГОРОДНИЙ ТРАНСФЕР</div>
-        <h1 className="font-display text-4xl md:text-6xl font-bold mb-6 leading-tight">
+        <div className="inline-block font-display text-neon text-xs tracking-widest mb-2">МЕЖДУГОРОДНИЙ ТРАНСФЕР</div>
+        <h1 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold mb-4 leading-tight">
           Трансфер<br />
-          <span style={{ background: 'linear-gradient(to bottom, #ffffff 0%, #003087 50%, #CC0000 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', display: 'inline-block' }}>
+          <span className="break-words" style={{ background: 'linear-gradient(to bottom, #ffffff 0%, #003087 50%, #CC0000 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', display: 'inline-block', maxWidth: '100%' }}>
             {route.from} — {route.to}
           </span>
         </h1>
 
-        <p className="text-lg text-muted-foreground leading-relaxed mb-10 max-w-3xl">
+        <p className="text-sm sm:text-base text-muted-foreground leading-relaxed mb-8">
           {route.description}
         </p>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
-          <div className="bg-surface border border-border rounded-2xl p-5">
-            <Icon name="MapPin" size={20} className="text-neon mb-3" />
-            <div className="font-display text-2xl font-bold">{route.distance} км</div>
-            <div className="text-xs text-muted-foreground mt-1">Расстояние</div>
-          </div>
-          <div className="bg-surface border border-border rounded-2xl p-5">
-            <Icon name="Clock" size={20} className="text-neon mb-3" />
-            <div className="font-display text-2xl font-bold">{route.duration}</div>
-            <div className="text-xs text-muted-foreground mt-1">В пути</div>
-          </div>
-          <div className="bg-surface border border-border rounded-2xl p-5">
-            <Icon name="CreditCard" size={20} className="text-neon mb-3" />
-            <div className="font-display text-2xl font-bold">от {route.priceFrom.toLocaleString("ru-RU")} ₽</div>
-            <div className="text-xs text-muted-foreground mt-1">Стоимость</div>
-          </div>
-          <div className="bg-surface border border-border rounded-2xl p-5">
-            <Icon name="Shield" size={20} className="text-neon mb-3" />
-            <div className="font-display text-2xl font-bold">24/7</div>
-            <div className="text-xs text-muted-foreground mt-1">Поддержка</div>
-          </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
+          {[
+            { icon: "MapPin", value: `${route.distance} км`, label: "Расстояние" },
+            { icon: "Clock", value: route.duration, label: "В пути" },
+            { icon: "CreditCard", value: `от ${route.priceFrom.toLocaleString("ru-RU")} ₽`, label: "Стоимость" },
+            { icon: "Shield", value: "24/7", label: "Поддержка" },
+          ].map((s, i) => (
+            <div key={i} className="bg-surface border border-border rounded-xl p-3 sm:p-5 overflow-hidden">
+              <Icon name={s.icon as "MapPin"} size={16} className="text-neon mb-2" />
+              <div className="font-display text-base sm:text-xl font-bold truncate">{s.value}</div>
+              <div className="text-xs text-muted-foreground mt-0.5">{s.label}</div>
+            </div>
+          ))}
         </div>
 
-        <div className="bg-surface border border-border rounded-2xl p-8 mb-12">
-          <h2 className="font-display text-2xl font-bold mb-6">Что входит в поездку</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="bg-surface border border-border rounded-2xl p-4 sm:p-8 mb-8">
+          <h2 className="font-display text-xl font-bold mb-4">Что входит в поездку</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {route.highlights.map((item, i) => (
               <div key={i} className="flex items-start gap-3">
-                <Icon name="CheckCircle" size={18} className="text-neon flex-shrink-0 mt-0.5" />
+                <Icon name="CheckCircle" size={16} className="text-neon flex-shrink-0 mt-0.5" />
                 <span className="text-sm text-muted-foreground">{item}</span>
               </div>
             ))}
           </div>
         </div>
 
-        <div className="bg-surface border border-border rounded-2xl p-8 mb-12">
-          <h2 className="font-display text-2xl font-bold mb-6">Тарифы на маршрут {route.from} — {route.to}</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="bg-surface border border-border rounded-2xl p-4 sm:p-8 mb-8">
+          <h2 className="font-display text-xl font-bold mb-4 leading-snug">Тарифы: {route.from} — {route.to}</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             {TARIFFS.map((t, i) => (
-              <div key={i} className="border border-border rounded-xl p-5 text-center">
-                <Icon name={t.icon as "Car"} size={28} className="text-neon mx-auto mb-3" />
-                <div className="font-display text-lg font-bold mb-1">{t.name}</div>
-                <div className="text-xs text-muted-foreground mb-3">{t.desc}</div>
-                <div className="font-display text-xl text-neon font-bold">
+              <div key={i} className="border border-border rounded-xl p-4 text-center overflow-hidden">
+                <Icon name={t.icon as "Car"} size={24} className="text-neon mx-auto mb-2" />
+                <div className="font-display text-base font-bold mb-1 truncate">{t.name}</div>
+                <div className="text-xs text-muted-foreground mb-2 truncate">{t.desc}</div>
+                <div className="font-display text-lg text-neon font-bold truncate">
                   от {(route.distance * t.pricePerKm).toLocaleString("ru-RU")} ₽
                 </div>
               </div>
@@ -107,29 +99,29 @@ export default function RoutePage() {
           </div>
         </div>
 
-        <div className="text-center mb-16">
+        <div className="text-center mb-10">
           <button
             onClick={() => navigate("/#calc")}
-            className="bg-neon text-background font-display font-bold text-lg px-10 py-5 rounded-xl hover:opacity-90 transition-all glow-neon"
+            className="bg-neon text-background font-display font-bold text-sm sm:text-base px-8 py-4 rounded-xl hover:opacity-90 transition-all glow-neon w-full sm:w-auto"
           >
             ЗАБРОНИРОВАТЬ ПОЕЗДКУ
           </button>
         </div>
 
         <div>
-          <h2 className="font-display text-2xl font-bold mb-6">Другие популярные маршруты</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <h2 className="font-display text-xl font-bold mb-4">Другие маршруты</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {otherRoutes.map((r) => (
               <Link
                 key={r.slug}
                 to={`/marshrut/${r.slug}`}
-                className="bg-surface border border-border rounded-xl p-5 hover:border-neon/40 transition-all flex items-center justify-between group"
+                className="bg-surface border border-border rounded-xl p-4 hover:border-neon/40 transition-all flex items-center justify-between gap-2 group overflow-hidden min-w-0"
               >
-                <div>
-                  <div className="font-display text-lg font-semibold mb-1">{r.from} — {r.to}</div>
-                  <div className="text-xs text-muted-foreground">{r.distance} км · от {r.priceFrom.toLocaleString("ru-RU")} ₽</div>
+                <div className="min-w-0">
+                  <div className="font-display text-sm sm:text-base font-semibold mb-0.5 truncate">{r.from} — {r.to}</div>
+                  <div className="text-xs text-muted-foreground truncate">{r.distance} км · от {r.priceFrom.toLocaleString("ru-RU")} ₽</div>
                 </div>
-                <Icon name="ChevronRight" size={20} className="text-muted-foreground group-hover:text-neon transition-colors" />
+                <Icon name="ChevronRight" size={18} className="text-muted-foreground group-hover:text-neon transition-colors flex-shrink-0" />
               </Link>
             ))}
           </div>

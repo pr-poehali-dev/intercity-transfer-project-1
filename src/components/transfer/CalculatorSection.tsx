@@ -17,6 +17,7 @@ interface CalculatorSectionProps {
   date: string;
   setDate: (v: string) => void;
   price: number | null;
+  distance: number | null;
   calculated: boolean;
   calculating: boolean;
   onCalculate: () => void;
@@ -30,7 +31,7 @@ export default function CalculatorSection({
   tariff, setTariff,
   passengers, setPassengers,
   date, setDate,
-  price, calculated, calculating,
+  price, distance, calculated, calculating,
   onCalculate, onClose, onRouteSelect,
   sectionRef,
 }: CalculatorSectionProps) {
@@ -201,9 +202,17 @@ export default function CalculatorSection({
                   </span>
                   <span className="font-display text-2xl text-muted-foreground">₽</span>
                 </div>
-                <div className="text-sm text-muted-foreground mb-6">
+                <div className="text-sm text-muted-foreground mb-3">
                   {from} → {to} · {TARIFFS[tariff].name} · {passengers} пасс.
                 </div>
+                {distance && (
+                  <div className="inline-flex items-center gap-2 bg-background border border-border rounded-lg px-3 py-2 mb-6">
+                    <Icon name="Navigation" size={14} className="text-neon" />
+                    <span className="text-sm text-foreground font-medium">
+                      Расстояние: {distance.toLocaleString("ru-RU")} км по дорогам
+                    </span>
+                  </div>
+                )}
                 <div className="space-y-2 text-sm mb-6">
                   {[
                     "Фиксированная цена, без доплат",

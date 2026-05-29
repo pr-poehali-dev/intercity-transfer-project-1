@@ -14,6 +14,7 @@ export default function Index() {
   const [passengers, setPassengers] = useState(1);
   const [date, setDate] = useState("");
   const [price, setPrice] = useState<number | null>(null);
+  const [distance, setDistance] = useState<number | null>(null);
   const [calculated, setCalculated] = useState(false);
   const [calculating, setCalculating] = useState(false);
 
@@ -60,6 +61,7 @@ export default function Index() {
       // fallback на локальную матрицу расстояний
     }
     setPrice(priceFromDistance(dist));
+    setDistance(dist);
     setCalculated(true);
     setCalculating(false);
   }
@@ -96,6 +98,7 @@ export default function Index() {
         date={date}
         setDate={setDate}
         price={price}
+        distance={distance}
         calculated={calculated}
         calculating={calculating}
         onCalculate={calculate}

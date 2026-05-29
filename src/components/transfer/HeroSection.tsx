@@ -15,13 +15,13 @@ export default function HeroSection({ onBookClick }: HeroSectionProps) {
         <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent" />
         <div className="absolute top-0 right-0 w-1/3 h-1 bg-neon" />
 
-        <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 py-20 pb-36">
-          <div className="max-w-xl">
+        <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 py-7 pb-36">
+          <div className="max-w-2xl">
             <div className="inline-flex items-center gap-2 bg-neon/10 border border-neon/30 text-neon text-[10px] sm:text-xs font-display tracking-widest px-3 py-1.5 rounded-full mb-4 animate-fade-up">
               <span className="w-1.5 h-1.5 bg-neon rounded-full animate-pulse flex-shrink-0" />
               ОНЛАЙН БРОНИРОВАНИЕ ДОСТУПНО
             </div>
-            <h1 className="font-display text-4xl sm:text-5xl md:text-6xl font-bold leading-none tracking-tight mb-4 animate-fade-up" style={{ animationDelay: "0.1s" }}>
+            <h1 className="font-display text-6xl sm:text-7xl md:text-9xl font-bold leading-none tracking-tight mb-4 animate-fade-up" style={{ animationDelay: "0.1s" }}>
               <span style={{ background: 'linear-gradient(to bottom, #ffffff 0%, #003087 50%, #CC0000 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', display: 'inline-block' }}>НАШЕ<br />for Russia Transfer</span>
             </h1>
             <p className="text-sm sm:text-base text-muted-foreground mb-6 leading-relaxed animate-fade-up" style={{ animationDelay: "0.2s" }}>

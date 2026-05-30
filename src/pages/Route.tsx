@@ -101,7 +101,7 @@ export default function RoutePage() {
 
         <div className="text-center mb-10">
           <button
-            onClick={() => navigate("/#calc")}
+            onClick={() => navigate(`/?from=${encodeURIComponent(route.from)}&to=${encodeURIComponent(route.to)}#calc`)}
             className="bg-neon text-background font-display font-bold text-sm sm:text-base px-8 py-4 rounded-xl hover:opacity-90 transition-all glow-neon w-full sm:w-auto"
           >
             ЗАБРОНИРОВАТЬ ПОЕЗДКУ

@@ -33,6 +33,17 @@ export default function Index() {
   }, []);
 
   useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const qFrom = params.get("from");
+    const qTo = params.get("to");
+    if (qFrom) setFrom(qFrom);
+    if (qTo) setTo(qTo);
+    if (qFrom || qTo) {
+      setTimeout(() => bookRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
+    }
+  }, []);
+
+  useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => entries.forEach((e) => {
         if (e.isIntersecting) e.target.classList.add("in-view");

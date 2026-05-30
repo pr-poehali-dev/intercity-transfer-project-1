@@ -55,15 +55,25 @@ export default function CalculatorSection({
 }: CalculatorSectionProps) {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
+  const [comment, setComment] = useState("");
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState("");
 
+  function handlePhoneChange(val: string) {
+    let v = val;
+    if (v && !v.startsWith("+")) v = "+" + v.replace(/^\+*/, "");
+    setPhone(v);
+  }
+
+  function isPhoneValid(val: string) {
+    const digits = val.replace(/\D/g, "");
+    return val.startsWith("+") && digits.length >= 11;
+  }
+
   async function handleBook() {
-    if (!name.trim() || !phone.trim()) {
-      setError("Заполните имя и телефон");
-      return;
-    }
+    if (!name.trim()) { setError("Заполните имя"); return; }
+    if (!isPhoneValid(phone)) { setError("Телефон должен начинаться с + и содержать не менее 11 цифр"); return; }
     setError("");
     setSending(true);
     const t = TARIFFS[tariff];
@@ -103,6 +113,7 @@ export default function CalculatorSection({
           price: finalPrice,
           distance,
           services: services.length ? services.join("; ") : "—",
+          comment: comment.trim() || "—",
         }),
       });
       if (!res.ok) throw new Error();
@@ -503,9 +514,21 @@ export default function CalculatorSection({
                   <input
                     type="tel"
                     value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    placeholder="Телефон, например +7 999 123-45-67"
-                    className="w-full bg-background border border-border rounded-lg px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/60"
+                    onChange={(e) => handlePhoneChange(e.target.value)}
+                    placeholder="+7 999 123-45-67"
+                    className={`w-full bg-background border rounded-lg px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/60 ${
+                      phone && !isPhoneValid(phone) ? "border-red-500/60" : "border-border"
+                    }`}
+                  />
+                  {phone && !isPhoneValid(phone) && (
+                    <div className="text-xs text-red-400 -mt-1.5 px-1">Начните с + и введите не менее 11 цифр</div>
+                  )}
+                  <textarea
+                    value={comment}
+                    onChange={(e) => setComment(e.target.value)}
+                    placeholder="Комментарий (адрес подачи, пожелания к поездке...)"
+                    rows={2}
+                    className="w-full bg-background border border-border rounded-lg px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/60 resize-none"
                   />
                 </div>
                 {error && <div className="text-sm text-red-400 mb-3">{error}</div>}

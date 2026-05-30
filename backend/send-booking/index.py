@@ -30,9 +30,11 @@ def handler(event: dict, context) -> dict:
     price = body.get('price', '—')
     distance = body.get('distance')
     services = body.get('services', '—')
+    comment = body.get('comment', '—')
 
     distance_line = f"\n📏 Расстояние: {distance} км" if distance else ""
     services_line = f"\n🧩 Доп. услуги: {services}" if services and services != '—' else ""
+    comment_line = f"\n💬 Комментарий: {comment}" if comment and comment != '—' else ""
 
     text = (
         f"🚗 *Новое бронирование!*\n\n"
@@ -44,7 +46,8 @@ def handler(event: dict, context) -> dict:
         f"📅 Дата: {date}\n"
         f"👥 Пассажиры: {passengers}\n"
         f"🚘 Тариф: {tariff}"
-        f"{services_line}\n"
+        f"{services_line}"
+        f"{comment_line}\n"
         f"💰 Стоимость: {price} ₽"
     )
 

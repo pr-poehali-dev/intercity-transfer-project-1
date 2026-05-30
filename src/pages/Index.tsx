@@ -75,10 +75,9 @@ export default function Index() {
       : t.isMinivan
         ? MINIVAN_SUBTARIFFS[minivanSub].pricePerKm
         : t.pricePerKm;
-    const mult = (isDelivery || t.isMinivan) ? 1 : (passengers > 1 ? 1 + (passengers - 1) * 0.15 : 1);
     const surcharge = getDistanceSurcharge(dist);
     const extras = isDelivery ? 0 : extrasTotal();
-    return Math.round((dist * ratePerKm * mult * surcharge) / 50) * 50 + extras;
+    return Math.round((dist * ratePerKm * surcharge) / 50) * 50 + extras;
   }
 
   async function fetchDist(a: string, b: string): Promise<number> {

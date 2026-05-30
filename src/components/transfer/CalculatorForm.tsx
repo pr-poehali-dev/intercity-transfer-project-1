@@ -49,25 +49,24 @@ export default function CalculatorForm({
 }: CalculatorFormProps) {
   return (
     <div className="reveal bg-surface border border-border rounded-2xl p-4 sm:p-8">
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-3">
+      <div className="space-y-3 mb-3">
         <div>
           <label className="text-sm font-display text-muted-foreground tracking-wider mb-2 block">ОТКУДА</label>
           <CitySelect value={from} onChange={setFrom} iconName="MapPin" exclude={to} />
         </div>
+        {withVia && (
+          <div>
+            <label className="text-sm font-display text-muted-foreground tracking-wider mb-2 block">ПРОМЕЖУТОЧНЫЙ ПУНКТ</label>
+            <CitySelect value={via} onChange={setVia} iconName="Navigation" exclude={from} />
+          </div>
+        )}
         <div>
           <label className="text-sm font-display text-muted-foreground tracking-wider mb-2 block">КУДА</label>
           <CitySelect value={to} onChange={setTo} iconName="Navigation" exclude={from} />
         </div>
       </div>
 
-      {/* Via stop — between from and to */}
       <div className="mb-6">
-        {withVia && (
-          <div className="mb-3">
-            <label className="text-sm font-display text-muted-foreground tracking-wider mb-2 block">ПРОМЕЖУТОЧНЫЙ ПУНКТ</label>
-            <CitySelect value={via} onChange={setVia} iconName="Navigation" exclude={from} />
-          </div>
-        )}
         <button
           type="button"
           onClick={() => setWithVia(!withVia)}

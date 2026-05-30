@@ -60,25 +60,25 @@ export default function CalculatorForm({
         </div>
       </div>
 
-      {/* Via stop — between from and to */}
+      {/* Via stop */}
       <div className="mb-6">
-        {withVia && (
-          <div className="mb-3">
-            <label className="text-sm font-display text-muted-foreground tracking-wider mb-2 block">ПРОМЕЖУТОЧНЫЙ ПУНКТ</label>
-            <CitySelect value={via} onChange={setVia} iconName="Navigation" exclude={from} />
-          </div>
-        )}
         <button
           type="button"
           onClick={() => setWithVia(!withVia)}
-          className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-3"
         >
           <div className={`w-4 h-4 rounded border flex items-center justify-center flex-shrink-0 transition-colors ${withVia ? "bg-neon border-neon" : "border-muted-foreground"}`}>
             {withVia && <Icon name="Check" size={10} className="text-background" />}
           </div>
           <Icon name="MapPin" size={14} className={withVia ? "text-neon" : ""} />
-          {withVia ? "Убрать промежуточный пункт" : "Добавить промежуточный пункт"}
+          Добавить промежуточный пункт
         </button>
+        {withVia && (
+          <div>
+            <label className="text-sm font-display text-muted-foreground tracking-wider mb-2 block">ПРОМЕЖУТОЧНЫЙ ПУНКТ</label>
+            <CitySelect value={via} onChange={setVia} iconName="Navigation" exclude={from} />
+          </div>
+        )}
       </div>
 
       {/* Tariffs */}

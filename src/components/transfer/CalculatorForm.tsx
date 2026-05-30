@@ -47,6 +47,18 @@ export default function CalculatorForm({
   date, setDate,
   calculating, onCalculate,
 }: CalculatorFormProps) {
+  const norm = (s: string) => s.trim().toLowerCase();
+  const sameRoute = !!from && !!to && norm(from) === norm(to);
+  const viaSameAsFrom = withVia && !!via && norm(via) === norm(from);
+  const viaSameAsTo = withVia && !!via && norm(via) === norm(to);
+  const routeError = sameRoute
+    ? "Пункты «Откуда» и «Куда» совпадают — выберите разные адреса"
+    : viaSameAsFrom
+      ? "Промежуточный пункт совпадает с «Откуда»"
+      : viaSameAsTo
+        ? "Промежуточный пункт совпадает с «Куда»"
+        : "";
+
   return (
     <div className="reveal bg-surface border border-border rounded-2xl p-4 sm:p-8">
       <div className="space-y-3 mb-3">
@@ -57,7 +69,7 @@ export default function CalculatorForm({
         {withVia && (
           <div>
             <label className="text-sm font-display text-muted-foreground tracking-wider mb-2 block">ПРОМЕЖУТОЧНЫЙ ПУНКТ</label>
-            <CitySelect value={via} onChange={setVia} iconName="Navigation" exclude={from} />
+            <CitySelect value={via} onChange={setVia} iconName="Navigation" exclude={to} />
           </div>
         )}
         <div>
@@ -65,6 +77,13 @@ export default function CalculatorForm({
           <CitySelect value={to} onChange={setTo} iconName="Navigation" exclude={from} />
         </div>
       </div>
+
+      {routeError && (
+        <div className="mb-3 flex items-center gap-2 text-sm text-red-400 bg-red-500/10 border border-red-500/30 rounded-lg px-3 py-2">
+          <Icon name="TriangleAlert" size={14} className="flex-shrink-0" />
+          {routeError}
+        </div>
+      )}
 
       <div className="mb-6">
         <button
@@ -264,7 +283,7 @@ export default function CalculatorForm({
 
       <button
         onClick={onCalculate}
-        disabled={from === to || calculating}
+        disabled={!!routeError || calculating}
         className="w-full bg-neon text-background font-display font-bold text-base py-4 rounded-xl hover:opacity-90 transition-all glow-neon hover:scale-[1.02] active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
       >
         {calculating ? (

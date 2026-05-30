@@ -95,10 +95,11 @@ export default function Index() {
   }
 
   async function calculate() {
-    if (from === to || calculating) return;
+    const norm = (s: string) => s.trim().toLowerCase();
+    if (!from || !to || norm(from) === norm(to) || calculating) return;
     setCalculating(true);
     let totalDist: number;
-    if (withVia && via && via !== from && via !== to) {
+    if (withVia && via && norm(via) !== norm(from) && norm(via) !== norm(to)) {
       const d1 = await fetchDist(from, via);
       const d2 = await fetchDist(via, to);
       totalDist = d1 + d2;

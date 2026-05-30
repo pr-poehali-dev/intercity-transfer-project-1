@@ -49,10 +49,9 @@ export default function BookingModal({
     ? DELIVERY_OPTIONS[deliveryMode].pricePerKm
     : isMinivan ? MINIVAN_SUBTARIFFS[minivanSub].pricePerKm
     : cur.pricePerKm;
-  const mult = (isDelivery || isMinivan) ? 1 : (passengers > 1 ? 1 + (passengers - 1) * 0.15 : 1);
   const extras = isDelivery ? 0 : ((withChildren ? childrenCount * CHILD_SEAT_PRICE : 0) + (withPet ? PET_OPTIONS[petOption].price : 0));
   const shownPrice = distance
-    ? Math.round((distance * ratePerKm * mult * getDistanceSurcharge(distance)) / 50) * 50 + extras
+    ? Math.round((distance * ratePerKm * getDistanceSurcharge(distance)) / 50) * 50 + extras
     : price;
 
   return (

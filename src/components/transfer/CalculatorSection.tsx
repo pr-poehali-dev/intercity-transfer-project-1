@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import Icon from "@/components/ui/icon";
-import { TARIFFS, DELIVERY_OPTIONS, getDistanceSurcharge, CHILD_SEAT_PRICE, PET_OPTIONS } from "./constants";
+import { TARIFFS, DELIVERY_OPTIONS, MINIVAN_SUBTARIFFS, getDistanceSurcharge, CHILD_SEAT_PRICE, PET_OPTIONS } from "./constants";
 import type { IconName } from "./constants";
 import CitySelect from "./CitySelect";
 import func2url from "../../../backend/func2url.json";
@@ -25,6 +25,8 @@ interface CalculatorSectionProps {
   setPetOption: (v: number) => void;
   deliveryMode: number;
   setDeliveryMode: (v: number) => void;
+  minivanSub: number;
+  setMinivanSub: (v: number) => void;
   date: string;
   setDate: (v: string) => void;
   price: number | null;
@@ -45,6 +47,7 @@ export default function CalculatorSection({
   childrenCount, setChildrenCount, maxChildren,
   withPet, setWithPet, petOption, setPetOption,
   deliveryMode, setDeliveryMode,
+  minivanSub, setMinivanSub,
   date, setDate,
   price, distance, calculated, calculating,
   onCalculate, onClose, onRouteSelect,
@@ -63,13 +66,21 @@ export default function CalculatorSection({
     }
     setError("");
     setSending(true);
-    const isDelivery = TARIFFS[tariff].isDelivery;
-    const ratePerKm = isDelivery ? DELIVERY_OPTIONS[deliveryMode].pricePerKm : TARIFFS[tariff].pricePerKm;
-    const mult = isDelivery ? 1 : (passengers > 1 ? 1 + (passengers - 1) * 0.15 : 1);
+    const t = TARIFFS[tariff];
+    const isDelivery = t.isDelivery;
+    const isMinivan = t.isMinivan;
+    const ratePerKm = isDelivery
+      ? DELIVERY_OPTIONS[deliveryMode].pricePerKm
+      : isMinivan ? MINIVAN_SUBTARIFFS[minivanSub].pricePerKm
+      : t.pricePerKm;
+    const mult = (isDelivery || isMinivan) ? 1 : (passengers > 1 ? 1 + (passengers - 1) * 0.15 : 1);
     const extras = isDelivery ? 0 : ((withChildren ? childrenCount * CHILD_SEAT_PRICE : 0) + (withPet ? PET_OPTIONS[petOption].price : 0));
     const finalPrice = distance
       ? Math.round((distance * ratePerKm * mult * getDistanceSurcharge(distance)) / 50) * 50 + extras
       : price;
+    const tariffLabel = isMinivan
+      ? `${t.name} · ${MINIVAN_SUBTARIFFS[minivanSub].name}`
+      : t.name;
     const services: string[] = [];
     if (isDelivery) {
       services.push(`Доставка: ${DELIVERY_OPTIONS[deliveryMode].name} (${DELIVERY_OPTIONS[deliveryMode].pricePerKm} ₽/км)`);
@@ -88,7 +99,7 @@ export default function CalculatorSection({
           to_city: to,
           date,
           passengers: isDelivery ? "—" : passengers,
-          tariff: TARIFFS[tariff].name,
+          tariff: tariffLabel,
           price: finalPrice,
           distance,
           services: services.length ? services.join("; ") : "—",
@@ -147,6 +158,34 @@ export default function CalculatorSection({
                   ))}
                 </div>
               </div>
+
+              {/* Minivan subtariffs */}
+              {TARIFFS[tariff].isMinivan && (
+                <div className="mb-6">
+                  <label className="text-sm font-display text-muted-foreground tracking-wider mb-3 block">ВЫБЕРИТЕ ВМЕСТИМОСТЬ</label>
+                  <div className="grid grid-cols-3 gap-3">
+                    {MINIVAN_SUBTARIFFS.map((s, i) => (
+                      <button
+                        key={i}
+                        type="button"
+                        onClick={() => setMinivanSub(i)}
+                        className={`border rounded-xl p-3 text-center transition-all ${
+                          minivanSub === i
+                            ? "border-neon bg-neon/10 text-foreground"
+                            : "border-border bg-background text-muted-foreground hover:border-white/30"
+                        }`}
+                      >
+                        <Icon name="Users" size={18} className={`mx-auto mb-1.5 ${minivanSub === i ? "text-neon" : ""}`} />
+                        <div className="font-display text-sm font-semibold leading-tight">{s.name}</div>
+                        <div className="text-[11px] opacity-70 mt-0.5">{s.desc}</div>
+                        <div className={`font-display text-sm font-bold mt-1 ${minivanSub === i ? "text-neon" : ""}`}>
+                          {s.pricePerKm} ₽/км
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* Delivery type selector — only for Доставка tariff */}
               {TARIFFS[tariff].isDelivery && (
@@ -336,9 +375,14 @@ export default function CalculatorSection({
             ) : (
               <>
                 {(() => {
-                  const mult = passengers > 1 ? 1 + (passengers - 1) * 0.15 : 1;
-                  const isDelivery = TARIFFS[tariff].isDelivery;
-                  const ratePerKm = isDelivery ? DELIVERY_OPTIONS[deliveryMode].pricePerKm : TARIFFS[tariff].pricePerKm;
+                  const cur = TARIFFS[tariff];
+                  const isDelivery = cur.isDelivery;
+                  const isMinivan = cur.isMinivan;
+                  const ratePerKm = isDelivery
+                    ? DELIVERY_OPTIONS[deliveryMode].pricePerKm
+                    : isMinivan ? MINIVAN_SUBTARIFFS[minivanSub].pricePerKm
+                    : cur.pricePerKm;
+                  const mult = (isDelivery || isMinivan) ? 1 : (passengers > 1 ? 1 + (passengers - 1) * 0.15 : 1);
                   const extras = isDelivery ? 0 : ((withChildren ? childrenCount * CHILD_SEAT_PRICE : 0) + (withPet ? PET_OPTIONS[petOption].price : 0));
                   const shownPrice = distance
                     ? Math.round((distance * ratePerKm * mult * getDistanceSurcharge(distance)) / 50) * 50 + extras
@@ -364,7 +408,9 @@ export default function CalculatorSection({
                   {from} → {to} · {TARIFFS[tariff].name}
                   {TARIFFS[tariff].isDelivery
                     ? ` · ${DELIVERY_OPTIONS[deliveryMode].name} ${DELIVERY_OPTIONS[deliveryMode].pricePerKm} ₽/км`
-                    : ` · ${passengers} пасс.`
+                    : TARIFFS[tariff].isMinivan
+                      ? ` · ${MINIVAN_SUBTARIFFS[minivanSub].name} (${MINIVAN_SUBTARIFFS[minivanSub].desc})`
+                      : ` · ${passengers} пасс.`
                   }
                 </div>
                 {!TARIFFS[tariff].isDelivery && (withChildren || withPet) && (
@@ -396,10 +442,14 @@ export default function CalculatorSection({
                     <div className="text-xs font-display text-muted-foreground tracking-wider mb-3">ВЫБЕРИТЕ ТАРИФ</div>
                     <div className="space-y-2">
                       {TARIFFS.map((t, i) => {
-                        const isT = t.isDelivery;
-                        const tRate = isT ? DELIVERY_OPTIONS[deliveryMode].pricePerKm : t.pricePerKm;
-                        const tMult = isT ? 1 : (passengers > 1 ? 1 + (passengers - 1) * 0.15 : 1);
-                        const tExtras = isT ? 0 : ((withChildren ? childrenCount * CHILD_SEAT_PRICE : 0) + (withPet ? PET_OPTIONS[petOption].price : 0));
+                        const isTD = t.isDelivery;
+                        const isTM = t.isMinivan;
+                        const tRate = isTD
+                          ? DELIVERY_OPTIONS[deliveryMode].pricePerKm
+                          : isTM ? MINIVAN_SUBTARIFFS[minivanSub].pricePerKm
+                          : t.pricePerKm;
+                        const tMult = (isTD || isTM) ? 1 : (passengers > 1 ? 1 + (passengers - 1) * 0.15 : 1);
+                        const tExtras = isTD ? 0 : ((withChildren ? childrenCount * CHILD_SEAT_PRICE : 0) + (withPet ? PET_OPTIONS[petOption].price : 0));
                         const tPrice = Math.round((distance * tRate * tMult * getDistanceSurcharge(distance)) / 50) * 50 + tExtras;
                         return (
                           <button
@@ -416,7 +466,9 @@ export default function CalculatorSection({
                               <Icon name={t.icon as IconName} size={18} className={tariff === i ? "text-neon" : "text-muted-foreground"} />
                               <div className="text-left">
                                 <div className="font-display text-sm font-semibold text-foreground">{t.name}</div>
-                                <div className="text-xs text-muted-foreground">{t.desc}</div>
+                                <div className="text-xs text-muted-foreground">
+                                  {isTM ? MINIVAN_SUBTARIFFS[minivanSub].desc : t.desc}
+                                </div>
                               </div>
                             </div>
                             <div className="font-display font-bold text-foreground">

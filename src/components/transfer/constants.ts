@@ -7,11 +7,18 @@ export const CITIES = [
 ];
 
 export const TARIFFS = [
-  { name: "Эконом", pricePerKm: 32, icon: "Car", desc: "Комфортный седан", maxPassengers: 4, isDelivery: false },
-  { name: "Комфорт", pricePerKm: 37, icon: "Star", desc: "Повышенный комфорт", maxPassengers: 4, isDelivery: false },
-  { name: "Универсал", pricePerKm: 40, icon: "Truck", desc: "Везите больше", maxPassengers: 4, isDelivery: false },
-  { name: "Минивэн", pricePerKm: 55, icon: "Users", desc: "До 10 пассажиров", maxPassengers: 10, isDelivery: false },
-  { name: "Доставка", pricePerKm: 15, icon: "Package", desc: "Грузы и посылки", maxPassengers: 0, isDelivery: true },
+  { name: "Эконом",    pricePerKm: 32, icon: "Car",       desc: "Комфортный седан",    maxPassengers: 4,  isDelivery: false, isMinivan: false },
+  { name: "Комфорт",  pricePerKm: 37, icon: "Star",      desc: "Повышенный комфорт",  maxPassengers: 4,  isDelivery: false, isMinivan: false },
+  { name: "Бизнес",   pricePerKm: 70, icon: "Gem",       desc: "Премиум класс",       maxPassengers: 4,  isDelivery: false, isMinivan: false },
+  { name: "Универсал",pricePerKm: 40, icon: "Truck",     desc: "Везите больше",       maxPassengers: 4,  isDelivery: false, isMinivan: false },
+  { name: "Минивэн",  pricePerKm: 0,  icon: "Bus",       desc: "Выберите вместимость",maxPassengers: 10, isDelivery: false, isMinivan: true  },
+  { name: "Доставка", pricePerKm: 15, icon: "Package",   desc: "Грузы и посылки",     maxPassengers: 0,  isDelivery: true,  isMinivan: false },
+];
+
+export const MINIVAN_SUBTARIFFS = [
+  { name: "Компакт вэн", seats: 5,  pricePerKm: 45, desc: "до 5 мест" },
+  { name: "Минивэн",     seats: 7,  pricePerKm: 55, desc: "до 7 мест" },
+  { name: "Минивэн XL",  seats: 10, pricePerKm: 65, desc: "до 10 мест" },
 ];
 
 export const DELIVERY_OPTIONS = [
@@ -121,7 +128,7 @@ export function getDistance(from: string, to: string): number {
 
 export type IconName =
   | "MapPin" | "Navigation" | "Car" | "Star" | "Users" | "Truck" | "Baby" | "Dog"
-  | "Package" | "PackageSearch" | "Zap"
+  | "Package" | "PackageSearch" | "Zap" | "Gem" | "Bus" | "ArrowRight2"
   | "Shield" | "Clock" | "CreditCard" | "Headphones" | "Phone"
   | "Calculator" | "CheckCircle" | "Check" | "ArrowRight" | "MessageCircle"
   | "Send" | "Mail" | "ChevronRight";

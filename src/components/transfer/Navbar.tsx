@@ -30,14 +30,33 @@ export default function Navbar({ onBookClick }: NavbarProps) {
             <span className="hidden sm:inline">ЗАБРОНИРОВАТЬ</span>
             <span className="sm:hidden">ЦЕНА</span>
           </button>
-          <a
-            href="#contacts"
-            className="w-9 h-9 rounded-md border border-white/20 flex items-center justify-center text-neon hover:border-neon/60 hover:bg-neon/10 transition-all"
-            aria-label="Контакты"
-          >
-            <Icon name="Phone" size={16} />
-          </a>
+          <div className="relative flex items-center">
+            {/* Blinking pointer arrow */}
+            <span
+              className="absolute -left-6 top-1/2 -translate-y-1/2 text-neon text-sm font-bold select-none"
+              style={{ animation: "phonePointerBlink 1.2s ease-in-out infinite" }}
+            >›</span>
+            <a
+              href="#contacts"
+              className="w-9 h-9 rounded-md border border-neon/60 bg-neon/10 flex items-center justify-center text-neon hover:bg-neon/20 transition-all"
+              aria-label="Контакты"
+              style={{ animation: "phoneGlowPulse 1.2s ease-in-out infinite" }}
+            >
+              <Icon name="Phone" size={16} />
+            </a>
+          </div>
         </div>
+
+        <style>{`
+          @keyframes phonePointerBlink {
+            0%, 100% { opacity: 1; transform: translateY(-50%) translateX(0); }
+            50% { opacity: 0.3; transform: translateY(-50%) translateX(-3px); }
+          }
+          @keyframes phoneGlowPulse {
+            0%, 100% { box-shadow: 0 0 0 0 hsl(38 100% 55% / 0.5); }
+            50% { box-shadow: 0 0 0 5px hsl(38 100% 55% / 0); }
+          }
+        `}</style>
       </div>
     </nav>
   );

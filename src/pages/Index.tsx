@@ -4,7 +4,7 @@ import HeroSection from "@/components/transfer/HeroSection";
 import CalculatorSection from "@/components/transfer/CalculatorSection";
 import PopularRoutesSection from "@/components/transfer/PopularRoutesSection";
 import ContactsSection from "@/components/transfer/ContactsSection";
-import { TARIFFS, DELIVERY_OPTIONS, getDistance, getDistanceSurcharge, CHILD_SEAT_PRICE, PET_OPTIONS } from "@/components/transfer/constants";
+import { TARIFFS, DELIVERY_OPTIONS, MINIVAN_SUBTARIFFS, getDistance, getDistanceSurcharge, CHILD_SEAT_PRICE, PET_OPTIONS } from "@/components/transfer/constants";
 import func2url from "../../backend/func2url.json";
 
 export default function Index() {
@@ -18,6 +18,7 @@ export default function Index() {
   const [withPet, setWithPet] = useState(false);
   const [petOption, setPetOption] = useState(0);
   const [deliveryMode, setDeliveryMode] = useState(0);
+  const [minivanSub, setMinivanSub] = useState(0);
   const [price, setPrice] = useState<number | null>(null);
   const [distance, setDistance] = useState<number | null>(null);
   const [calculated, setCalculated] = useState(false);
@@ -42,7 +43,8 @@ export default function Index() {
     return () => observer.disconnect();
   }, []);
 
-  const maxChildren = TARIFFS[tariff].name === "Минивэн" ? 5 : 3;
+  const isMinivan = TARIFFS[tariff].isMinivan;
+  const maxChildren = isMinivan ? 5 : 3;
 
   function extrasTotal() {
     let sum = 0;
@@ -52,9 +54,14 @@ export default function Index() {
   }
 
   function priceFromDistance(dist: number) {
-    const isDelivery = TARIFFS[tariff].isDelivery;
-    const ratePerKm = isDelivery ? DELIVERY_OPTIONS[deliveryMode].pricePerKm : TARIFFS[tariff].pricePerKm;
-    const mult = isDelivery ? 1 : (passengers > 1 ? 1 + (passengers - 1) * 0.15 : 1);
+    const t = TARIFFS[tariff];
+    const isDelivery = t.isDelivery;
+    const ratePerKm = isDelivery
+      ? DELIVERY_OPTIONS[deliveryMode].pricePerKm
+      : t.isMinivan
+        ? MINIVAN_SUBTARIFFS[minivanSub].pricePerKm
+        : t.pricePerKm;
+    const mult = (isDelivery || t.isMinivan) ? 1 : (passengers > 1 ? 1 + (passengers - 1) * 0.15 : 1);
     const surcharge = getDistanceSurcharge(dist);
     const extras = isDelivery ? 0 : extrasTotal();
     return Math.round((dist * ratePerKm * mult * surcharge) / 50) * 50 + extras;
@@ -109,6 +116,7 @@ export default function Index() {
   function handleSetWithPet(v: boolean) { setWithPet(v); setCalculated(false); }
   function handleSetPetOption(v: number) { setPetOption(v); setCalculated(false); }
   function handleSetDeliveryMode(v: number) { setDeliveryMode(v); setCalculated(false); }
+  function handleSetMinivanSub(v: number) { setMinivanSub(v); setCalculated(false); }
 
   return (
     <div className="min-h-screen bg-background text-foreground font-golos overflow-x-hidden">
@@ -134,6 +142,8 @@ export default function Index() {
         setPetOption={handleSetPetOption}
         deliveryMode={deliveryMode}
         setDeliveryMode={handleSetDeliveryMode}
+        minivanSub={minivanSub}
+        setMinivanSub={handleSetMinivanSub}
         date={date}
         setDate={setDate}
         price={price}

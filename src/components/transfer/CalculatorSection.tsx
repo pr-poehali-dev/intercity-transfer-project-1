@@ -178,9 +178,6 @@ export default function CalculatorSection({
                         <Icon name="Users" size={18} className={`mx-auto mb-1.5 ${minivanSub === i ? "text-neon" : ""}`} />
                         <div className="font-display text-sm font-semibold leading-tight">{s.name}</div>
                         <div className="text-[11px] opacity-70 mt-0.5">{s.desc}</div>
-                        <div className={`font-display text-sm font-bold mt-1 ${minivanSub === i ? "text-neon" : ""}`}>
-                          {s.pricePerKm} ₽/км
-                        </div>
                       </button>
                     ))}
                   </div>
@@ -265,7 +262,7 @@ export default function CalculatorSection({
                       <Icon name="Baby" size={18} className={withChildren ? "text-neon" : "text-muted-foreground"} />
                       <div className="text-left flex-1 min-w-0">
                         <div className="font-display text-sm font-semibold text-foreground">С детьми до 6 лет</div>
-                        <div className="text-xs text-muted-foreground">+{CHILD_SEAT_PRICE} ₽ за каждого ребёнка</div>
+                        <div className="text-xs text-muted-foreground">Детское кресло, до 6 лет</div>
                       </div>
                     </button>
                     {withChildren && (
@@ -313,7 +310,6 @@ export default function CalculatorSection({
                             className={`border rounded-lg p-2 text-center transition-all ${petOption === i ? "border-neon bg-neon/10 text-foreground" : "border-border bg-surface text-muted-foreground hover:border-white/30"}`}
                           >
                             <div className="font-display text-sm font-semibold leading-tight">{p.label}</div>
-                            <div className="text-xs opacity-70 mt-0.5">+{p.price} ₽</div>
                           </button>
                         ))}
                       </div>

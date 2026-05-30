@@ -172,7 +172,7 @@ export default function BookingModal({
                 }`}
               />
               {phone && !isPhoneValid(phone) && (
-                <div className="text-xs text-red-400 -mt-1.5 px-1">Начните с + и введите не менее 11 цифр</div>
+                <div className="text-xs text-red-400 -mt-1.5 px-1">Начните с + и введите от 11 до 15 цифр</div>
               )}
               <textarea
                 value={comment}

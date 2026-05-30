@@ -74,12 +74,12 @@ export default function CalculatorSection({
 
   function isPhoneValid(val: string) {
     const digits = val.replace(/\D/g, "");
-    return val.startsWith("+") && digits.length >= 11;
+    return val.startsWith("+") && digits.length >= 11 && digits.length <= 15;
   }
 
   async function handleBook() {
     if (!name.trim()) { setError("Заполните имя"); return; }
-    if (!isPhoneValid(phone)) { setError("Телефон должен начинаться с + и содержать не менее 11 цифр"); return; }
+    if (!isPhoneValid(phone)) { setError("Телефон должен начинаться с + и содержать от 11 до 15 цифр"); return; }
     setError("");
     setSending(true);
     const t = TARIFFS[tariff];

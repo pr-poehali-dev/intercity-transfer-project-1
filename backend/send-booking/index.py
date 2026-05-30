@@ -23,6 +23,7 @@ def handler(event: dict, context) -> dict:
     name = body.get('name', '—')
     phone = body.get('phone', '—')
     from_city = body.get('from_city', '—')
+    via_city = body.get('via_city')
     to_city = body.get('to_city', '—')
     date = body.get('date', '—')
     passengers = body.get('passengers', '—')
@@ -33,6 +34,7 @@ def handler(event: dict, context) -> dict:
     comment = body.get('comment', '—')
 
     distance_line = f"\n📏 Расстояние: {distance} км" if distance else ""
+    via_line = f"📌 Через: {via_city}\n" if via_city else ""
     services_line = f"\n🧩 Доп. услуги: {services}" if services and services != '—' else ""
     comment_line = f"\n💬 Комментарий: {comment}" if comment and comment != '—' else ""
 
@@ -41,6 +43,7 @@ def handler(event: dict, context) -> dict:
         f"👤 Имя: {name}\n"
         f"📞 Телефон: {phone}\n"
         f"📍 Откуда: {from_city}\n"
+        f"{via_line}"
         f"🏁 Куда: {to_city}"
         f"{distance_line}\n"
         f"📅 Дата: {date}\n"

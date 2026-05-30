@@ -10,6 +10,10 @@ interface CalculatorSectionProps {
   setFrom: (v: string) => void;
   to: string;
   setTo: (v: string) => void;
+  via: string;
+  setVia: (v: string) => void;
+  withVia: boolean;
+  setWithVia: (v: boolean) => void;
   tariff: number;
   setTariff: (v: number) => void;
   passengers: number;
@@ -40,7 +44,7 @@ interface CalculatorSectionProps {
 }
 
 export default function CalculatorSection({
-  from, setFrom, to, setTo,
+  from, setFrom, to, setTo, via, setVia, withVia, setWithVia,
   tariff, setTariff,
   passengers, setPassengers,
   withChildren, setWithChildren,
@@ -106,6 +110,7 @@ export default function CalculatorSection({
           name,
           phone,
           from_city: from,
+          via_city: (withVia && via) ? via : undefined,
           to_city: to,
           date,
           passengers: isDelivery ? "—" : passengers,
@@ -138,6 +143,8 @@ export default function CalculatorSection({
             <CalculatorForm
               from={from} setFrom={setFrom}
               to={to} setTo={setTo}
+              via={via} setVia={setVia}
+              withVia={withVia} setWithVia={setWithVia}
               tariff={tariff} setTariff={setTariff}
               passengers={passengers} setPassengers={setPassengers}
               withChildren={withChildren} setWithChildren={setWithChildren}
@@ -158,7 +165,7 @@ export default function CalculatorSection({
       {/* MODAL with price */}
       {calculated && price && (
         <BookingModal
-          from={from} to={to}
+          from={from} via={(withVia && via) ? via : undefined} to={to}
           tariff={tariff} passengers={passengers}
           withChildren={withChildren} childrenCount={childrenCount}
           withPet={withPet} petOption={petOption}

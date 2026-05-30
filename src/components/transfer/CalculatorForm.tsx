@@ -8,6 +8,10 @@ interface CalculatorFormProps {
   setFrom: (v: string) => void;
   to: string;
   setTo: (v: string) => void;
+  via: string;
+  setVia: (v: string) => void;
+  withVia: boolean;
+  setWithVia: (v: boolean) => void;
   tariff: number;
   setTariff: (v: number) => void;
   passengers: number;
@@ -32,7 +36,7 @@ interface CalculatorFormProps {
 }
 
 export default function CalculatorForm({
-  from, setFrom, to, setTo,
+  from, setFrom, to, setTo, via, setVia, withVia, setWithVia,
   tariff, setTariff,
   passengers, setPassengers,
   withChildren, setWithChildren,
@@ -45,7 +49,7 @@ export default function CalculatorForm({
 }: CalculatorFormProps) {
   return (
     <div className="reveal bg-surface border border-border rounded-2xl p-4 sm:p-8">
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-3">
         <div>
           <label className="text-sm font-display text-muted-foreground tracking-wider mb-2 block">ОТКУДА</label>
           <CitySelect value={from} onChange={setFrom} iconName="MapPin" exclude={to} />
@@ -54,6 +58,27 @@ export default function CalculatorForm({
           <label className="text-sm font-display text-muted-foreground tracking-wider mb-2 block">КУДА</label>
           <CitySelect value={to} onChange={setTo} iconName="Navigation" exclude={from} />
         </div>
+      </div>
+
+      {/* Via stop */}
+      <div className="mb-6">
+        <button
+          type="button"
+          onClick={() => setWithVia(!withVia)}
+          className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-3"
+        >
+          <div className={`w-4 h-4 rounded border flex items-center justify-center flex-shrink-0 transition-colors ${withVia ? "bg-neon border-neon" : "border-muted-foreground"}`}>
+            {withVia && <Icon name="Check" size={10} className="text-background" />}
+          </div>
+          <Icon name="MapPin" size={14} className={withVia ? "text-neon" : ""} />
+          Добавить промежуточный пункт
+        </button>
+        {withVia && (
+          <div>
+            <label className="text-sm font-display text-muted-foreground tracking-wider mb-2 block">ПРОМЕЖУТОЧНЫЙ ПУНКТ</label>
+            <CitySelect value={via} onChange={setVia} iconName="Navigation" exclude={from} />
+          </div>
+        )}
       </div>
 
       {/* Tariffs */}

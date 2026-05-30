@@ -4,6 +4,7 @@ import type { IconName } from "./constants";
 
 interface BookingModalProps {
   from: string;
+  via?: string;
   to: string;
   tariff: number;
   passengers: number;
@@ -31,7 +32,7 @@ interface BookingModalProps {
 }
 
 export default function BookingModal({
-  from, to, tariff, passengers,
+  from, via, to, tariff, passengers,
   withChildren, childrenCount, withPet, petOption,
   deliveryMode, minivanSub,
   price, distance,
@@ -103,7 +104,7 @@ export default function BookingModal({
             </div>
 
             <div className="text-sm text-muted-foreground mb-3">
-              {from} → {to} · {cur.name}
+              {from}{via ? ` → ${via}` : ""} → {to} · {cur.name}
               {isDelivery
                 ? ` · ${DELIVERY_OPTIONS[deliveryMode].name} ${DELIVERY_OPTIONS[deliveryMode].pricePerKm} ₽/км`
                 : isMinivan

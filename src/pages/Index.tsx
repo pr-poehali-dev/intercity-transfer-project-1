@@ -10,6 +10,8 @@ import func2url from "../../backend/func2url.json";
 export default function Index() {
   const [from, setFrom] = useState("Москва");
   const [to, setTo] = useState("Санкт-Петербург");
+  const [via, setVia] = useState("");
+  const [withVia, setWithVia] = useState(false);
   const [tariff, setTariff] = useState(0);
   const [passengers, setPassengers] = useState(1);
   const [date, setDate] = useState("");
@@ -78,25 +80,33 @@ export default function Index() {
     return Math.round((dist * ratePerKm * mult * surcharge) / 50) * 50 + extras;
   }
 
-  async function calculate() {
-    if (from === to || calculating) return;
-    setCalculating(true);
-    let dist = getDistance(from, to);
+  async function fetchDist(a: string, b: string): Promise<number> {
+    let dist = getDistance(a, b);
     try {
       const res = await fetch(func2url["calc-distance"], {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ from, to }),
+        body: JSON.stringify({ from: a, to: b }),
       });
       const data = await res.json();
-      if (typeof data.distance === "number" && data.distance > 0) {
-        dist = data.distance;
-      }
-    } catch {
-      // fallback на локальную матрицу расстояний
+      if (typeof data.distance === "number" && data.distance > 0) dist = data.distance;
+    } catch { /* fallback */ }
+    return dist;
+  }
+
+  async function calculate() {
+    if (from === to || calculating) return;
+    setCalculating(true);
+    let totalDist: number;
+    if (withVia && via && via !== from && via !== to) {
+      const d1 = await fetchDist(from, via);
+      const d2 = await fetchDist(via, to);
+      totalDist = d1 + d2;
+    } else {
+      totalDist = await fetchDist(from, to);
     }
-    setPrice(priceFromDistance(dist));
-    setDistance(dist);
+    setPrice(priceFromDistance(totalDist));
+    setDistance(totalDist);
     setCalculated(true);
     setCalculating(false);
   }
@@ -114,6 +124,8 @@ export default function Index() {
 
   function handleSetFrom(v: string) { setFrom(v); setCalculated(false); }
   function handleSetTo(v: string) { setTo(v); setCalculated(false); }
+  function handleSetVia(v: string) { setVia(v); setCalculated(false); }
+  function handleSetWithVia(v: boolean) { setWithVia(v); setCalculated(false); if (!v) setVia(""); }
   function handleSetTariff(v: number) {
     setTariff(v);
     setPassengers((p) => Math.min(p, TARIFFS[v].maxPassengers));
@@ -138,6 +150,10 @@ export default function Index() {
         setFrom={handleSetFrom}
         to={to}
         setTo={handleSetTo}
+        via={via}
+        setVia={handleSetVia}
+        withVia={withVia}
+        setWithVia={handleSetWithVia}
         tariff={tariff}
         setTariff={handleSetTariff}
         passengers={passengers}

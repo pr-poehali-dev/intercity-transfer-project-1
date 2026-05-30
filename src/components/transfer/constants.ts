@@ -7,10 +7,10 @@ export const CITIES = [
 ];
 
 export const TARIFFS = [
-  { name: "Эконом", pricePerKm: 32, icon: "Car", desc: "Комфортный седан", maxPassengers: 4 },
-  { name: "Комфорт", pricePerKm: 37, icon: "Star", desc: "Повышенный комфорт", maxPassengers: 4 },
-  { name: "Универсал", pricePerKm: 40, icon: "Truck", desc: "Везите больше", maxPassengers: 4 },
-  { name: "Минивэн", pricePerKm: 55, icon: "Users", desc: "До 10 пассажиров", maxPassengers: 10 },
+  { name: "Эконом", pricePerKm: 29, icon: "Car", desc: "Комфортный седан", maxPassengers: 4 },
+  { name: "Комфорт", pricePerKm: 34, icon: "Star", desc: "Повышенный комфорт", maxPassengers: 4 },
+  { name: "Универсал", pricePerKm: 37, icon: "Truck", desc: "Везите больше", maxPassengers: 4 },
+  { name: "Минивэн", pricePerKm: 49, icon: "Users", desc: "До 10 пассажиров", maxPassengers: 10 },
 ];
 
 export const CHILD_SEAT_PRICE = 500;
@@ -99,10 +99,10 @@ function hashPair(a: string, b: string): number {
 }
 
 export function getDistanceSurcharge(distance: number): number {
-  if (distance <= 50) return 1.5;
-  if (distance <= 100) return 1.25;
-  if (distance <= 200) return 1.1;
-  return 1;
+  if (distance <= 300) return 1.08;
+  if (distance <= 700) return 1.0;
+  if (distance <= 1500) return 0.93;
+  return 0.87;
 }
 
 export function getDistance(from: string, to: string): number {

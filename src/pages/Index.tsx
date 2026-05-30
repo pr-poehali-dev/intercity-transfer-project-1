@@ -12,6 +12,7 @@ export default function Index() {
   const [to, setTo] = useState("Санкт-Петербург");
   const [via, setVia] = useState("");
   const [withVia, setWithVia] = useState(false);
+  const [roundTrip, setRoundTrip] = useState(false);
   const [tariff, setTariff] = useState(0);
   const [passengers, setPassengers] = useState(1);
   const [date, setDate] = useState("");
@@ -96,7 +97,8 @@ export default function Index() {
 
   async function calculate() {
     const norm = (s: string) => s.trim().toLowerCase();
-    if (!from || !to || norm(from) === norm(to) || calculating) return;
+    if (!from || !to || calculating) return;
+    if (!roundTrip && norm(from) === norm(to)) return;
     setCalculating(true);
     let totalDist: number;
     if (withVia && via && norm(via) !== norm(from) && norm(via) !== norm(to)) {
@@ -106,6 +108,7 @@ export default function Index() {
     } else {
       totalDist = await fetchDist(from, to);
     }
+    if (roundTrip) totalDist *= 2;
     setPrice(priceFromDistance(totalDist));
     setDistance(totalDist);
     setCalculated(true);
@@ -127,6 +130,7 @@ export default function Index() {
   function handleSetTo(v: string) { setTo(v); setCalculated(false); }
   function handleSetVia(v: string) { setVia(v); setCalculated(false); }
   function handleSetWithVia(v: boolean) { setWithVia(v); setCalculated(false); if (!v) setVia(""); }
+  function handleSetRoundTrip(v: boolean) { setRoundTrip(v); setCalculated(false); }
   function handleSetTariff(v: number) {
     setTariff(v);
     setPassengers((p) => Math.min(p, TARIFFS[v].maxPassengers));
@@ -155,6 +159,8 @@ export default function Index() {
         setVia={handleSetVia}
         withVia={withVia}
         setWithVia={handleSetWithVia}
+        roundTrip={roundTrip}
+        setRoundTrip={handleSetRoundTrip}
         tariff={tariff}
         setTariff={handleSetTariff}
         passengers={passengers}

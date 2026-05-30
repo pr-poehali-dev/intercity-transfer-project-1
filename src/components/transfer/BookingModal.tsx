@@ -6,6 +6,7 @@ interface BookingModalProps {
   from: string;
   via?: string;
   to: string;
+  roundTrip: boolean;
   tariff: number;
   passengers: number;
   withChildren: boolean;
@@ -32,7 +33,7 @@ interface BookingModalProps {
 }
 
 export default function BookingModal({
-  from, via, to, tariff, passengers,
+  from, via, to, roundTrip, tariff, passengers,
   withChildren, childrenCount, withPet, petOption,
   deliveryMode, minivanSub,
   price, distance,
@@ -104,7 +105,8 @@ export default function BookingModal({
             </div>
 
             <div className="text-sm text-muted-foreground mb-3">
-              {from}{via ? ` → ${via}` : ""} → {to} · {cur.name}
+              {from}{via ? ` → ${via}` : ""} → {to}{roundTrip ? `${via ? ` → ${via}` : ""} → ${from}` : ""} · {cur.name}
+              {roundTrip ? " · туда-обратно" : ""}
               {isDelivery
                 ? ` · ${DELIVERY_OPTIONS[deliveryMode].name} ${DELIVERY_OPTIONS[deliveryMode].pricePerKm} ₽/км`
                 : isMinivan

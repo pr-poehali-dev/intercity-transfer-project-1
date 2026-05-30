@@ -131,4 +131,4 @@ export type IconName =
   | "Package" | "PackageSearch" | "Zap" | "Gem" | "Bus" | "ArrowRight2"
   | "Shield" | "Clock" | "CreditCard" | "Headphones" | "Phone"
   | "Calculator" | "CheckCircle" | "Check" | "ArrowRight" | "MessageCircle" | "TriangleAlert"
-  | "Send" | "Mail" | "ChevronRight";
+  | "Send" | "Mail" | "ChevronRight" | "RefreshCw";

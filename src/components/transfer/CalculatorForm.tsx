@@ -12,6 +12,8 @@ interface CalculatorFormProps {
   setVia: (v: string) => void;
   withVia: boolean;
   setWithVia: (v: boolean) => void;
+  roundTrip: boolean;
+  setRoundTrip: (v: boolean) => void;
   tariff: number;
   setTariff: (v: number) => void;
   passengers: number;
@@ -36,7 +38,7 @@ interface CalculatorFormProps {
 }
 
 export default function CalculatorForm({
-  from, setFrom, to, setTo, via, setVia, withVia, setWithVia,
+  from, setFrom, to, setTo, via, setVia, withVia, setWithVia, roundTrip, setRoundTrip,
   tariff, setTariff,
   passengers, setPassengers,
   withChildren, setWithChildren,
@@ -48,11 +50,11 @@ export default function CalculatorForm({
   calculating, onCalculate,
 }: CalculatorFormProps) {
   const norm = (s: string) => s.trim().toLowerCase();
-  const sameRoute = !!from && !!to && norm(from) === norm(to);
+  const sameRoute = !roundTrip && !!from && !!to && norm(from) === norm(to);
   const viaSameAsFrom = withVia && !!via && norm(via) === norm(from);
-  const viaSameAsTo = withVia && !!via && norm(via) === norm(to);
+  const viaSameAsTo = withVia && !roundTrip && !!via && norm(via) === norm(to);
   const routeError = sameRoute
-    ? "Пункты «Откуда» и «Куда» совпадают — выберите разные адреса"
+    ? "Пункты «Откуда» и «Куда» совпадают — выберите разные адреса или включите «Туда и обратно»"
     : viaSameAsFrom
       ? "Промежуточный пункт совпадает с «Откуда»"
       : viaSameAsTo
@@ -74,7 +76,7 @@ export default function CalculatorForm({
         )}
         <div>
           <label className="text-sm font-display text-muted-foreground tracking-wider mb-2 block">КУДА</label>
-          <CitySelect value={to} onChange={setTo} iconName="Navigation" exclude={from} />
+          <CitySelect value={to} onChange={setTo} iconName="Navigation" exclude={roundTrip ? undefined : from} />
         </div>
       </div>
 
@@ -84,6 +86,21 @@ export default function CalculatorForm({
           {routeError}
         </div>
       )}
+
+      <div className="mb-3">
+        <button
+          type="button"
+          onClick={() => setRoundTrip(!roundTrip)}
+          className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <div className={`w-4 h-4 rounded border flex items-center justify-center flex-shrink-0 transition-colors ${roundTrip ? "bg-neon border-neon" : "border-muted-foreground"}`}>
+            {roundTrip && <Icon name="Check" size={10} className="text-background" />}
+          </div>
+          <Icon name="RefreshCw" size={14} className={roundTrip ? "text-neon" : ""} />
+          Туда и обратно
+          {roundTrip && <span className="text-xs text-neon">(× 2 расстояния)</span>}
+        </button>
+      </div>
 
       <div className="mb-6">
         <button

@@ -14,6 +14,8 @@ interface CalculatorSectionProps {
   setVia: (v: string) => void;
   withVia: boolean;
   setWithVia: (v: boolean) => void;
+  roundTrip: boolean;
+  setRoundTrip: (v: boolean) => void;
   tariff: number;
   setTariff: (v: number) => void;
   passengers: number;
@@ -44,7 +46,7 @@ interface CalculatorSectionProps {
 }
 
 export default function CalculatorSection({
-  from, setFrom, to, setTo, via, setVia, withVia, setWithVia,
+  from, setFrom, to, setTo, via, setVia, withVia, setWithVia, roundTrip, setRoundTrip,
   tariff, setTariff,
   passengers, setPassengers,
   withChildren, setWithChildren,
@@ -96,6 +98,7 @@ export default function CalculatorSection({
       ? `${t.name} · ${MINIVAN_SUBTARIFFS[minivanSub].name}`
       : t.name;
     const services: string[] = [];
+    if (roundTrip) services.push("Поездка туда и обратно");
     if (isDelivery) {
       services.push(`Доставка: ${DELIVERY_OPTIONS[deliveryMode].name} (${DELIVERY_OPTIONS[deliveryMode].pricePerKm} ₽/км)`);
     } else {
@@ -145,6 +148,7 @@ export default function CalculatorSection({
               to={to} setTo={setTo}
               via={via} setVia={setVia}
               withVia={withVia} setWithVia={setWithVia}
+              roundTrip={roundTrip} setRoundTrip={setRoundTrip}
               tariff={tariff} setTariff={setTariff}
               passengers={passengers} setPassengers={setPassengers}
               withChildren={withChildren} setWithChildren={setWithChildren}
@@ -166,6 +170,7 @@ export default function CalculatorSection({
       {calculated && price && (
         <BookingModal
           from={from} via={(withVia && via) ? via : undefined} to={to}
+          roundTrip={roundTrip}
           tariff={tariff} passengers={passengers}
           withChildren={withChildren} childrenCount={childrenCount}
           withPet={withPet} petOption={petOption}

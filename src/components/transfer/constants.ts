@@ -130,5 +130,5 @@ export type IconName =
   | "MapPin" | "Navigation" | "Car" | "Star" | "Users" | "Truck" | "Baby" | "Dog"
   | "Package" | "PackageSearch" | "Zap" | "Gem" | "Bus" | "ArrowRight2"
   | "Shield" | "Clock" | "CreditCard" | "Headphones" | "Phone"
-  | "Calculator" | "CheckCircle" | "Check" | "ArrowRight" | "MessageCircle"
+  | "Calculator" | "CheckCircle" | "Check" | "ArrowRight" | "MessageCircle" | "TriangleAlert"
   | "Send" | "Mail" | "ChevronRight";

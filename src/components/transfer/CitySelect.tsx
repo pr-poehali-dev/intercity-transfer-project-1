@@ -168,9 +168,19 @@ export default function CitySelect({ value, onChange, iconName, exclude }: CityS
                   </button>
                 ))}
                 {!searching && filtered.matches.length === 0 && remoteResults.length === 0 && search.trim().length >= 2 && (
-                  <div className="px-4 py-8 text-center text-base text-muted-foreground">
+                  <div className="px-4 py-6 text-center text-base text-muted-foreground">
                     Ничего не найдено
                   </div>
+                )}
+                {search.trim().length >= 2 && (
+                  <button
+                    type="button"
+                    onClick={() => pick(search.trim())}
+                    className="w-full text-left px-4 py-3 text-sm hover:bg-neon/10 transition-colors border-t border-border flex items-center gap-2 text-neon"
+                  >
+                    <Icon name="MapPin" size={14} className="flex-shrink-0" />
+                    Использовать «{search.trim()}» как адрес
+                  </button>
                 )}
               </>
             ) : (

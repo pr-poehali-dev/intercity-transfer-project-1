@@ -1,8 +1,8 @@
-import { useRef, useState } from "react";
-import Icon from "@/components/ui/icon";
+import { useState } from "react";
 import { TARIFFS, DELIVERY_OPTIONS, MINIVAN_SUBTARIFFS, getDistanceSurcharge, CHILD_SEAT_PRICE, PET_OPTIONS } from "./constants";
-import type { IconName } from "./constants";
-import CitySelect from "./CitySelect";
+import CalculatorForm from "./CalculatorForm";
+import BookingModal from "./BookingModal";
+import HowItWorks from "./HowItWorks";
 import func2url from "../../../backend/func2url.json";
 
 interface CalculatorSectionProps {
@@ -135,401 +135,49 @@ export default function CalculatorSection({
             <h2 className="font-display text-2xl sm:text-3xl md:text-4xl font-bold">РАССЧИТАЙТЕ СТОИМОСТЬ ПОЕЗДКИ</h2>
           </div>
           <div className="max-w-3xl mx-auto">
-            {/* Form */}
-            <div className="reveal bg-surface border border-border rounded-2xl p-4 sm:p-8">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-                <div>
-                  <label className="text-sm font-display text-muted-foreground tracking-wider mb-2 block">ОТКУДА</label>
-                  <CitySelect value={from} onChange={setFrom} iconName="MapPin" exclude={to} />
-                </div>
-                <div>
-                  <label className="text-sm font-display text-muted-foreground tracking-wider mb-2 block">КУДА</label>
-                  <CitySelect value={to} onChange={setTo} iconName="Navigation" exclude={from} />
-                </div>
-              </div>
-
-              {/* Tariffs */}
-              <div className="mb-6">
-                <label className="text-sm font-display text-muted-foreground tracking-wider mb-3 block">ТАРИФ</label>
-                <div className="grid grid-cols-3 gap-3">
-                  {TARIFFS.map((t, i) => (
-                    <button
-                      key={i}
-                      onClick={() => { setTariff(i); }}
-                      className={`border rounded-xl p-2 sm:p-3 text-center transition-all overflow-hidden min-w-0 ${
-                        tariff === i
-                          ? "border-neon bg-neon/10 text-foreground"
-                          : "border-border bg-background text-muted-foreground hover:border-white/30"
-                      }`}
-                    >
-                      <Icon name={t.icon as IconName} size={18} className={`mx-auto mb-1 ${tariff === i ? "text-neon" : ""}`} />
-                      <div className="font-display text-sm sm:text-base font-semibold leading-tight">{t.name}</div>
-                      <div className="text-[11px] sm:text-xs opacity-70 leading-tight mt-0.5">{t.desc}</div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Minivan subtariffs */}
-              {TARIFFS[tariff].isMinivan && (
-                <div className="mb-6">
-                  <label className="text-sm font-display text-muted-foreground tracking-wider mb-3 block">ВЫБЕРИТЕ ВМЕСТИМОСТЬ</label>
-                  <div className="grid grid-cols-3 gap-3">
-                    {MINIVAN_SUBTARIFFS.map((s, i) => (
-                      <button
-                        key={i}
-                        type="button"
-                        onClick={() => setMinivanSub(i)}
-                        className={`border rounded-xl p-3 text-center transition-all ${
-                          minivanSub === i
-                            ? "border-neon bg-neon/10 text-foreground"
-                            : "border-border bg-background text-muted-foreground hover:border-white/30"
-                        }`}
-                      >
-                        <Icon name="Users" size={18} className={`mx-auto mb-1.5 ${minivanSub === i ? "text-neon" : ""}`} />
-                        <div className="font-display text-sm font-semibold leading-tight">{s.name}</div>
-                        <div className="text-[11px] opacity-70 mt-0.5">{s.desc}</div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Delivery type selector — only for Доставка tariff */}
-              {TARIFFS[tariff].isDelivery && (
-                <div className="mb-6">
-                  <label className="text-sm font-display text-muted-foreground tracking-wider mb-3 block">ТИП ДОСТАВКИ</label>
-                  <div className="grid grid-cols-2 gap-3">
-                    {DELIVERY_OPTIONS.map((d, i) => (
-                      <button
-                        key={i}
-                        type="button"
-                        onClick={() => setDeliveryMode(i)}
-                        className={`border rounded-xl p-3 sm:p-4 text-left transition-all ${
-                          deliveryMode === i
-                            ? "border-neon bg-neon/10 text-foreground"
-                            : "border-border bg-background text-muted-foreground hover:border-white/30"
-                        }`}
-                      >
-                        <Icon name={d.icon as IconName} size={20} className={`mb-2 ${deliveryMode === i ? "text-neon" : ""}`} />
-                        <div className="font-display text-sm sm:text-base font-semibold leading-tight">{d.name}</div>
-                        <div className="text-[11px] sm:text-xs opacity-70 mt-0.5">{d.desc}</div>
-                        <div className={`font-display text-base font-bold mt-1 ${deliveryMode === i ? "text-neon" : ""}`}>
-                          {d.pricePerKm} ₽/км
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              <div className="grid grid-cols-2 gap-4 mb-6">
-                <div>
-                  <label className="text-sm font-display text-muted-foreground tracking-wider mb-2 block">ДАТА ПОЕЗДКИ</label>
-                  <input
-                    type="date"
-                    value={date}
-                    min={new Date().toISOString().split("T")[0]}
-                    onChange={(e) => setDate(e.target.value)}
-                    className="w-full bg-background border border-border rounded-lg px-4 py-3 text-base text-foreground"
-                  />
-                </div>
-                {!TARIFFS[tariff].isDelivery && (
-                  <div>
-                    <label className="text-sm font-display text-muted-foreground tracking-wider mb-2 block">ПАССАЖИРЫ</label>
-                    <div className="flex items-center gap-2 bg-background border border-border rounded-lg px-2 sm:px-4 py-3">
-                      <button
-                        onClick={() => { setPassengers(Math.max(1, passengers - 1)); }}
-                        className="w-7 h-7 rounded-full bg-surface-hover flex items-center justify-center hover:bg-neon/20 transition-colors text-foreground font-bold text-lg leading-none"
-                      >–</button>
-                      <span className="flex-1 text-center font-display font-bold text-foreground">{passengers}</span>
-                      <button
-                        onClick={() => { setPassengers(Math.min(TARIFFS[tariff].maxPassengers, passengers + 1)); }}
-                        className="w-7 h-7 rounded-full bg-surface-hover flex items-center justify-center hover:bg-neon/20 transition-colors text-foreground font-bold text-lg leading-none"
-                      >+</button>
-                    </div>
-                    <div className="text-xs text-muted-foreground mt-1.5">
-                      Макс. {TARIFFS[tariff].maxPassengers} для тарифа «{TARIFFS[tariff].name}»
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Extra services — hidden for Доставка tariff */}
-              {!TARIFFS[tariff].isDelivery && (
-              <div className="mb-6">
-                <label className="text-sm font-display text-muted-foreground tracking-wider mb-3 block">ДОПОЛНИТЕЛЬНЫЕ УСЛУГИ</label>
-                <div className="space-y-3">
-                  {/* Children */}
-                  <div className={`border rounded-xl p-3 transition-all ${withChildren ? "border-neon bg-neon/5" : "border-border bg-background"}`}>
-                    <button
-                      type="button"
-                      onClick={() => setWithChildren(!withChildren)}
-                      className="w-full flex items-center gap-3"
-                    >
-                      <div className={`w-5 h-5 rounded border flex items-center justify-center flex-shrink-0 ${withChildren ? "bg-neon border-neon" : "border-muted-foreground"}`}>
-                        {withChildren && <Icon name="Check" size={14} className="text-background" />}
-                      </div>
-                      <Icon name="Baby" size={18} className={withChildren ? "text-neon" : "text-muted-foreground"} />
-                      <div className="text-left flex-1 min-w-0">
-                        <div className="font-display text-sm font-semibold text-foreground">С детьми до 6 лет</div>
-                        <div className="text-xs text-muted-foreground">Детское кресло, до 6 лет</div>
-                      </div>
-                    </button>
-                    {withChildren && (
-                      <div className="flex items-center gap-2 mt-3 pl-8">
-                        <span className="text-sm text-muted-foreground">Детей:</span>
-                        <button
-                          type="button"
-                          onClick={() => setChildrenCount(Math.max(1, childrenCount - 1))}
-                          className="w-7 h-7 rounded-full bg-surface-hover flex items-center justify-center hover:bg-neon/20 transition-colors text-foreground font-bold text-lg leading-none"
-                        >–</button>
-                        <span className="w-8 text-center font-display font-bold text-foreground">{childrenCount}</span>
-                        <button
-                          type="button"
-                          onClick={() => setChildrenCount(Math.min(maxChildren, childrenCount + 1))}
-                          className="w-7 h-7 rounded-full bg-surface-hover flex items-center justify-center hover:bg-neon/20 transition-colors text-foreground font-bold text-lg leading-none"
-                        >+</button>
-                        <span className="text-xs text-muted-foreground ml-1">макс. {maxChildren}</span>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Pet */}
-                  <div className={`border rounded-xl p-3 transition-all ${withPet ? "border-neon bg-neon/5" : "border-border bg-background"}`}>
-                    <button
-                      type="button"
-                      onClick={() => setWithPet(!withPet)}
-                      className="w-full flex items-center gap-3"
-                    >
-                      <div className={`w-5 h-5 rounded border flex items-center justify-center flex-shrink-0 ${withPet ? "bg-neon border-neon" : "border-muted-foreground"}`}>
-                        {withPet && <Icon name="Check" size={14} className="text-background" />}
-                      </div>
-                      <Icon name="Dog" size={18} className={withPet ? "text-neon" : "text-muted-foreground"} />
-                      <div className="text-left flex-1 min-w-0">
-                        <div className="font-display text-sm font-semibold text-foreground">Перевозка животного</div>
-                        <div className="text-xs text-muted-foreground">Выберите вес питомца</div>
-                      </div>
-                    </button>
-                    {withPet && (
-                      <div className="grid grid-cols-3 gap-2 mt-3 pl-8">
-                        {PET_OPTIONS.map((p, i) => (
-                          <button
-                            key={i}
-                            type="button"
-                            onClick={() => setPetOption(i)}
-                            className={`border rounded-lg p-2 text-center transition-all ${petOption === i ? "border-neon bg-neon/10 text-foreground" : "border-border bg-surface text-muted-foreground hover:border-white/30"}`}
-                          >
-                            <div className="font-display text-sm font-semibold leading-tight">{p.label}</div>
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-              )}
-
-              <button
-                onClick={onCalculate}
-                disabled={from === to || calculating}
-                className="w-full bg-neon text-background font-display font-bold text-base py-4 rounded-xl hover:opacity-90 transition-all glow-neon hover:scale-[1.02] active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-              >
-                {calculating ? (
-                  <>
-                    <Icon name="Loader2" size={18} className="animate-spin" />
-                    РАССЧИТЫВАЕМ...
-                  </>
-                ) : (
-                  "РАССЧИТАТЬ СТОИМОСТЬ"
-                )}
-              </button>
-            </div>
+            <CalculatorForm
+              from={from} setFrom={setFrom}
+              to={to} setTo={setTo}
+              tariff={tariff} setTariff={setTariff}
+              passengers={passengers} setPassengers={setPassengers}
+              withChildren={withChildren} setWithChildren={setWithChildren}
+              childrenCount={childrenCount} setChildrenCount={setChildrenCount}
+              maxChildren={maxChildren}
+              withPet={withPet} setWithPet={setWithPet}
+              petOption={petOption} setPetOption={setPetOption}
+              deliveryMode={deliveryMode} setDeliveryMode={setDeliveryMode}
+              minivanSub={minivanSub} setMinivanSub={setMinivanSub}
+              date={date} setDate={setDate}
+              calculating={calculating}
+              onCalculate={onCalculate}
+            />
           </div>
         </div>
       </section>
 
       {/* MODAL with price */}
       {calculated && price && (
-        <div
-          className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-up overflow-y-auto"
-          onClick={() => { setSent(false); setError(""); onClose(); }}
-        >
-          <div
-            className="bg-surface border border-neon/40 rounded-2xl p-4 sm:p-8 max-w-lg w-full relative shadow-2xl my-auto"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <button
-              onClick={() => { setSent(false); setError(""); onClose(); }}
-              className="absolute top-4 right-4 w-9 h-9 rounded-full bg-background hover:bg-neon/20 transition-colors flex items-center justify-center"
-              aria-label="Закрыть"
-            >
-              <Icon name="ChevronRight" size={18} className="rotate-45 text-muted-foreground" />
-            </button>
-
-            {sent ? (
-              <div className="text-center py-6">
-                <Icon name="CheckCircle2" size={64} className="text-neon mx-auto mb-4" />
-                <div className="font-display text-2xl font-bold mb-2">Заявка принята!</div>
-                <p className="text-sm text-muted-foreground mb-6">Мы перезвоним вам в течение 15 минут</p>
-                <button
-                  onClick={() => { setSent(false); setName(""); setPhone(""); onClose(); }}
-                  className="bg-neon text-background font-display font-bold px-8 py-3 rounded-xl hover:opacity-90 transition-all"
-                >
-                  ХОРОШО
-                </button>
-              </div>
-            ) : (
-              <>
-                {(() => {
-                  const cur = TARIFFS[tariff];
-                  const isDelivery = cur.isDelivery;
-                  const isMinivan = cur.isMinivan;
-                  const ratePerKm = isDelivery
-                    ? DELIVERY_OPTIONS[deliveryMode].pricePerKm
-                    : isMinivan ? MINIVAN_SUBTARIFFS[minivanSub].pricePerKm
-                    : cur.pricePerKm;
-                  const mult = (isDelivery || isMinivan) ? 1 : (passengers > 1 ? 1 + (passengers - 1) * 0.15 : 1);
-                  const extras = isDelivery ? 0 : ((withChildren ? childrenCount * CHILD_SEAT_PRICE : 0) + (withPet ? PET_OPTIONS[petOption].price : 0));
-                  const shownPrice = distance
-                    ? Math.round((distance * ratePerKm * mult * getDistanceSurcharge(distance)) / 50) * 50 + extras
-                    : price;
-                  return (
-                    <>
-                      <div className="text-xs font-display text-neon tracking-widest mb-4">СТОИМОСТЬ ПОЕЗДКИ</div>
-                      <div className="flex items-baseline gap-2 mb-2 flex-wrap">
-                        <span className="font-display text-lg sm:text-2xl text-muted-foreground">от</span>
-                        <span className="font-display text-4xl sm:text-6xl font-bold text-neon glow-neon-text">
-                          {(shownPrice ?? 0).toLocaleString("ru-RU")}
-                        </span>
-                        <span className="font-display text-lg sm:text-2xl text-muted-foreground">₽</span>
-                      </div>
-                    </>
-                  );
-                })()}
-                <div className="text-xs text-muted-foreground/80 mb-1 flex items-center gap-1.5">
-                  <Icon name="Info" size={12} className="flex-shrink-0" />
-                  Точную стоимость подтвердит диспетчер
-                </div>
-                <div className="text-xs text-muted-foreground/60 mb-3 flex items-center gap-1.5">
-                  <Icon name="TriangleAlert" size={12} className="flex-shrink-0" />
-                  Стоимость указана без учёта платных дорог
-                </div>
-                <div className="text-sm text-muted-foreground mb-3">
-                  {from} → {to} · {TARIFFS[tariff].name}
-                  {TARIFFS[tariff].isDelivery
-                    ? ` · ${DELIVERY_OPTIONS[deliveryMode].name} ${DELIVERY_OPTIONS[deliveryMode].pricePerKm} ₽/км`
-                    : TARIFFS[tariff].isMinivan
-                      ? ` · ${MINIVAN_SUBTARIFFS[minivanSub].name} (${MINIVAN_SUBTARIFFS[minivanSub].desc})`
-                      : ` · ${passengers} пасс.`
-                  }
-                </div>
-                {!TARIFFS[tariff].isDelivery && (withChildren || withPet) && (
-                  <div className="mb-3 space-y-1.5">
-                    {withChildren && (
-                      <div className="flex items-center gap-2 text-sm text-foreground">
-                        <Icon name="Baby" size={14} className="text-neon flex-shrink-0" />
-                        С детьми до 6 лет: {childrenCount} (+{(childrenCount * CHILD_SEAT_PRICE).toLocaleString("ru-RU")} ₽)
-                      </div>
-                    )}
-                    {withPet && (
-                      <div className="flex items-center gap-2 text-sm text-foreground">
-                        <Icon name="Dog" size={14} className="text-neon flex-shrink-0" />
-                        Перевозка животного {PET_OPTIONS[petOption].label} (+{PET_OPTIONS[petOption].price.toLocaleString("ru-RU")} ₽)
-                      </div>
-                    )}
-                  </div>
-                )}
-                {distance && (
-                  <div className="inline-flex items-center gap-2 bg-background border border-border rounded-lg px-3 py-2 mb-6">
-                    <Icon name="Navigation" size={14} className="text-neon" />
-                    <span className="text-sm text-foreground font-medium">
-                      Расстояние: {distance.toLocaleString("ru-RU")} км по дорогам
-                    </span>
-                  </div>
-                )}
-
-                <div className="space-y-2 text-sm mb-6">
-                  {[
-                    "Фиксированная цена, без доплат",
-                    "Встреча по адресу или в аэропорту",
-                    "Бесплатное ожидание 30 минут",
-                  ].map((text, i) => (
-                    <div key={i} className="flex items-center gap-2 text-muted-foreground">
-                      <Icon name="CheckCircle" size={14} className="text-neon flex-shrink-0" />
-                      {text}
-                    </div>
-                  ))}
-                </div>
-                <div className="space-y-3 mb-4">
-                  <input
-                    type="text"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="Ваше имя"
-                    className="w-full bg-background border border-border rounded-lg px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/60"
-                  />
-                  <input
-                    type="tel"
-                    value={phone}
-                    onChange={(e) => handlePhoneChange(e.target.value)}
-                    placeholder="+7 999 123-45-67"
-                    className={`w-full bg-background border rounded-lg px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/60 ${
-                      phone && !isPhoneValid(phone) ? "border-red-500/60" : "border-border"
-                    }`}
-                  />
-                  {phone && !isPhoneValid(phone) && (
-                    <div className="text-xs text-red-400 -mt-1.5 px-1">Начните с + и введите не менее 11 цифр</div>
-                  )}
-                  <textarea
-                    value={comment}
-                    onChange={(e) => setComment(e.target.value)}
-                    placeholder="Комментарий (адрес подачи, пожелания к поездке...)"
-                    rows={2}
-                    className="w-full bg-background border border-border rounded-lg px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/60 resize-none"
-                  />
-                </div>
-                {error && <div className="text-sm text-red-400 mb-3">{error}</div>}
-                <button
-                  onClick={handleBook}
-                  disabled={sending}
-                  className="w-full bg-neon text-background font-display font-bold py-4 rounded-xl hover:opacity-90 transition-all glow-neon disabled:opacity-50"
-                >
-                  {sending ? "ОТПРАВЛЯЕМ..." : `ЗАБРОНИРОВАТЬ ЗА ${price.toLocaleString("ru-RU")} ₽`}
-                </button>
-              </>
-            )}
-          </div>
-        </div>
+        <BookingModal
+          from={from} to={to}
+          tariff={tariff} passengers={passengers}
+          withChildren={withChildren} childrenCount={childrenCount}
+          withPet={withPet} petOption={petOption}
+          deliveryMode={deliveryMode} minivanSub={minivanSub}
+          price={price} distance={distance}
+          name={name} setName={setName}
+          phone={phone}
+          handlePhoneChange={handlePhoneChange}
+          isPhoneValid={isPhoneValid}
+          comment={comment} setComment={setComment}
+          sending={sending} sent={sent} error={error}
+          onBook={handleBook}
+          onClose={() => { setSent(false); setError(""); onClose(); }}
+          onSuccessClose={() => { setSent(false); setName(""); setPhone(""); onClose(); }}
+        />
       )}
 
       {/* HOW IT WORKS */}
-      <section className="py-12 sm:py-16 max-w-7xl mx-auto px-4 sm:px-6">
-        <div className="reveal mb-8 text-center">
-          <div className="inline-block font-display text-neon text-sm tracking-widest mb-2">КАК ЭТО РАБОТАЕТ</div>
-          <h2 className="font-display text-2xl sm:text-3xl md:text-4xl font-bold">3 ШАГА ДО ПОЕЗДКИ</h2>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-10">
-          {[
-            { num: "1", icon: "MapPin", title: "Выберите маршрут", desc: "Укажите откуда и куда, дату и количество пассажиров" },
-            { num: "2", icon: "CreditCard", title: "Оплатите водителю", desc: "Наличными или переводом. Цена фиксирована и не меняется" },
-            { num: "3", icon: "Car", title: "Поедем!", desc: "Водитель встретит вас точно в назначенное время" },
-          ].map((step, i) => (
-            <div key={i} className="reveal text-center">
-              <div className="relative inline-flex mb-6">
-                <div className="w-20 h-20 border-2 border-neon rounded-2xl flex items-center justify-center bg-neon/10">
-                  <Icon name={step.icon as IconName} size={32} className="text-neon" />
-                </div>
-                <div className="absolute -top-3 -right-3 font-display text-xs font-bold bg-neon text-background w-7 h-7 rounded-full flex items-center justify-center">
-                  {step.num}
-                </div>
-              </div>
-              <h3 className="font-display text-xl font-bold mb-3">{step.title}</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed max-w-xs mx-auto">{step.desc}</p>
-            </div>
-          ))}
-        </div>
-      </section>
+      <HowItWorks />
     </>
   );
 }

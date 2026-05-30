@@ -30,10 +30,10 @@ export default function Navbar({ onBookClick }: NavbarProps) {
             <span className="hidden sm:inline">ЗАБРОНИРОВАТЬ</span>
             <span className="sm:hidden">ЦЕНА</span>
           </button>
-          <div className="relative flex items-center">
+          <div className="flex items-center gap-1">
             {/* Blinking pointer arrow */}
             <span
-              className="absolute -left-6 top-1/2 -translate-y-1/2 text-neon text-sm font-bold select-none"
+              className="text-neon text-base font-bold select-none leading-none"
               style={{ animation: "phonePointerBlink 1.2s ease-in-out infinite" }}
             >›</span>
             <a
@@ -49,8 +49,8 @@ export default function Navbar({ onBookClick }: NavbarProps) {
 
         <style>{`
           @keyframes phonePointerBlink {
-            0%, 100% { opacity: 1; transform: translateY(-50%) translateX(0); }
-            50% { opacity: 0.3; transform: translateY(-50%) translateX(-3px); }
+            0%, 100% { opacity: 1; transform: translateX(0); }
+            50% { opacity: 0.3; transform: translateX(-3px); }
           }
           @keyframes phoneGlowPulse {
             0%, 100% { box-shadow: 0 0 0 0 hsl(38 100% 55% / 0.5); }

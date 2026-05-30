@@ -98,7 +98,7 @@ export default function CalculatorForm({
           </div>
           <Icon name="RefreshCw" size={14} className={roundTrip ? "text-neon" : ""} />
           Туда и обратно
-          {roundTrip && <span className="text-xs text-neon">(× 2 расстояния)</span>}
+
         </button>
       </div>
 

@@ -107,7 +107,7 @@ export default function Index() {
     } else {
       totalDist = await fetchDist(from, to);
     }
-    if (roundTrip) totalDist *= 2;
+    if (roundTrip) totalDist *= 1.9;
     setPrice(priceFromDistance(totalDist));
     setDistance(totalDist);
     setCalculated(true);

@@ -7,10 +7,16 @@ export const CITIES = [
 ];
 
 export const TARIFFS = [
-  { name: "Эконом", pricePerKm: 32, icon: "Car", desc: "Комфортный седан", maxPassengers: 4 },
-  { name: "Комфорт", pricePerKm: 37, icon: "Star", desc: "Повышенный комфорт", maxPassengers: 4 },
-  { name: "Универсал", pricePerKm: 40, icon: "Truck", desc: "Везите больше", maxPassengers: 4 },
-  { name: "Минивэн", pricePerKm: 55, icon: "Users", desc: "До 10 пассажиров", maxPassengers: 10 },
+  { name: "Эконом", pricePerKm: 32, icon: "Car", desc: "Комфортный седан", maxPassengers: 4, isDelivery: false },
+  { name: "Комфорт", pricePerKm: 37, icon: "Star", desc: "Повышенный комфорт", maxPassengers: 4, isDelivery: false },
+  { name: "Универсал", pricePerKm: 40, icon: "Truck", desc: "Везите больше", maxPassengers: 4, isDelivery: false },
+  { name: "Минивэн", pricePerKm: 55, icon: "Users", desc: "До 10 пассажиров", maxPassengers: 10, isDelivery: false },
+  { name: "Доставка", pricePerKm: 15, icon: "Package", desc: "Грузы и посылки", maxPassengers: 0, isDelivery: true },
+];
+
+export const DELIVERY_OPTIONS = [
+  { name: "Попутная", pricePerKm: 15, desc: "Вместе с другим заказом", icon: "PackageSearch" },
+  { name: "Срочная", pricePerKm: 30, desc: "Отдельный рейс", icon: "Zap" },
 ];
 
 export const CHILD_SEAT_PRICE = 500;
@@ -115,6 +121,7 @@ export function getDistance(from: string, to: string): number {
 
 export type IconName =
   | "MapPin" | "Navigation" | "Car" | "Star" | "Users" | "Truck" | "Baby" | "Dog"
+  | "Package" | "PackageSearch" | "Zap"
   | "Shield" | "Clock" | "CreditCard" | "Headphones" | "Phone"
   | "Calculator" | "CheckCircle" | "Check" | "ArrowRight" | "MessageCircle"
   | "Send" | "Mail" | "ChevronRight";

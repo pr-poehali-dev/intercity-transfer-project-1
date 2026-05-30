@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import Icon from "@/components/ui/icon";
-import { TARIFFS, getDistanceSurcharge, CHILD_SEAT_PRICE, PET_OPTIONS } from "./constants";
+import { TARIFFS, DELIVERY_OPTIONS, getDistanceSurcharge, CHILD_SEAT_PRICE, PET_OPTIONS } from "./constants";
 import type { IconName } from "./constants";
 import CitySelect from "./CitySelect";
 import func2url from "../../../backend/func2url.json";
@@ -23,6 +23,8 @@ interface CalculatorSectionProps {
   setWithPet: (v: boolean) => void;
   petOption: number;
   setPetOption: (v: number) => void;
+  deliveryMode: number;
+  setDeliveryMode: (v: number) => void;
   date: string;
   setDate: (v: string) => void;
   price: number | null;
@@ -42,6 +44,7 @@ export default function CalculatorSection({
   withChildren, setWithChildren,
   childrenCount, setChildrenCount, maxChildren,
   withPet, setWithPet, petOption, setPetOption,
+  deliveryMode, setDeliveryMode,
   date, setDate,
   price, distance, calculated, calculating,
   onCalculate, onClose, onRouteSelect,
@@ -60,14 +63,20 @@ export default function CalculatorSection({
     }
     setError("");
     setSending(true);
-    const mult = passengers > 1 ? 1 + (passengers - 1) * 0.15 : 1;
-    const extras = (withChildren ? childrenCount * CHILD_SEAT_PRICE : 0) + (withPet ? PET_OPTIONS[petOption].price : 0);
+    const isDelivery = TARIFFS[tariff].isDelivery;
+    const ratePerKm = isDelivery ? DELIVERY_OPTIONS[deliveryMode].pricePerKm : TARIFFS[tariff].pricePerKm;
+    const mult = isDelivery ? 1 : (passengers > 1 ? 1 + (passengers - 1) * 0.15 : 1);
+    const extras = isDelivery ? 0 : ((withChildren ? childrenCount * CHILD_SEAT_PRICE : 0) + (withPet ? PET_OPTIONS[petOption].price : 0));
     const finalPrice = distance
-      ? Math.round((distance * TARIFFS[tariff].pricePerKm * mult * getDistanceSurcharge(distance)) / 50) * 50 + extras
+      ? Math.round((distance * ratePerKm * mult * getDistanceSurcharge(distance)) / 50) * 50 + extras
       : price;
     const services: string[] = [];
-    if (withChildren) services.push(`С детьми до 6 лет: ${childrenCount} (+${childrenCount * CHILD_SEAT_PRICE} ₽)`);
-    if (withPet) services.push(`Перевозка животного ${PET_OPTIONS[petOption].label} (+${PET_OPTIONS[petOption].price} ₽)`);
+    if (isDelivery) {
+      services.push(`Доставка: ${DELIVERY_OPTIONS[deliveryMode].name} (${DELIVERY_OPTIONS[deliveryMode].pricePerKm} ₽/км)`);
+    } else {
+      if (withChildren) services.push(`С детьми до 6 лет: ${childrenCount} (+${childrenCount * CHILD_SEAT_PRICE} ₽)`);
+      if (withPet) services.push(`Перевозка животного ${PET_OPTIONS[petOption].label} (+${PET_OPTIONS[petOption].price} ₽)`);
+    }
     try {
       const res = await fetch(func2url["send-booking"], {
         method: "POST",
@@ -78,7 +87,7 @@ export default function CalculatorSection({
           from_city: from,
           to_city: to,
           date,
-          passengers,
+          passengers: isDelivery ? "—" : passengers,
           tariff: TARIFFS[tariff].name,
           price: finalPrice,
           distance,
@@ -139,6 +148,34 @@ export default function CalculatorSection({
                 </div>
               </div>
 
+              {/* Delivery type selector — only for Доставка tariff */}
+              {TARIFFS[tariff].isDelivery && (
+                <div className="mb-6">
+                  <label className="text-sm font-display text-muted-foreground tracking-wider mb-3 block">ТИП ДОСТАВКИ</label>
+                  <div className="grid grid-cols-2 gap-3">
+                    {DELIVERY_OPTIONS.map((d, i) => (
+                      <button
+                        key={i}
+                        type="button"
+                        onClick={() => setDeliveryMode(i)}
+                        className={`border rounded-xl p-3 sm:p-4 text-left transition-all ${
+                          deliveryMode === i
+                            ? "border-neon bg-neon/10 text-foreground"
+                            : "border-border bg-background text-muted-foreground hover:border-white/30"
+                        }`}
+                      >
+                        <Icon name={d.icon as IconName} size={20} className={`mb-2 ${deliveryMode === i ? "text-neon" : ""}`} />
+                        <div className="font-display text-sm sm:text-base font-semibold leading-tight">{d.name}</div>
+                        <div className="text-[11px] sm:text-xs opacity-70 mt-0.5">{d.desc}</div>
+                        <div className={`font-display text-base font-bold mt-1 ${deliveryMode === i ? "text-neon" : ""}`}>
+                          {d.pricePerKm} ₽/км
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               <div className="grid grid-cols-2 gap-4 mb-6">
                 <div>
                   <label className="text-sm font-display text-muted-foreground tracking-wider mb-2 block">ДАТА ПОЕЗДКИ</label>
@@ -150,26 +187,29 @@ export default function CalculatorSection({
                     className="w-full bg-background border border-border rounded-lg px-4 py-3 text-base text-foreground"
                   />
                 </div>
-                <div>
-                  <label className="text-sm font-display text-muted-foreground tracking-wider mb-2 block">ПАССАЖИРЫ</label>
-                  <div className="flex items-center gap-2 bg-background border border-border rounded-lg px-2 sm:px-4 py-3">
-                    <button
-                      onClick={() => { setPassengers(Math.max(1, passengers - 1)); }}
-                      className="w-7 h-7 rounded-full bg-surface-hover flex items-center justify-center hover:bg-neon/20 transition-colors text-foreground font-bold text-lg leading-none"
-                    >–</button>
-                    <span className="flex-1 text-center font-display font-bold text-foreground">{passengers}</span>
-                    <button
-                      onClick={() => { setPassengers(Math.min(TARIFFS[tariff].maxPassengers, passengers + 1)); }}
-                      className="w-7 h-7 rounded-full bg-surface-hover flex items-center justify-center hover:bg-neon/20 transition-colors text-foreground font-bold text-lg leading-none"
-                    >+</button>
+                {!TARIFFS[tariff].isDelivery && (
+                  <div>
+                    <label className="text-sm font-display text-muted-foreground tracking-wider mb-2 block">ПАССАЖИРЫ</label>
+                    <div className="flex items-center gap-2 bg-background border border-border rounded-lg px-2 sm:px-4 py-3">
+                      <button
+                        onClick={() => { setPassengers(Math.max(1, passengers - 1)); }}
+                        className="w-7 h-7 rounded-full bg-surface-hover flex items-center justify-center hover:bg-neon/20 transition-colors text-foreground font-bold text-lg leading-none"
+                      >–</button>
+                      <span className="flex-1 text-center font-display font-bold text-foreground">{passengers}</span>
+                      <button
+                        onClick={() => { setPassengers(Math.min(TARIFFS[tariff].maxPassengers, passengers + 1)); }}
+                        className="w-7 h-7 rounded-full bg-surface-hover flex items-center justify-center hover:bg-neon/20 transition-colors text-foreground font-bold text-lg leading-none"
+                      >+</button>
+                    </div>
+                    <div className="text-xs text-muted-foreground mt-1.5">
+                      Макс. {TARIFFS[tariff].maxPassengers} для тарифа «{TARIFFS[tariff].name}»
+                    </div>
                   </div>
-                  <div className="text-xs text-muted-foreground mt-1.5">
-                    Макс. {TARIFFS[tariff].maxPassengers} для тарифа «{TARIFFS[tariff].name}»
-                  </div>
-                </div>
+                )}
               </div>
 
-              {/* Extra services */}
+              {/* Extra services — hidden for Доставка tariff */}
+              {!TARIFFS[tariff].isDelivery && (
               <div className="mb-6">
                 <label className="text-sm font-display text-muted-foreground tracking-wider mb-3 block">ДОПОЛНИТЕЛЬНЫЕ УСЛУГИ</label>
                 <div className="space-y-3">
@@ -242,6 +282,7 @@ export default function CalculatorSection({
                   </div>
                 </div>
               </div>
+              )}
 
               <button
                 onClick={onCalculate}
@@ -296,9 +337,11 @@ export default function CalculatorSection({
               <>
                 {(() => {
                   const mult = passengers > 1 ? 1 + (passengers - 1) * 0.15 : 1;
-                  const extras = (withChildren ? childrenCount * CHILD_SEAT_PRICE : 0) + (withPet ? PET_OPTIONS[petOption].price : 0);
+                  const isDelivery = TARIFFS[tariff].isDelivery;
+                  const ratePerKm = isDelivery ? DELIVERY_OPTIONS[deliveryMode].pricePerKm : TARIFFS[tariff].pricePerKm;
+                  const extras = isDelivery ? 0 : ((withChildren ? childrenCount * CHILD_SEAT_PRICE : 0) + (withPet ? PET_OPTIONS[petOption].price : 0));
                   const shownPrice = distance
-                    ? Math.round((distance * TARIFFS[tariff].pricePerKm * mult * getDistanceSurcharge(distance)) / 50) * 50 + extras
+                    ? Math.round((distance * ratePerKm * mult * getDistanceSurcharge(distance)) / 50) * 50 + extras
                     : price;
                   return (
                     <>
@@ -318,9 +361,13 @@ export default function CalculatorSection({
                   Точную стоимость подтвердит диспетчер
                 </div>
                 <div className="text-sm text-muted-foreground mb-3">
-                  {from} → {to} · {TARIFFS[tariff].name} · {passengers} пасс.
+                  {from} → {to} · {TARIFFS[tariff].name}
+                  {TARIFFS[tariff].isDelivery
+                    ? ` · ${DELIVERY_OPTIONS[deliveryMode].name} ${DELIVERY_OPTIONS[deliveryMode].pricePerKm} ₽/км`
+                    : ` · ${passengers} пасс.`
+                  }
                 </div>
-                {(withChildren || withPet) && (
+                {!TARIFFS[tariff].isDelivery && (withChildren || withPet) && (
                   <div className="mb-3 space-y-1.5">
                     {withChildren && (
                       <div className="flex items-center gap-2 text-sm text-foreground">
@@ -349,9 +396,11 @@ export default function CalculatorSection({
                     <div className="text-xs font-display text-muted-foreground tracking-wider mb-3">ВЫБЕРИТЕ ТАРИФ</div>
                     <div className="space-y-2">
                       {TARIFFS.map((t, i) => {
-                        const mult = passengers > 1 ? 1 + (passengers - 1) * 0.15 : 1;
-                        const extras = (withChildren ? childrenCount * CHILD_SEAT_PRICE : 0) + (withPet ? PET_OPTIONS[petOption].price : 0);
-                        const tPrice = Math.round((distance * t.pricePerKm * mult * getDistanceSurcharge(distance)) / 50) * 50 + extras;
+                        const isT = t.isDelivery;
+                        const tRate = isT ? DELIVERY_OPTIONS[deliveryMode].pricePerKm : t.pricePerKm;
+                        const tMult = isT ? 1 : (passengers > 1 ? 1 + (passengers - 1) * 0.15 : 1);
+                        const tExtras = isT ? 0 : ((withChildren ? childrenCount * CHILD_SEAT_PRICE : 0) + (withPet ? PET_OPTIONS[petOption].price : 0));
+                        const tPrice = Math.round((distance * tRate * tMult * getDistanceSurcharge(distance)) / 50) * 50 + tExtras;
                         return (
                           <button
                             key={i}

@@ -4,7 +4,7 @@ import HeroSection from "@/components/transfer/HeroSection";
 import CalculatorSection from "@/components/transfer/CalculatorSection";
 import PopularRoutesSection from "@/components/transfer/PopularRoutesSection";
 import ContactsSection from "@/components/transfer/ContactsSection";
-import { TARIFFS, getDistance, getDistanceSurcharge, CHILD_SEAT_PRICE, PET_OPTIONS } from "@/components/transfer/constants";
+import { TARIFFS, DELIVERY_OPTIONS, getDistance, getDistanceSurcharge, CHILD_SEAT_PRICE, PET_OPTIONS } from "@/components/transfer/constants";
 import func2url from "../../backend/func2url.json";
 
 export default function Index() {
@@ -17,6 +17,7 @@ export default function Index() {
   const [childrenCount, setChildrenCount] = useState(1);
   const [withPet, setWithPet] = useState(false);
   const [petOption, setPetOption] = useState(0);
+  const [deliveryMode, setDeliveryMode] = useState(0);
   const [price, setPrice] = useState<number | null>(null);
   const [distance, setDistance] = useState<number | null>(null);
   const [calculated, setCalculated] = useState(false);
@@ -51,10 +52,12 @@ export default function Index() {
   }
 
   function priceFromDistance(dist: number) {
-    const base = dist * TARIFFS[tariff].pricePerKm;
-    const mult = passengers > 1 ? 1 + (passengers - 1) * 0.15 : 1;
+    const isDelivery = TARIFFS[tariff].isDelivery;
+    const ratePerKm = isDelivery ? DELIVERY_OPTIONS[deliveryMode].pricePerKm : TARIFFS[tariff].pricePerKm;
+    const mult = isDelivery ? 1 : (passengers > 1 ? 1 + (passengers - 1) * 0.15 : 1);
     const surcharge = getDistanceSurcharge(dist);
-    return Math.round((base * mult * surcharge) / 50) * 50 + extrasTotal();
+    const extras = isDelivery ? 0 : extrasTotal();
+    return Math.round((dist * ratePerKm * mult * surcharge) / 50) * 50 + extras;
   }
 
   async function calculate() {
@@ -105,6 +108,7 @@ export default function Index() {
   function handleSetChildrenCount(v: number) { setChildrenCount(v); setCalculated(false); }
   function handleSetWithPet(v: boolean) { setWithPet(v); setCalculated(false); }
   function handleSetPetOption(v: number) { setPetOption(v); setCalculated(false); }
+  function handleSetDeliveryMode(v: number) { setDeliveryMode(v); setCalculated(false); }
 
   return (
     <div className="min-h-screen bg-background text-foreground font-golos overflow-x-hidden">
@@ -128,6 +132,8 @@ export default function Index() {
         setWithPet={handleSetWithPet}
         petOption={petOption}
         setPetOption={handleSetPetOption}
+        deliveryMode={deliveryMode}
+        setDeliveryMode={handleSetDeliveryMode}
         date={date}
         setDate={setDate}
         price={price}

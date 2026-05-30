@@ -39,7 +39,7 @@ def handler(event: dict, context) -> dict:
     comment_line = f"\n💬 Комментарий: {comment}" if comment and comment != '—' else ""
 
     text = (
-        f"🚗 *Новое бронирование!*\n\n"
+        f"🚗 Новое бронирование!\n\n"
         f"👤 Имя: {name}\n"
         f"📞 Телефон: {phone}\n"
         f"📍 Откуда: {from_city}\n"
@@ -63,7 +63,6 @@ def handler(event: dict, context) -> dict:
     data = urllib.parse.urlencode({
         'chat_id': chat_id,
         'text': text,
-        'parse_mode': 'Markdown'
     }).encode()
 
     req = urllib.request.Request(

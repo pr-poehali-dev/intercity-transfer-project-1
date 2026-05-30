@@ -448,49 +448,7 @@ export default function CalculatorSection({
                     </span>
                   </div>
                 )}
-                {distance && (
-                  <div className="mb-6">
-                    <div className="text-xs font-display text-muted-foreground tracking-wider mb-3">ВЫБЕРИТЕ ТАРИФ</div>
-                    <div className="space-y-2">
-                      {TARIFFS.map((t, i) => {
-                        const isTD = t.isDelivery;
-                        const isTM = t.isMinivan;
-                        const tRate = isTD
-                          ? DELIVERY_OPTIONS[deliveryMode].pricePerKm
-                          : isTM ? MINIVAN_SUBTARIFFS[minivanSub].pricePerKm
-                          : t.pricePerKm;
-                        const tMult = (isTD || isTM) ? 1 : (passengers > 1 ? 1 + (passengers - 1) * 0.15 : 1);
-                        const tExtras = isTD ? 0 : ((withChildren ? childrenCount * CHILD_SEAT_PRICE : 0) + (withPet ? PET_OPTIONS[petOption].price : 0));
-                        const tPrice = Math.round((distance * tRate * tMult * getDistanceSurcharge(distance)) / 50) * 50 + tExtras;
-                        return (
-                          <button
-                            key={i}
-                            type="button"
-                            onClick={() => setTariff(i)}
-                            className={`w-full flex items-center justify-between border rounded-xl px-4 py-3 transition-all ${
-                              tariff === i
-                                ? "border-neon bg-neon/10"
-                                : "border-border bg-background hover:border-white/30"
-                            }`}
-                          >
-                            <div className="flex items-center gap-3">
-                              <Icon name={t.icon as IconName} size={18} className={tariff === i ? "text-neon" : "text-muted-foreground"} />
-                              <div className="text-left">
-                                <div className="font-display text-sm font-semibold text-foreground">{t.name}</div>
-                                <div className="text-xs text-muted-foreground">
-                                  {isTM ? MINIVAN_SUBTARIFFS[minivanSub].desc : t.desc}
-                                </div>
-                              </div>
-                            </div>
-                            <div className="font-display font-bold text-foreground">
-                              от {tPrice.toLocaleString("ru-RU")} ₽
-                            </div>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
+
                 <div className="space-y-2 text-sm mb-6">
                   {[
                     "Фиксированная цена, без доплат",

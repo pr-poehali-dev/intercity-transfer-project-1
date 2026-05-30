@@ -95,11 +95,11 @@ export default function BookingModal({
               <span className="font-display text-lg sm:text-2xl text-muted-foreground">₽</span>
             </div>
 
-            <div className="text-xs text-muted-foreground/80 mb-1 flex items-center gap-1.5">
+            <div className="text-xs text-muted-foreground/80 mb-1 flex items-center gap-1.5 animate-pulse">
               <Icon name="Info" size={12} className="flex-shrink-0" />
               Точную стоимость подтвердит диспетчер
             </div>
-            <div className="text-xs text-muted-foreground/60 mb-3 flex items-center gap-1.5">
+            <div className="text-xs text-muted-foreground/60 mb-3 flex items-center gap-1.5 animate-pulse">
               <Icon name="TriangleAlert" size={12} className="flex-shrink-0" />
               Стоимость указана без учёта платных дорог
             </div>

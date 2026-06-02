@@ -182,9 +182,7 @@ export default function CalculatorForm({
                 <Icon name={d.icon as IconName} size={20} className={`mb-2 ${deliveryMode === i ? "text-neon" : ""}`} />
                 <div className="font-display text-sm sm:text-base font-semibold leading-tight">{d.name}</div>
                 <div className="text-[11px] sm:text-xs opacity-70 mt-0.5">{d.desc}</div>
-                <div className={`font-display text-base font-bold mt-1 ${deliveryMode === i ? "text-neon" : ""}`}>
-                  {d.pricePerKm} ₽/км
-                </div>
+
               </button>
             ))}
           </div>

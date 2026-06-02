@@ -20,6 +20,7 @@ export default function PopularRoutesSection() {
   const displayed = showAll ? grouped : grouped.slice(0, INITIAL_COUNT);
   const hasMore = grouped.length > INITIAL_COUNT;
 
+
   function handleGroupChange(idx: number) {
     setActiveGroup(idx);
     setShowAll(false);
@@ -55,7 +56,7 @@ export default function PopularRoutesSection() {
           <Link
             key={r.slug}
             to={`/marshrut/${r.slug}`}
-            className="reveal group bg-surface border border-border rounded-2xl p-4 sm:p-6 hover:border-neon/40 transition-all hover:-translate-y-1 overflow-hidden min-w-0"
+            className="group bg-surface border border-border rounded-2xl p-4 sm:p-6 hover:border-neon/40 transition-all hover:-translate-y-1 overflow-hidden min-w-0"
           >
             <div className="flex items-start justify-between mb-3">
               <div className="w-10 h-10 bg-neon/10 rounded-lg flex items-center justify-center flex-shrink-0">

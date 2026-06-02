@@ -1,16 +1,57 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import Icon from "@/components/ui/icon";
 import { ROUTES } from "./routesData";
 
+const GROUPS = [
+  { label: "Из Москвы", filter: (slug: string) => slug.startsWith("moskva-") },
+  { label: "На юг России", filter: (slug: string) => ["sochi", "krasnodar", "anapa", "gelendzhik", "rostov"].some(c => slug.includes(c)) && !slug.startsWith("moskva-") },
+  { label: "Поволжье и Урал", filter: (slug: string) => ["kazan", "nizhniy-novgorod", "samara", "ufa", "yekaterinburg", "perm"].some(c => slug.includes(c)) && !slug.startsWith("moskva-") },
+  { label: "Из Петербурга", filter: (slug: string) => slug.startsWith("sankt-peterburg-") },
+];
+
+const INITIAL_COUNT = 6;
+
 export default function PopularRoutesSection() {
+  const [activeGroup, setActiveGroup] = useState(0);
+  const [showAll, setShowAll] = useState(false);
+
+  const grouped = ROUTES.filter(r => GROUPS[activeGroup].filter(r.slug));
+  const displayed = showAll ? grouped : grouped.slice(0, INITIAL_COUNT);
+  const hasMore = grouped.length > INITIAL_COUNT;
+
+  function handleGroupChange(idx: number) {
+    setActiveGroup(idx);
+    setShowAll(false);
+  }
+
   return (
     <section className="py-16 max-w-7xl mx-auto px-4 sm:px-6">
       <div className="reveal mb-8 text-center">
         <div className="inline-block font-display text-neon text-base tracking-widest mb-2">ПОПУЛЯРНЫЕ НАПРАВЛЕНИЯ</div>
         <h2 className="font-display text-3xl md:text-4xl font-bold">МАРШРУТЫ ПО РОССИИ</h2>
       </div>
+
+      {/* Группы-табы */}
+      <div className="reveal flex flex-wrap gap-2 mb-6 justify-center">
+        {GROUPS.map((g, i) => (
+          <button
+            key={i}
+            onClick={() => handleGroupChange(i)}
+            className={`px-4 py-2 rounded-xl font-display text-sm font-semibold transition-all border ${
+              activeGroup === i
+                ? "bg-neon text-background border-neon"
+                : "bg-surface border-border text-muted-foreground hover:border-white/30"
+            }`}
+          >
+            {g.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Карточки маршрутов */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-        {ROUTES.map((r) => (
+        {displayed.map((r) => (
           <Link
             key={r.slug}
             to={`/marshrut/${r.slug}`}
@@ -32,6 +73,19 @@ export default function PopularRoutesSection() {
           </Link>
         ))}
       </div>
+
+      {/* Кнопка "Показать все" */}
+      {hasMore && !showAll && (
+        <div className="text-center mt-6">
+          <button
+            onClick={() => setShowAll(true)}
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl border border-border bg-surface text-muted-foreground hover:border-neon/40 hover:text-foreground font-display font-semibold transition-all"
+          >
+            <Icon name="ChevronDown" size={16} />
+            Показать все маршруты ({grouped.length})
+          </button>
+        </div>
+      )}
     </section>
   );
 }

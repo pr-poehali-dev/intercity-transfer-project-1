@@ -51,7 +51,13 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://nashe-for-russia-transfer.ru/marshrut/moskva-tver</loc>
+    <loc>https://nashe-for-russia-transfer.ru/marshrut/moskva-samara</loc>
+    <lastmod>2026-06-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://nashe-for-russia-transfer.ru/marshrut/moskva-tula</loc>
     <lastmod>2026-06-03</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
@@ -63,16 +69,22 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://nashe-for-russia-transfer.ru/marshrut/moskva-tver</loc>
+    <lastmod>2026-06-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://nashe-for-russia-transfer.ru/marshrut/moskva-vladimir</loc>
     <lastmod>2026-06-03</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://nashe-for-russia-transfer.ru/marshrut/moskva-tula</loc>
+    <loc>https://nashe-for-russia-transfer.ru/marshrut/moskva-suzdal</loc>
     <lastmod>2026-06-03</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://nashe-for-russia-transfer.ru/marshrut/moskva-ryazan</loc>
@@ -90,64 +102,16 @@
     <loc>https://nashe-for-russia-transfer.ru/marshrut/moskva-smolensk</loc>
     <lastmod>2026-06-03</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://nashe-for-russia-transfer.ru/marshrut/moskva-kursk</loc>
     <lastmod>2026-06-03</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://nashe-for-russia-transfer.ru/marshrut/moskva-tambov</loc>
-    <lastmod>2026-06-03</lastmod>
-    <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://nashe-for-russia-transfer.ru/marshrut/moskva-penza</loc>
-    <lastmod>2026-06-03</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://nashe-for-russia-transfer.ru/marshrut/moskva-saratov</loc>
-    <lastmod>2026-06-03</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://nashe-for-russia-transfer.ru/marshrut/moskva-samara</loc>
-    <lastmod>2026-06-03</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://nashe-for-russia-transfer.ru/marshrut/moskva-ufa</loc>
-    <lastmod>2026-06-03</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://nashe-for-russia-transfer.ru/marshrut/moskva-stavropol</loc>
-    <lastmod>2026-06-03</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://nashe-for-russia-transfer.ru/marshrut/moskva-anapa</loc>
-    <lastmod>2026-06-03</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://nashe-for-russia-transfer.ru/marshrut/moskva-gelendzhik</loc>
-    <lastmod>2026-06-03</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://nashe-for-russia-transfer.ru/marshrut/moskva-pskov</loc>
+    <loc>https://nashe-for-russia-transfer.ru/marshrut/moskva-belgorod</loc>
     <lastmod>2026-06-03</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -171,7 +135,43 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://nashe-for-russia-transfer.ru/marshrut/moskva-belgorod</loc>
+    <loc>https://nashe-for-russia-transfer.ru/marshrut/moskva-tambov</loc>
+    <lastmod>2026-06-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://nashe-for-russia-transfer.ru/marshrut/moskva-penza</loc>
+    <lastmod>2026-06-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://nashe-for-russia-transfer.ru/marshrut/moskva-saratov</loc>
+    <lastmod>2026-06-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://nashe-for-russia-transfer.ru/marshrut/moskva-ufa</loc>
+    <lastmod>2026-06-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://nashe-for-russia-transfer.ru/marshrut/moskva-stavropol</loc>
+    <lastmod>2026-06-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://nashe-for-russia-transfer.ru/marshrut/moskva-gelendzhik</loc>
+    <lastmod>2026-06-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://nashe-for-russia-transfer.ru/marshrut/moskva-anapa</loc>
     <lastmod>2026-06-03</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -188,18 +188,6 @@
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
-  <url>
-    <loc>https://nashe-for-russia-transfer.ru/marshrut/moskva-suzdal</loc>
-    <lastmod>2026-06-03</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://nashe-for-russia-transfer.ru/marshrut/moskva-serpuhov</loc>
-    <lastmod>2026-06-03</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
 
   <!-- Маршруты из Санкт-Петербурга -->
   <url>
@@ -209,7 +197,7 @@
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://nashe-for-russia-transfer.ru/marshrut/sankt-peterburg-vyborg</loc>
+    <loc>https://nashe-for-russia-transfer.ru/marshrut/sankt-peterburg-tver</loc>
     <lastmod>2026-06-03</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -227,9 +215,43 @@
     <priority>0.7</priority>
   </url>
 
-  <!-- Маршруты из Сочи / Краснодар -->
+  <!-- Маршруты из Нижнего Новгорода и Казани -->
+  <url>
+    <loc>https://nashe-for-russia-transfer.ru/marshrut/nizhniy-novgorod-moskva</loc>
+    <lastmod>2026-06-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://nashe-for-russia-transfer.ru/marshrut/kazan-moskva</loc>
+    <lastmod>2026-06-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://nashe-for-russia-transfer.ru/marshrut/kazan-nizhniy-novgorod</loc>
+    <lastmod>2026-06-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Маршруты Урал -->
+  <url>
+    <loc>https://nashe-for-russia-transfer.ru/marshrut/yekaterinburg-perm</loc>
+    <lastmod>2026-06-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Маршруты юг России -->
   <url>
     <loc>https://nashe-for-russia-transfer.ru/marshrut/sochi-moskva</loc>
+    <lastmod>2026-06-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://nashe-for-russia-transfer.ru/marshrut/krasnodar-moskva</loc>
     <lastmod>2026-06-03</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
@@ -241,13 +263,19 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://nashe-for-russia-transfer.ru/marshrut/krasnodar-moskva</loc>
+    <loc>https://nashe-for-russia-transfer.ru/marshrut/krasnodar-sochi</loc>
     <lastmod>2026-06-03</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://nashe-for-russia-transfer.ru/marshrut/krasnodar-sochi</loc>
+    <loc>https://nashe-for-russia-transfer.ru/marshrut/krasnodar-rostov-na-donu</loc>
+    <lastmod>2026-06-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://nashe-for-russia-transfer.ru/marshrut/rostov-na-donu-krasnodar</loc>
     <lastmod>2026-06-03</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>

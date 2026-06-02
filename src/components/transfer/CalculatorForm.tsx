@@ -205,7 +205,7 @@ export default function CalculatorForm({
         {!TARIFFS[tariff].isDelivery && (
           <div>
             <label className="text-sm font-display text-muted-foreground tracking-wider mb-2 block">ПАССАЖИРЫ</label>
-            <div className="flex items-center gap-2 bg-background border border-border rounded-lg px-2 sm:px-4 py-3">
+            <div className="flex items-center gap-2 bg-background border border-border rounded-lg px-2 py-3 text-sm">
               <button
                 onClick={() => { setPassengers(Math.max(1, passengers - 1)); }}
                 className="w-7 h-7 rounded-full bg-surface-hover flex items-center justify-center hover:bg-neon/20 transition-colors text-foreground font-bold text-lg leading-none"

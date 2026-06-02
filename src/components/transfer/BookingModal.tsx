@@ -188,7 +188,7 @@ export default function BookingModal({
               disabled={sending}
               className="w-full bg-neon text-background font-display font-bold py-4 rounded-xl hover:opacity-90 transition-all glow-neon disabled:opacity-50"
             >
-              {sending ? "ОТПРАВЛЯЕМ..." : `ЗАБРОНИРОВАТЬ ЗА ${price.toLocaleString("ru-RU")} ₽`}
+              {sending ? "ОТПРАВЛЯЕМ..." : `ПЕРЕЙТИ К ОФОРМЛЕНИЮ — ${price.toLocaleString("ru-RU")} ₽`}
             </button>
           </>
         )}

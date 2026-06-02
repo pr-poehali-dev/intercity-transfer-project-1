@@ -27,7 +27,7 @@ export default function Navbar({ onBookClick }: NavbarProps) {
             onClick={onBookClick}
             className="bg-neon text-background font-display text-sm sm:text-base px-3 sm:px-5 py-2 rounded-md font-semibold hover:opacity-90 transition-opacity glow-neon"
           >
-            <span className="hidden sm:inline">ЗАБРОНИРОВАТЬ</span>
+            <span className="hidden sm:inline">ОФОРМИТЬ ПОЕЗДКУ</span>
             <span className="sm:hidden">ЦЕНА</span>
           </button>
           <div className="flex items-center gap-1">

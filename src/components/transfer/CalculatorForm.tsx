@@ -199,7 +199,7 @@ export default function CalculatorForm({
             value={date}
             min={new Date().toISOString().split("T")[0]}
             onChange={(e) => setDate(e.target.value)}
-            className="w-full bg-background border border-border rounded-lg px-4 py-3 text-base text-foreground"
+            className="w-full bg-background border border-border rounded-lg px-2 py-3 text-sm text-foreground"
           />
         </div>
         {!TARIFFS[tariff].isDelivery && (

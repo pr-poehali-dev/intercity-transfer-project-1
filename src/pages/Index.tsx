@@ -8,8 +8,8 @@ import { TARIFFS, DELIVERY_OPTIONS, MINIVAN_SUBTARIFFS, getDistance, getDistance
 import func2url from "../../backend/func2url.json";
 
 export default function Index() {
-  const [from, setFrom] = useState("Москва");
-  const [to, setTo] = useState("Санкт-Петербург");
+  const [from, setFrom] = useState("");
+  const [to, setTo] = useState("");
   const [via, setVia] = useState("");
   const [withVia, setWithVia] = useState(false);
   const [roundTrip, setRoundTrip] = useState(false);

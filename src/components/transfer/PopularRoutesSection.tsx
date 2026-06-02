@@ -5,8 +5,9 @@ import { ROUTES } from "./routesData";
 
 const GROUPS = [
   { label: "Из Москвы", filter: (slug: string) => slug.startsWith("moskva-") },
-  { label: "На юг России", filter: (slug: string) => ["sochi", "krasnodar", "anapa", "gelendzhik", "rostov"].some(c => slug.includes(c)) && !slug.startsWith("moskva-") },
-  { label: "Поволжье и Урал", filter: (slug: string) => ["kazan", "nizhniy-novgorod", "samara", "ufa", "yekaterinburg", "perm"].some(c => slug.includes(c)) && !slug.startsWith("moskva-") },
+  { label: "В Москву", filter: (slug: string) => slug.endsWith("-moskva") },
+  { label: "На юг России", filter: (slug: string) => ["sochi", "krasnodar", "anapa", "gelendzhik", "rostov", "stavropol"].some(c => slug.includes(c)) && !slug.startsWith("moskva-") && !slug.endsWith("-moskva") },
+  { label: "Поволжье и Урал", filter: (slug: string) => ["kazan", "nizhniy-novgorod", "samara", "ufa", "yekaterinburg", "perm", "chelyabinsk", "kirov"].some(c => slug.includes(c)) && !slug.startsWith("moskva-") && !slug.endsWith("-moskva") },
   { label: "Из Петербурга", filter: (slug: string) => slug.startsWith("sankt-peterburg-") },
 ];
 

@@ -1,5 +1,6 @@
 import json
 import os
+import random
 import smtplib
 import requests
 from email.mime.text import MIMEText
@@ -24,8 +25,31 @@ def send_email(subject: str, text: str):
     print(f"Email sent to {email_to}")
 
 
+def send_vk(message: str):
+    vk_token = os.environ.get('VK_BOT_TOKEN', '')
+    vk_user_id = os.environ.get('VK_USER_ID', '')
+    if not (vk_token and vk_user_id):
+        print("VK secrets not configured, skipping VK")
+        return
+    resp = requests.post(
+        'https://api.vk.com/method/messages.send',
+        data={
+            'user_id': vk_user_id,
+            'message': message,
+            'random_id': random.randint(0, 2**31),
+            'access_token': vk_token,
+            'v': '5.131',
+        },
+        timeout=15,
+    )
+    result = resp.json()
+    print(f"VK response: {result}")
+    if 'error' in result:
+        raise Exception(f"VK error: {result['error']}")
+
+
 def handler(event: dict, context) -> dict:
-    """Отправляет заявку на бронирование в Telegram и на Email"""
+    """Отправляет заявку на бронирование в VK и на Email"""
     if event.get('httpMethod') == 'OPTIONS':
         return {
             'statusCode': 200,
@@ -57,25 +81,24 @@ def handler(event: dict, context) -> dict:
     services_line = f"\nДоп. услуги: {services}" if services and services != '—' else ""
     comment_line = f"\nКомментарий: {comment}" if comment and comment != '—' else ""
 
-    tg_distance_line = f"\n📏 Расстояние: {distance} км" if distance else ""
-    tg_via_line = f"📌 Через: {via_city}\n" if via_city else ""
-    tg_services_line = f"\n🧩 Доп. услуги: {services}" if services and services != '—' else ""
-    tg_comment_line = f"\n💬 Комментарий: {comment}" if comment and comment != '—' else ""
+    vk_via_line = f"Через: {via_city}\n" if via_city else ""
+    vk_services_line = f"\nДоп. услуги: {services}" if services and services != '—' else ""
+    vk_comment_line = f"\nКомментарий: {comment}" if comment and comment != '—' else ""
 
-    tg_text = (
+    vk_text = (
         f"🚗 Новое бронирование!\n\n"
-        f"👤 Имя: {name}\n"
-        f"📞 Телефон: {phone}\n"
-        f"📍 Откуда: {from_city}\n"
-        f"{tg_via_line}"
-        f"🏁 Куда: {to_city}"
-        f"{tg_distance_line}\n"
-        f"📅 Дата: {date}\n"
-        f"👥 Пассажиры: {passengers}\n"
-        f"🚘 Тариф: {tariff}"
-        f"{tg_services_line}"
-        f"{tg_comment_line}\n"
-        f"💰 Стоимость: {price} ₽"
+        f"Имя: {name}\n"
+        f"Телефон: {phone}\n"
+        f"Откуда: {from_city}\n"
+        f"{vk_via_line}"
+        f"Куда: {to_city}"
+        f"{distance_line}\n"
+        f"Дата: {date}\n"
+        f"Пассажиры: {passengers}\n"
+        f"Тариф: {tariff}"
+        f"{vk_services_line}"
+        f"{vk_comment_line}\n"
+        f"Стоимость: {price} руб."
     )
 
     email_text = (
@@ -94,31 +117,10 @@ def handler(event: dict, context) -> dict:
         f"Стоимость: {price} руб."
     )
 
-    token = os.environ.get('TELEGRAM_BOT_TOKEN', '')
-    chat_id = os.environ.get('TELEGRAM_CHAT_ID', '')
-    proxy_url = os.environ.get('TELEGRAM_PROXY', '')
-    token_hint = f"{token[:10]}...{token[-4:]}" if len(token) > 14 else "EMPTY/SHORT"
-    print(f"Using token: {token_hint}, chat_id: {chat_id}, proxy: {'yes' if proxy_url else 'no'}")
-
-    proxies = {'https': proxy_url, 'http': proxy_url} if proxy_url else None
-
     try:
-        resp = requests.post(
-            f'https://api.telegram.org/bot{token}/sendMessage',
-            json={'chat_id': chat_id, 'text': tg_text},
-            proxies=proxies,
-            timeout=15,
-        )
-        result = resp.json()
-        if not resp.ok:
-            print(f"Telegram error {resp.status_code}: {resp.text}")
-            return {
-                'statusCode': 502,
-                'headers': {'Access-Control-Allow-Origin': '*'},
-                'body': json.dumps({'ok': False, 'error': resp.text})
-            }
+        send_vk(vk_text)
     except Exception as e:
-        print(f"Telegram unexpected error: {e}")
+        print(f"VK error: {e}")
         return {
             'statusCode': 500,
             'headers': {'Access-Control-Allow-Origin': '*'},
@@ -133,5 +135,5 @@ def handler(event: dict, context) -> dict:
     return {
         'statusCode': 200,
         'headers': {'Access-Control-Allow-Origin': '*'},
-        'body': json.dumps({'ok': result.get('ok', False)})
+        'body': json.dumps({'ok': True})
     }

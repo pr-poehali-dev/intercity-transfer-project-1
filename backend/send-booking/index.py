@@ -1,9 +1,7 @@
 import json
 import os
 import smtplib
-import urllib.request
-import urllib.parse
-import urllib.error
+import requests
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
@@ -98,30 +96,27 @@ def handler(event: dict, context) -> dict:
 
     token = os.environ.get('TELEGRAM_BOT_TOKEN', '')
     chat_id = os.environ.get('TELEGRAM_CHAT_ID', '')
+    proxy_url = os.environ.get('TELEGRAM_PROXY', '')
     token_hint = f"{token[:10]}...{token[-4:]}" if len(token) > 14 else "EMPTY/SHORT"
-    print(f"Using token: {token_hint}, chat_id: {chat_id}")
+    print(f"Using token: {token_hint}, chat_id: {chat_id}, proxy: {'yes' if proxy_url else 'no'}")
 
-    data = urllib.parse.urlencode({
-        'chat_id': chat_id,
-        'text': tg_text,
-    }).encode()
+    proxies = {'https': proxy_url, 'http': proxy_url} if proxy_url else None
 
-    req = urllib.request.Request(
-        f'https://api.telegram.org/bot{token}/sendMessage',
-        data=data,
-        method='POST'
-    )
     try:
-        with urllib.request.urlopen(req) as resp:
-            result = json.loads(resp.read())
-    except urllib.error.HTTPError as e:
-        err_body = e.read().decode()
-        print(f"Telegram error {e.code}: {err_body}")
-        return {
-            'statusCode': 502,
-            'headers': {'Access-Control-Allow-Origin': '*'},
-            'body': json.dumps({'ok': False, 'error': err_body})
-        }
+        resp = requests.post(
+            f'https://api.telegram.org/bot{token}/sendMessage',
+            json={'chat_id': chat_id, 'text': tg_text},
+            proxies=proxies,
+            timeout=15,
+        )
+        result = resp.json()
+        if not resp.ok:
+            print(f"Telegram error {resp.status_code}: {resp.text}")
+            return {
+                'statusCode': 502,
+                'headers': {'Access-Control-Allow-Origin': '*'},
+                'body': json.dumps({'ok': False, 'error': resp.text})
+            }
     except Exception as e:
         print(f"Telegram unexpected error: {e}")
         return {

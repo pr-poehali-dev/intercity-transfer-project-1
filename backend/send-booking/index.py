@@ -82,7 +82,14 @@ def handler(event: dict, context) -> dict:
         err_body = e.read().decode()
         print(f"Telegram error {e.code}: {err_body}, token_hint={token_hint}")
         return {
-            'statusCode': 200,
+            'statusCode': 502,
             'headers': {'Access-Control-Allow-Origin': '*'},
-            'body': json.dumps({'ok': False, 'error': err_body, 'code': e.code, 'token_hint': token_hint})
+            'body': json.dumps({'ok': False, 'error': err_body, 'code': e.code})
+        }
+    except Exception as e:
+        print(f"Unexpected error: {e}, token_hint={token_hint}")
+        return {
+            'statusCode': 500,
+            'headers': {'Access-Control-Allow-Origin': '*'},
+            'body': json.dumps({'ok': False, 'error': str(e)})
         }

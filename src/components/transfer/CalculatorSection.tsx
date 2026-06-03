@@ -124,6 +124,8 @@ export default function CalculatorSection({
         }),
       });
       if (!res.ok) throw new Error();
+      const data = await res.json();
+      if (!data.ok) throw new Error();
       setSent(true);
     } catch {
       setError("Ошибка отправки. Попробуйте позже");

@@ -5,6 +5,25 @@
       "method": "OPTIONS",
       "path": "/",
       "expectedStatus": 200
+    },
+    {
+      "name": "POST booking",
+      "method": "POST",
+      "path": "/",
+      "body": {
+        "name": "Тест",
+        "phone": "+79001234567",
+        "from_city": "Москва",
+        "to_city": "Санкт-Петербург",
+        "date": "2026-06-10",
+        "passengers": 2,
+        "tariff": "Комфорт",
+        "price": 12000,
+        "distance": 700
+      },
+      "expectedStatus": 200,
+      "expectedBody": {"ok": true},
+      "bodyMatcher": "partial"
     }
   ]
 }

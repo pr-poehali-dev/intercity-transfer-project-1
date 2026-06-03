@@ -11,5 +11,5 @@ Allow: /
 User-agent: Bingbot
 Allow: /
 
-Host: https://nashe-for-russia-transfer.ru
-Sitemap: https://nashe-for-russia-transfer.ru/sitemap.xml
+Host: https://nashe-transfer.ru
+Sitemap: https://nashe-transfer.ru/sitemap.xml

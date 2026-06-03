@@ -49,7 +49,7 @@ def send_vk(message: str):
 
 
 def handler(event: dict, context) -> dict:
-    """Отправляет заявку на бронирование в VK и на Email"""
+    """Отправляет заявку на бронирование в VK и на Email. v2"""
     if event.get('httpMethod') == 'OPTIONS':
         return {
             'statusCode': 200,

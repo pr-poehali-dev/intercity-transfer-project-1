@@ -182,7 +182,6 @@ export default function BookingModal({
               />
             </div>
 
-            {error && <div className="text-sm text-red-400 mb-3">{error}</div>}
             <button
               onClick={onBook}
               disabled={sending}
@@ -193,6 +192,26 @@ export default function BookingModal({
           </>
         )}
       </div>
+
+      {error && (
+        <div
+          className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-up"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="bg-surface border border-red-400/40 rounded-2xl p-6 sm:p-8 max-w-md w-full text-center shadow-2xl">
+            <Icon name="TriangleAlert" size={56} className="text-red-400 mx-auto mb-4" />
+            <div className="font-display text-xl font-bold mb-3">Упс, что-то пошло не так!</div>
+            <p className="text-base text-muted-foreground mb-6">Попробуйте позвонить нам или написать</p>
+            <a
+              href="#contacts"
+              onClick={() => onClose()}
+              className="inline-block w-full bg-neon text-background font-display font-bold py-4 rounded-xl hover:opacity-90 transition-all glow-neon"
+            >
+              СВЯЗАТЬСЯ
+            </a>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

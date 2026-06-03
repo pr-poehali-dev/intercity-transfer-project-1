@@ -65,6 +65,7 @@ export default function CalculatorSection({
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState("");
+  const [validationError, setValidationError] = useState("");
 
   function handlePhoneChange(val: string) {
     let v = val;
@@ -78,8 +79,9 @@ export default function CalculatorSection({
   }
 
   async function handleBook() {
-    if (!name.trim()) { setError("Заполните имя"); return; }
-    if (!isPhoneValid(phone)) { setError("Телефон должен начинаться с + и содержать от 11 до 15 цифр"); return; }
+    if (!name.trim()) { setValidationError("Заполните имя"); return; }
+    if (!isPhoneValid(phone)) { setValidationError("Телефон должен начинаться с + и содержать от 11 до 15 цифр"); return; }
+    setValidationError("");
     setError("");
     setSending(true);
     const t = TARIFFS[tariff];
@@ -182,9 +184,9 @@ export default function CalculatorSection({
           handlePhoneChange={handlePhoneChange}
           isPhoneValid={isPhoneValid}
           comment={comment} setComment={setComment}
-          sending={sending} sent={sent} error={error}
+          sending={sending} sent={sent} error={error} validationError={validationError}
           onBook={handleBook}
-          onClose={() => { setSent(false); setError(""); onClose(); }}
+          onClose={() => { setSent(false); setError(""); setValidationError(""); onClose(); }}
           onSuccessClose={() => { setSent(false); setName(""); setPhone(""); onClose(); }}
         />
       )}

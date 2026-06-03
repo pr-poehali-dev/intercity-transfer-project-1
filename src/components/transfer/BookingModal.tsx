@@ -27,6 +27,7 @@ interface BookingModalProps {
   sending: boolean;
   sent: boolean;
   error: string;
+  validationError: string;
   onBook: () => void;
   onClose: () => void;
   onSuccessClose: () => void;
@@ -39,7 +40,7 @@ export default function BookingModal({
   price, distance,
   name, setName, phone, handlePhoneChange, isPhoneValid,
   comment, setComment,
-  sending, sent, error,
+  sending, sent, error, validationError,
   onBook, onClose, onSuccessClose,
 }: BookingModalProps) {
   const cur = TARIFFS[tariff];
@@ -182,6 +183,7 @@ export default function BookingModal({
               />
             </div>
 
+            {validationError && <div className="text-sm text-red-400 mb-3">{validationError}</div>}
             <button
               onClick={onBook}
               disabled={sending}

@@ -182,7 +182,23 @@ export default function BookingModal({
               />
             </div>
 
-            {error && <div className="text-sm text-red-400 mb-3">{error}</div>}
+            {error && (
+              <div className="text-sm text-red-400 bg-red-400/10 border border-red-400/20 rounded-xl p-4 mb-3">
+                <div className="font-bold mb-1">Не удалось отправить заявку</div>
+                <div className="text-muted-foreground mb-3">Пожалуйста, свяжитесь с нами напрямую:</div>
+                <div className="flex flex-col gap-2">
+                  <a href="tel:+79961606567" className="flex items-center gap-2 text-neon hover:underline">
+                    <Icon name="Phone" size={14} /> +7 996 160-65-67 (Максим)
+                  </a>
+                  <a href="tel:+79365250050" className="flex items-center gap-2 text-neon hover:underline">
+                    <Icon name="Phone" size={14} /> +7 936 525-00-50 (Иван)
+                  </a>
+                  <a href="https://t.me/+79961606567" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-neon hover:underline">
+                    <Icon name="Send" size={14} /> Написать в Telegram
+                  </a>
+                </div>
+              </div>
+            )}
             <button
               onClick={onBook}
               disabled={sending}

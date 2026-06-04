@@ -12,7 +12,7 @@
       "path": "/",
       "body": {},
       "expectedStatus": 400,
-      "expectedBody": {"error": "string"},
+      "expectedBody": {"error": "from and to are required"},
       "bodyMatcher": "partial"
     },
     {
@@ -21,7 +21,7 @@
       "path": "/",
       "body": {"from": "Москва", "to": "Санкт-Петербург"},
       "expectedStatus": 200,
-      "expectedBody": {"distance": "number"},
+      "expectedBody": {"distance": 708},
       "bodyMatcher": "partial"
     }
   ]

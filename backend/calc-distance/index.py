@@ -38,26 +38,28 @@ def geocode(query: str, api_key: str):
     return float(lat), float(lon)
 
 
-def road_distance(from_coords, to_coords):
-    """Расстояние по дорогам в км через OSRM"""
+def road_distance(from_coords, to_coords, gh_key: str):
+    """Расстояние по дорогам в км через GraphHopper"""
     flat, flon = from_coords
     tlat, tlon = to_coords
     url = (
-        f'https://router.project-osrm.org/route/v1/driving/'
-        f'{flon},{flat};{tlon},{tlat}?overview=false'
+        f'https://graphhopper.com/api/1/route'
+        f'?point={flat},{flon}&point={tlat},{tlon}'
+        f'&vehicle=car&locale=ru&calc_points=false'
+        f'&key={gh_key}'
     )
     req = urllib.request.Request(url, headers={'User-Agent': 'transfer-app'})
-    with urllib.request.urlopen(req, timeout=8) as resp:
+    with urllib.request.urlopen(req, timeout=10) as resp:
         data = json.loads(resp.read())
-    routes = data.get('routes', [])
-    if not routes:
+    paths = data.get('paths', [])
+    if not paths:
         return None
-    meters = routes[0].get('distance', 0)
+    meters = paths[0].get('distance', 0)
     return round(meters / 1000)
 
 
 def handler(event: dict, context) -> dict:
-    """Расчёт расстояния по дорогам между двумя населёнными пунктами России"""
+    """Расчёт расстояния по дорогам между двумя населёнными пунктами через GraphHopper"""
     if event.get('httpMethod') == 'OPTIONS':
         return {
             'statusCode': 200,
@@ -81,24 +83,26 @@ def handler(event: dict, context) -> dict:
             'body': json.dumps({'error': 'from and to are required'})
         }
 
-    api_key = os.environ.get('DADATA_API_KEY', '')
-    if not api_key:
+    dadata_key = os.environ.get('DADATA_API_KEY', '')
+    gh_key = os.environ.get('GRAPHHOPPER_API_KEY', '')
+
+    if not dadata_key or not gh_key:
         return {
             'statusCode': 200,
             'headers': {'Access-Control-Allow-Origin': '*'},
-            'body': json.dumps({'distance': None, 'error': 'API key not configured'})
+            'body': json.dumps({'distance': None, 'error': 'API keys not configured'})
         }
 
     try:
-        from_coords = geocode(from_city, api_key)
-        to_coords = geocode(to_city, api_key)
+        from_coords = geocode(from_city, dadata_key)
+        to_coords = geocode(to_city, dadata_key)
         if not from_coords or not to_coords:
             return {
                 'statusCode': 200,
                 'headers': {'Access-Control-Allow-Origin': '*'},
                 'body': json.dumps({'distance': None, 'error': 'Координаты не найдены'})
             }
-        dist = road_distance(from_coords, to_coords)
+        dist = road_distance(from_coords, to_coords, gh_key)
     except Exception as e:
         return {
             'statusCode': 200,

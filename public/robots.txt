@@ -4,12 +4,6 @@ Disallow: /api/
 
 User-agent: Yandex
 Allow: /
+Host: nashe-transfer.ru
 
-User-agent: Googlebot
-Allow: /
-
-User-agent: Bingbot
-Allow: /
-
-Host: https://nashe-transfer.ru
 Sitemap: https://nashe-transfer.ru/sitemap.xml

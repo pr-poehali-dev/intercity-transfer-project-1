@@ -3,7 +3,7 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import Icon from "@/components/ui/icon";
 import Navbar from "@/components/transfer/Navbar";
 import { getRouteBySlug, ROUTES } from "@/components/transfer/routesData";
-import { TARIFFS } from "@/components/transfer/constants";
+import { TARIFFS, MINIVAN_SUBTARIFFS } from "@/components/transfer/constants";
 
 export default function RoutePage() {
   const { slug } = useParams<{ slug: string }>();
@@ -92,7 +92,7 @@ export default function RoutePage() {
                 <div className="font-display text-base font-bold mb-1 truncate">{t.name}</div>
                 <div className="text-xs text-muted-foreground mb-2 truncate">{t.desc}</div>
                 <div className="font-display text-lg text-neon font-bold truncate">
-                  от {(route.distance * t.pricePerKm).toLocaleString("ru-RU")} ₽
+                  от {(route.distance * (t.isMinivan ? MINIVAN_SUBTARIFFS[0].pricePerKm : t.pricePerKm)).toLocaleString("ru-RU")} ₽
                 </div>
               </div>
             ))}

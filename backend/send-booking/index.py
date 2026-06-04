@@ -85,8 +85,18 @@ def handler(event: dict, context) -> dict:
         f"Стоимость: {price} руб."
     )
 
-    # Сообщение 2 — только данные о поездке, без контактов
+    # Сообщение 2 — только данные о поездке, без контактов и стоимости
+    import re
+    def strip_prices(text: str) -> str:
+        # Убираем (+500 ₽) и (500 ₽/км) и подобные скобки с ценами
+        return re.sub(r'\s*\([^)]*₽[^)]*\)', '', text).strip()
+
     msg2_comment = f"\nКомментарий: {comment}" if comment and comment != '—' else ""
+    if services and services != '—':
+        services_clean = "; ".join(strip_prices(s) for s in services.split("; "))
+        msg2_services = f"\nДоп. услуги: {services_clean}"
+    else:
+        msg2_services = ""
     msg2 = (
         f"📋 Детали поездки:\n\n"
         f"Откуда: {from_city}\n"
@@ -96,6 +106,7 @@ def handler(event: dict, context) -> dict:
         f"Дата: {date}\n"
         f"Тариф: {tariff}\n"
         f"Пассажиры: {passengers}"
+        f"{msg2_services}"
         f"{msg2_comment}"
     )
 

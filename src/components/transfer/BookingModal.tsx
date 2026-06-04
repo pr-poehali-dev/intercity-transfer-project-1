@@ -129,13 +129,13 @@ export default function BookingModal({
                 {withChildren && (
                   <div className="flex items-center gap-2 text-sm text-foreground">
                     <Icon name="Baby" size={14} className="text-neon flex-shrink-0" />
-                    С детьми до 6 лет: {childrenCount} (+{(childrenCount * CHILD_SEAT_PRICE).toLocaleString("ru-RU")} ₽)
+                    С детьми до 6 лет: {childrenCount}
                   </div>
                 )}
                 {withPet && (
                   <div className="flex items-center gap-2 text-sm text-foreground">
                     <Icon name="Dog" size={14} className="text-neon flex-shrink-0" />
-                    Перевозка животного {PET_OPTIONS[petOption].label} (+{PET_OPTIONS[petOption].price.toLocaleString("ru-RU")} ₽)
+                    Перевозка животного {PET_OPTIONS[petOption].label}
                   </div>
                 )}
               </div>

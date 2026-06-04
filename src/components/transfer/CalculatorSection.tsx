@@ -35,6 +35,8 @@ interface CalculatorSectionProps {
   setMinivanSub: (v: number) => void;
   date: string;
   setDate: (v: string) => void;
+  time: string;
+  setTime: (v: string) => void;
   price: number | null;
   distance: number | null;
   calculated: boolean;
@@ -55,6 +57,7 @@ export default function CalculatorSection({
   deliveryMode, setDeliveryMode,
   minivanSub, setMinivanSub,
   date, setDate,
+  time, setTime,
   price, distance, calculated, calculating,
   onCalculate, onClose, onRouteSelect,
   sectionRef,
@@ -116,7 +119,7 @@ export default function CalculatorSection({
           from_city: from,
           via_city: (withVia && via) ? via : undefined,
           to_city: to,
-          date,
+          date: time ? `${date} ${time}` : date,
           passengers: isDelivery ? "—" : passengers,
           tariff: tariffLabel,
           price: finalPrice,
@@ -167,6 +170,7 @@ export default function CalculatorSection({
               deliveryMode={deliveryMode} setDeliveryMode={setDeliveryMode}
               minivanSub={minivanSub} setMinivanSub={setMinivanSub}
               date={date} setDate={setDate}
+              time={time} setTime={setTime}
               calculating={calculating}
               onCalculate={onCalculate}
             />

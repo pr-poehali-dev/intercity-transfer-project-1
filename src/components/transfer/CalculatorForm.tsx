@@ -33,6 +33,8 @@ interface CalculatorFormProps {
   setMinivanSub: (v: number) => void;
   date: string;
   setDate: (v: string) => void;
+  time: string;
+  setTime: (v: string) => void;
   calculating: boolean;
   onCalculate: () => void;
 }
@@ -47,6 +49,7 @@ export default function CalculatorForm({
   deliveryMode, setDeliveryMode,
   minivanSub, setMinivanSub,
   date, setDate,
+  time, setTime,
   calculating, onCalculate,
 }: CalculatorFormProps) {
   const norm = (s: string) => s.trim().toLowerCase();
@@ -189,7 +192,7 @@ export default function CalculatorForm({
         </div>
       )}
 
-      <div className="grid grid-cols-2 gap-4 mb-6">
+      <div className={`grid gap-4 mb-6 ${TARIFFS[tariff].isDelivery ? "grid-cols-2" : "grid-cols-3"}`}>
         <div>
           <label className="text-sm font-display text-muted-foreground tracking-wider mb-2 block">ДАТА ПОЕЗДКИ</label>
           <input
@@ -197,6 +200,15 @@ export default function CalculatorForm({
             value={date}
             min={new Date().toISOString().split("T")[0]}
             onChange={(e) => setDate(e.target.value)}
+            className="w-full bg-background border border-border rounded-lg px-2 py-3 text-sm text-foreground"
+          />
+        </div>
+        <div>
+          <label className="text-sm font-display text-muted-foreground tracking-wider mb-2 block">ВРЕМЯ</label>
+          <input
+            type="time"
+            value={time}
+            onChange={(e) => setTime(e.target.value)}
             className="w-full bg-background border border-border rounded-lg px-2 py-3 text-sm text-foreground"
           />
         </div>

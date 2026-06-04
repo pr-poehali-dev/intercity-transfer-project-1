@@ -17,6 +17,7 @@ export default function Index() {
   const [tariff, setTariff] = useState(0);
   const [passengers, setPassengers] = useState(1);
   const [date, setDate] = useState("");
+  const [time, setTime] = useState("");
   const [withChildren, setWithChildren] = useState(false);
   const [childrenCount, setChildrenCount] = useState(1);
   const [withPet, setWithPet] = useState(false);
@@ -180,6 +181,8 @@ export default function Index() {
         setMinivanSub={handleSetMinivanSub}
         date={date}
         setDate={setDate}
+        time={time}
+        setTime={setTime}
         price={price}
         distance={distance}
         calculated={calculated}

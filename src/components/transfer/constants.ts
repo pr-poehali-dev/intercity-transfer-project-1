@@ -1,4 +1,4 @@
-export const HERO_IMAGE = "https://cdn.poehali.dev/projects/62498eaa-31ad-4421-848c-bf54bb4f1b4a/files/640492d8-f620-444e-966d-ca32f7dc1810.jpg";
+export const HERO_IMAGE = "https://cdn.poehali.dev/projects/62498eaa-31ad-4421-848c-bf54bb4f1b4a/files/c5f389ba-aad6-42fd-b2e7-37829ac076d6.jpg";
 
 export const CITIES = [
   "Москва", "Санкт-Петербург", "Казань", "Нижний Новгород",

@@ -1,0 +1,177 @@
+import json
+import os
+import time
+import urllib.request
+import psycopg2
+
+ROUTES = [
+    ("Москва", "Санкт-Петербург"), ("Москва", "Сочи"), ("Москва", "Казань"),
+    ("Москва", "Краснодар"), ("Москва", "Нижний Новгород"), ("Москва", "Воронеж"),
+    ("Москва", "Тула"), ("Москва", "Ярославль"), ("Москва", "Тверь"),
+    ("Москва", "Самара"), ("Москва", "Ростов-на-Дону"), ("Москва", "Владимир"),
+    ("Москва", "Суздаль"), ("Москва", "Рязань"), ("Москва", "Калуга"),
+    ("Москва", "Смоленск"), ("Москва", "Курск"), ("Москва", "Белгород"),
+    ("Москва", "Брянск"), ("Москва", "Орёл"), ("Москва", "Липецк"),
+    ("Москва", "Тамбов"), ("Москва", "Пенза"), ("Москва", "Саратов"),
+    ("Москва", "Уфа"), ("Москва", "Ставрополь"), ("Москва", "Геленджик"),
+    ("Москва", "Анапа"), ("Москва", "Иваново"), ("Москва", "Кострома"),
+    ("Москва", "Псков"), ("Москва", "Великий Новгород"), ("Москва", "Киров"),
+    ("Москва", "Челябинск"), ("Москва", "Новосибирск"), ("Москва", "Волгоград"),
+    ("Москва", "Астрахань"), ("Москва", "Тюмень"), ("Москва", "Магнитогорск"),
+    ("Москва", "Оренбург"), ("Москва", "Вологда"), ("Москва", "Архангельск"),
+    ("Москва", "Сыктывкар"), ("Москва", "Коломна"), ("Москва", "Сергиев Посад"),
+    ("Москва", "Чебоксары"), ("Москва", "Ульяновск"), ("Москва", "Саранск"),
+    ("Москва", "Серпухов"), ("Москва", "Дмитров"), ("Москва", "Тольятти"),
+    ("Москва", "Набережные Челны"), ("Москва", "Екатеринбург"),
+    ("Краснодар", "Ростов-на-Дону"), ("Краснодар", "Сочи"), ("Краснодар", "Анапа"),
+    ("Краснодар", "Геленджик"), ("Краснодар", "Новороссийск"), ("Краснодар", "Минеральные Воды"),
+    ("Краснодар", "Пятигорск"), ("Краснодар", "Ставрополь"), ("Краснодар", "Волгоград"),
+    ("Краснодар", "Таганрог"), ("Краснодар", "Майкоп"), ("Краснодар", "Кабардинка"),
+    ("Краснодар", "Витязево"),
+    ("Сочи", "Ростов-на-Дону"), ("Сочи", "Геленджик"), ("Сочи", "Анапа"),
+    ("Сочи", "Минеральные Воды"), ("Сочи", "Новороссийск"), ("Сочи", "Кисловодск"),
+    ("Сочи", "Адлер"), ("Сочи", "Красная Поляна"), ("Сочи", "Азов"),
+    ("Анапа", "Геленджик"), ("Анапа", "Ростов-на-Дону"), ("Анапа", "Ставрополь"),
+    ("Анапа", "Новороссийск"), ("Анапа", "Таганрог"),
+    ("Геленджик", "Ростов-на-Дону"), ("Геленджик", "Новороссийск"),
+    ("Ростов-на-Дону", "Ставрополь"), ("Ростов-на-Дону", "Волгоград"),
+    ("Ростов-на-Дону", "Пятигорск"), ("Ростов-на-Дону", "Таганрог"),
+    ("Ставрополь", "Пятигорск"), ("Ставрополь", "Минеральные Воды"),
+    ("Казань", "Нижний Новгород"), ("Казань", "Самара"), ("Казань", "Уфа"),
+    ("Казань", "Екатеринбург"), ("Казань", "Пермь"), ("Казань", "Киров"),
+    ("Казань", "Чебоксары"), ("Казань", "Ульяновск"), ("Казань", "Ижевск"),
+    ("Самара", "Уфа"), ("Самара", "Екатеринбург"), ("Самара", "Тольятти"),
+    ("Самара", "Саратов"), ("Самара", "Оренбург"), ("Самара", "Пенза"),
+    ("Самара", "Ульяновск"), ("Самара", "Нижний Новгород"),
+    ("Уфа", "Челябинск"), ("Уфа", "Екатеринбург"), ("Уфа", "Пермь"),
+    ("Уфа", "Оренбург"), ("Уфа", "Магнитогорск"),
+    ("Екатеринбург", "Пермь"), ("Екатеринбург", "Челябинск"), ("Екатеринбург", "Тюмень"),
+    ("Екатеринбург", "Курган"), ("Екатеринбург", "Казань"),
+    ("Пермь", "Уфа"), ("Пермь", "Киров"), ("Пермь", "Ижевск"),
+    ("Челябинск", "Магнитогорск"),
+    ("Нижний Новгород", "Чебоксары"), ("Нижний Новгород", "Уфа"),
+    ("Санкт-Петербург", "Тверь"), ("Санкт-Петербург", "Великий Новгород"),
+    ("Санкт-Петербург", "Псков"), ("Санкт-Петербург", "Петрозаводск"),
+    ("Санкт-Петербург", "Мурманск"), ("Санкт-Петербург", "Вологда"),
+    ("Санкт-Петербург", "Архангельск"), ("Санкт-Петербург", "Выборг"),
+    ("Санкт-Петербург", "Великие Луки"), ("Санкт-Петербург", "Сортавала"),
+]
+
+
+def geocode(query: str, api_key: str):
+    payload = json.dumps({
+        'query': query, 'count': 1,
+        'from_bound': {'value': 'city'}, 'to_bound': {'value': 'settlement'},
+        'locations': [{'country': '*'}],
+    }).encode('utf-8')
+    req = urllib.request.Request(
+        'https://suggestions.dadata.ru/suggestions/api/4_1/rs/suggest/address',
+        data=payload, method='POST',
+        headers={'Content-Type': 'application/json', 'Accept': 'application/json',
+                 'Authorization': f'Token {api_key}'}
+    )
+    with urllib.request.urlopen(req, timeout=5) as resp:
+        data = json.loads(resp.read())
+    items = data.get('suggestions', [])
+    if not items:
+        return None
+    d = items[0].get('data', {})
+    lat, lon = d.get('geo_lat'), d.get('geo_lon')
+    if not lat or not lon:
+        return None
+    return float(lat), float(lon)
+
+
+def road_distance(from_coords, to_coords, gh_key: str):
+    flat, flon = from_coords
+    tlat, tlon = to_coords
+    url = (f'https://graphhopper.com/api/1/route'
+           f'?point={flat},{flon}&point={tlat},{tlon}'
+           f'&vehicle=car&locale=ru&calc_points=false&key={gh_key}')
+    req = urllib.request.Request(url, headers={'User-Agent': 'transfer-app'})
+    with urllib.request.urlopen(req, timeout=10) as resp:
+        data = json.loads(resp.read())
+    paths = data.get('paths', [])
+    if not paths:
+        return None
+    return round(paths[0].get('distance', 0) / 1000)
+
+
+def handler(event: dict, context) -> dict:
+    """Массовое заполнение кеша расстояний через GraphHopper. Параметр batch=0..N для постраничного запуска."""
+    if event.get('httpMethod') == 'OPTIONS':
+        return {'statusCode': 200, 'headers': {'Access-Control-Allow-Origin': '*'}, 'body': ''}
+
+    params = event.get('queryStringParameters') or {}
+    batch = int(params.get('batch', 0))
+    batch_size = 10
+    batch_routes = ROUTES[batch * batch_size:(batch + 1) * batch_size]
+
+    dadata_key = os.environ.get('DADATA_API_KEY', '')
+    gh_key = os.environ.get('GRAPHHOPPER_API_KEY', '')
+    dsn = os.environ.get('DATABASE_URL', '')
+    schema = os.environ.get('MAIN_DB_SCHEMA', 'public')
+
+    conn = psycopg2.connect(dsn)
+    cur = conn.cursor()
+
+    coord_cache = {}
+    results = []
+    skipped = 0
+    errors = []
+
+    for from_city, to_city in batch_routes:
+        # Проверяем кеш БД (оба направления)
+        cur.execute(
+            f"SELECT distance_km FROM {schema}.distance_cache "
+            f"WHERE (from_city = %s AND to_city = %s) OR (from_city = %s AND to_city = %s) LIMIT 1",
+            (from_city, to_city, to_city, from_city)
+        )
+        row = cur.fetchone()
+        if row:
+            skipped += 1
+            results.append({"from": from_city, "to": to_city, "distance": row[0], "source": "cache"})
+            continue
+
+        try:
+            if from_city not in coord_cache:
+                coord_cache[from_city] = geocode(from_city, dadata_key)
+            if to_city not in coord_cache:
+                coord_cache[to_city] = geocode(to_city, dadata_key)
+
+            fc = coord_cache[from_city]
+            tc = coord_cache[to_city]
+            if not fc or not tc:
+                errors.append(f"No coords: {from_city} or {to_city}")
+                continue
+
+            dist = road_distance(fc, tc, gh_key)
+            time.sleep(0.15)
+
+            if dist:
+                cur.execute(
+                    f"INSERT INTO {schema}.distance_cache (from_city, to_city, distance_km) "
+                    f"VALUES (%s, %s, %s) ON CONFLICT (from_city, to_city) DO UPDATE SET distance_km = EXCLUDED.distance_km",
+                    (from_city, to_city, dist)
+                )
+                conn.commit()
+                results.append({"from": from_city, "to": to_city, "distance": dist, "source": "graphhopper"})
+        except Exception as e:
+            errors.append(f"{from_city}-{to_city}: {str(e)[:80]}")
+            time.sleep(1)
+
+    cur.close()
+    conn.close()
+
+    return {
+        'statusCode': 200,
+        'headers': {'Access-Control-Allow-Origin': '*'},
+        'body': json.dumps({
+            'batch': batch,
+            'total_batches': (len(ROUTES) + batch_size - 1) // batch_size,
+            'done': len(results),
+            'skipped_cached': skipped,
+            'errors': errors,
+            'results': results
+        })
+    }

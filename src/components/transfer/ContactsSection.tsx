@@ -51,7 +51,7 @@ export default function ContactsSection() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="reveal mb-8">
             <div className="inline-block font-display text-neon text-base tracking-widest mb-2">КОНТАКТЫ</div>
-            <h2 className="font-display text-3xl md:text-4xl font-bold">СВЯЖИТЕСЬ С НАМИ</h2>
+            <h2 className="font-display text-2xl sm:text-3xl md:text-4xl font-bold">СВЯЖИТЕСЬ С НАМИ</h2>
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <div className="reveal space-y-4">
@@ -77,18 +77,18 @@ export default function ContactsSection() {
                     <a
                       href={`tel:${c.tel}`}
                       aria-label={`Позвонить ${c.name}`}
-                      className="w-10 h-10 rounded-lg bg-neon/10 flex items-center justify-center text-neon hover:bg-neon hover:text-background transition-all"
+                      className="w-11 h-11 rounded-lg bg-neon/10 flex items-center justify-center text-neon hover:bg-neon hover:text-background transition-all"
                     >
-                      <Icon name="Phone" size={18} />
+                      <Icon name="Phone" size={20} />
                     </a>
                     <a
                       href={`https://t.me/${c.tel}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       aria-label={`Telegram ${c.name}`}
-                      className="w-10 h-10 rounded-lg bg-neon/10 flex items-center justify-center text-neon hover:bg-neon hover:text-background transition-all"
+                      className="w-11 h-11 rounded-lg bg-neon/10 flex items-center justify-center text-neon hover:bg-neon hover:text-background transition-all"
                     >
-                      <Icon name="Send" size={18} />
+                      <Icon name="Send" size={20} />
                     </a>
                   </div>
                 </div>

@@ -110,7 +110,8 @@ export default function Index() {
       totalDist = await fetchDist(from, to);
     }
     if (roundTrip) totalDist *= 1.9;
-    setPrice(priceFromDistance(totalDist));
+    const hasViaStop = withVia && via && norm(via) !== norm(from) && norm(via) !== norm(to);
+    setPrice(priceFromDistance(totalDist) + (hasViaStop ? 1000 : 0));
     setDistance(totalDist);
     setCalculated(true);
     setCalculating(false);

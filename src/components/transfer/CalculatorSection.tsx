@@ -125,12 +125,17 @@ export default function CalculatorSection({
           comment: comment.trim() || "—",
         }),
       });
-      if (!res.ok) throw new Error();
+      if (!res.ok) {
+        const text = await res.text().catch(() => "");
+        throw new Error(`Сервер вернул ошибку ${res.status}. ${text}`);
+      }
       const data = await res.json();
-      if (!data.ok) throw new Error();
+      if (!data.ok) throw new Error(data.error || "Сервер не подтвердил отправку");
       setSent(true);
-    } catch {
-      setError("Ошибка отправки. Попробуйте позже");
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      setError(`Ошибка отправки: ${msg}`);
+      console.error("Booking error:", e, "URL:", func2url["send-booking"]);
     } finally {
       setSending(false);
     }

@@ -6,6 +6,8 @@ interface BookingModalProps {
   from: string;
   via?: string;
   to: string;
+  date?: string;
+  time?: string;
   roundTrip: boolean;
   tariff: number;
   passengers: number;
@@ -34,7 +36,7 @@ interface BookingModalProps {
 }
 
 export default function BookingModal({
-  from, via, to, roundTrip, tariff, passengers,
+  from, via, to, date, time, roundTrip, tariff, passengers,
   withChildren, childrenCount, withPet, petOption,
   deliveryMode, minivanSub,
   price, distance,
@@ -114,6 +116,13 @@ export default function BookingModal({
                   : ` · ${passengers} пасс.`
               }
             </div>
+
+            {(date || time) && (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground mb-3">
+                <Icon name="Clock" size={14} className="text-neon flex-shrink-0" />
+                {date}{time ? ` в ${time}` : ""}
+              </div>
+            )}
 
             {!isDelivery && (withChildren || withPet) && (
               <div className="mb-3 space-y-1.5">

@@ -182,6 +182,7 @@ export default function CalculatorSection({
       {calculated && price && (
         <BookingModal
           from={from} via={(withVia && via) ? via : undefined} to={to}
+          date={date} time={time}
           roundTrip={roundTrip}
           tariff={tariff} passengers={passengers}
           withChildren={withChildren} childrenCount={childrenCount}

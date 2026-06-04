@@ -4,16 +4,11 @@ import random
 import requests
 
 
-def send_vk(message: str):
-    vk_token = os.environ.get('VK_BOT_TOKEN', '')
-    vk_user_id = os.environ.get('VK_USER_ID', '')
-    if not (vk_token and vk_user_id):
-        print("VK secrets not configured, skipping VK")
-        return
+def send_vk_to_user(user_id: str, message: str, vk_token: str):
     resp = requests.post(
         'https://api.vk.com/method/messages.send',
         data={
-            'user_id': vk_user_id,
+            'user_id': user_id.strip(),
             'message': message,
             'random_id': random.randint(0, 2**31),
             'access_token': vk_token,
@@ -22,13 +17,26 @@ def send_vk(message: str):
         timeout=15,
     )
     result = resp.json()
-    print(f"VK response: {result}")
+    print(f"VK response for {user_id}: {result}")
     if 'error' in result:
-        raise Exception(f"VK error: {result['error']}")
+        raise Exception(f"VK error for {user_id}: {result['error']}")
+
+
+def send_vk_all(msg1: str, msg2: str):
+    vk_token = os.environ.get('VK_BOT_TOKEN', '')
+    # Поддерживаем как VK_USER_IDS (несколько), так и старый VK_USER_ID
+    vk_ids_raw = os.environ.get('VK_USER_IDS', '') or os.environ.get('VK_USER_ID', '')
+    if not (vk_token and vk_ids_raw):
+        print("VK secrets not configured, skipping VK")
+        return
+    user_ids = [uid.strip() for uid in vk_ids_raw.split(',') if uid.strip()]
+    for uid in user_ids:
+        send_vk_to_user(uid, msg1, vk_token)
+        send_vk_to_user(uid, msg2, vk_token)
 
 
 def handler(event: dict, context) -> dict:
-    """Отправляет заявку на бронирование в VK"""
+    """Отправляет заявку на бронирование в VK двумя сообщениями всем получателям"""
     if event.get('httpMethod') == 'OPTIONS':
         return {
             'statusCode': 200,
@@ -60,7 +68,8 @@ def handler(event: dict, context) -> dict:
     services_line = f"\nДоп. услуги: {services}" if services and services != '—' else ""
     comment_line = f"\nКомментарий: {comment}" if comment and comment != '—' else ""
 
-    vk_text = (
+    # Сообщение 1 — полная информация о заявке
+    msg1 = (
         f"🚗 Новое бронирование!\n\n"
         f"Имя: {name}\n"
         f"Телефон: {phone}\n"
@@ -76,8 +85,22 @@ def handler(event: dict, context) -> dict:
         f"Стоимость: {price} руб."
     )
 
+    # Сообщение 2 — только данные о поездке, без контактов
+    msg2_comment = f"\nКомментарий: {comment}" if comment and comment != '—' else ""
+    msg2 = (
+        f"📋 Детали поездки:\n\n"
+        f"Откуда: {from_city}\n"
+        f"{via_line}"
+        f"Куда: {to_city}"
+        f"{distance_line}\n"
+        f"Дата: {date}\n"
+        f"Тариф: {tariff}\n"
+        f"Пассажиры: {passengers}"
+        f"{msg2_comment}"
+    )
+
     try:
-        send_vk(vk_text)
+        send_vk_all(msg1, msg2)
     except Exception as e:
         print(f"VK error: {e}")
         return {

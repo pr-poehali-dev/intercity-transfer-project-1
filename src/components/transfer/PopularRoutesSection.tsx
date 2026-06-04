@@ -31,7 +31,7 @@ export default function PopularRoutesSection() {
     <section className="py-16 max-w-7xl mx-auto px-4 sm:px-6">
       <div className="reveal mb-8 text-center">
         <div className="inline-block font-display text-neon text-base tracking-widest mb-2">ПОПУЛЯРНЫЕ НАПРАВЛЕНИЯ</div>
-        <h2 className="font-display text-2xl sm:text-3xl md:text-4xl font-bold">МАРШРУТЫ ПО РОССИИ</h2>
+        <h2 className="font-display text-3xl md:text-4xl font-bold">МАРШРУТЫ ПО РОССИИ</h2>
       </div>
 
       {/* Группы-табы */}
@@ -40,7 +40,7 @@ export default function PopularRoutesSection() {
           <button
             key={i}
             onClick={() => handleGroupChange(i)}
-            className={`px-3 sm:px-4 py-2 rounded-xl font-display text-xs sm:text-sm font-semibold transition-all border ${
+            className={`px-4 py-2 rounded-xl font-display text-sm font-semibold transition-all border ${
               activeGroup === i
                 ? "bg-neon text-background border-neon"
                 : "bg-surface border-border text-muted-foreground hover:border-white/30"

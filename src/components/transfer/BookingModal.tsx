@@ -57,11 +57,11 @@ export default function BookingModal({
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-start justify-center p-3 sm:p-4 bg-black/70 backdrop-blur-sm animate-fade-up overflow-y-auto"
+      className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-up overflow-y-auto"
       onClick={() => onClose()}
     >
       <div
-        className="bg-surface border border-neon/40 rounded-2xl p-4 sm:p-6 max-w-lg w-full relative shadow-2xl mt-4 mb-8"
+        className="bg-surface border border-neon/40 rounded-2xl p-4 sm:p-8 max-w-lg w-full relative shadow-2xl my-auto"
         onClick={(e) => e.stopPropagation()}
       >
         <button
@@ -88,11 +88,11 @@ export default function BookingModal({
           <>
             <div className="text-xs font-display text-neon tracking-widest mb-4">СТОИМОСТЬ ПОЕЗДКИ</div>
             <div className="flex items-baseline gap-2 mb-2 flex-wrap">
-              <span className="font-display text-base sm:text-2xl text-muted-foreground">от</span>
-              <span className="font-display text-3xl sm:text-5xl font-bold text-neon glow-neon-text">
+              <span className="font-display text-lg sm:text-2xl text-muted-foreground">от</span>
+              <span className="font-display text-4xl sm:text-6xl font-bold text-neon glow-neon-text">
                 {(shownPrice ?? 0).toLocaleString("ru-RU")}
               </span>
-              <span className="font-display text-base sm:text-2xl text-muted-foreground">₽</span>
+              <span className="font-display text-lg sm:text-2xl text-muted-foreground">₽</span>
             </div>
 
             <div className="text-xs text-muted-foreground/80 mb-1 flex items-center gap-1.5 animate-pulse">
@@ -104,7 +104,7 @@ export default function BookingModal({
               Стоимость указана без учёта платных дорог
             </div>
 
-            <div className="text-xs sm:text-sm text-muted-foreground mb-3 break-words">
+            <div className="text-sm text-muted-foreground mb-3">
               {from}{via ? ` → ${via}` : ""} → {to}{roundTrip ? `${via ? ` → ${via}` : ""} → ${from}` : ""} · {cur.name}
               {roundTrip ? " · туда-обратно" : ""}
               {isDelivery
@@ -160,26 +160,26 @@ export default function BookingModal({
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Ваше имя"
-                className="w-full bg-background border border-border rounded-lg px-4 py-3.5 text-base text-foreground placeholder:text-muted-foreground/60"
+                className="w-full bg-background border border-border rounded-lg px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/60"
               />
               <input
                 type="tel"
                 value={phone}
                 onChange={(e) => handlePhoneChange(e.target.value)}
                 placeholder="+7 999 123-45-67"
-                className={`w-full bg-background border rounded-lg px-4 py-3.5 text-base text-foreground placeholder:text-muted-foreground/60 ${
+                className={`w-full bg-background border rounded-lg px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/60 ${
                   phone && !isPhoneValid(phone) ? "border-red-500/60" : "border-border"
                 }`}
               />
               {phone && !isPhoneValid(phone) && (
-                <div className="text-sm text-red-400 -mt-1.5 px-1">Начните с + и введите от 11 до 15 цифр</div>
+                <div className="text-xs text-red-400 -mt-1.5 px-1">Начните с + и введите от 11 до 15 цифр</div>
               )}
               <textarea
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
                 placeholder="Комментарий (адрес подачи, пожелания к поездке...)"
-                rows={3}
-                className="w-full bg-background border border-border rounded-lg px-4 py-3.5 text-base text-foreground placeholder:text-muted-foreground/60 resize-none"
+                rows={2}
+                className="w-full bg-background border border-border rounded-lg px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/60 resize-none"
               />
             </div>
 

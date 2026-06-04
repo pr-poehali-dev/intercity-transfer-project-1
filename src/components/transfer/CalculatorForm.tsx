@@ -119,20 +119,20 @@ export default function CalculatorForm({
       {/* Tariffs */}
       <div className="mb-6">
         <label className="text-sm font-display text-muted-foreground tracking-wider mb-3 block">ТАРИФ</label>
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
+        <div className="grid grid-cols-3 gap-3">
           {TARIFFS.map((t, i) => (
             <button
               key={i}
               onClick={() => { setTariff(i); }}
-              className={`border rounded-xl p-3 text-center transition-all overflow-hidden min-w-0 ${
+              className={`border rounded-xl p-2 sm:p-3 text-center transition-all overflow-hidden min-w-0 ${
                 tariff === i
                   ? "border-neon bg-neon/10 text-foreground"
                   : "border-border bg-background text-muted-foreground hover:border-white/30"
               }`}
             >
-              <Icon name={t.icon as IconName} size={20} className={`mx-auto mb-1.5 ${tariff === i ? "text-neon" : ""}`} />
-              <div className="font-display text-sm font-semibold leading-tight">{t.name}</div>
-              <div className="text-xs opacity-70 leading-tight mt-0.5">{t.desc}</div>
+              <Icon name={t.icon as IconName} size={18} className={`mx-auto mb-1 ${tariff === i ? "text-neon" : ""}`} />
+              <div className="font-display text-sm sm:text-base font-semibold leading-tight">{t.name}</div>
+              <div className="text-[11px] sm:text-xs opacity-70 leading-tight mt-0.5">{t.desc}</div>
             </button>
           ))}
         </div>
@@ -142,7 +142,7 @@ export default function CalculatorForm({
       {TARIFFS[tariff].isMinivan && (
         <div className="mb-6">
           <label className="text-sm font-display text-muted-foreground tracking-wider mb-3 block">ВЫБЕРИТЕ ВМЕСТИМОСТЬ</label>
-          <div className="grid grid-cols-3 gap-2 sm:gap-3">
+          <div className="grid grid-cols-3 gap-3">
             {MINIVAN_SUBTARIFFS.map((s, i) => (
               <button
                 key={i}
@@ -155,8 +155,8 @@ export default function CalculatorForm({
                 }`}
               >
                 <Icon name="Users" size={18} className={`mx-auto mb-1.5 ${minivanSub === i ? "text-neon" : ""}`} />
-                <div className="font-display text-xs sm:text-sm font-semibold leading-tight">{s.name}</div>
-                <div className="text-xs opacity-70 mt-0.5">{s.desc}</div>
+                <div className="font-display text-sm font-semibold leading-tight">{s.name}</div>
+                <div className="text-[11px] opacity-70 mt-0.5">{s.desc}</div>
               </button>
             ))}
           </div>
@@ -189,7 +189,7 @@ export default function CalculatorForm({
         </div>
       )}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+      <div className="grid grid-cols-2 gap-4 mb-6">
         <div>
           <label className="text-sm font-display text-muted-foreground tracking-wider mb-2 block">ДАТА ПОЕЗДКИ</label>
           <input
@@ -197,21 +197,21 @@ export default function CalculatorForm({
             value={date}
             min={new Date().toISOString().split("T")[0]}
             onChange={(e) => setDate(e.target.value)}
-            className="w-full bg-background border border-border rounded-lg px-3 py-3 text-sm text-foreground"
+            className="w-full bg-background border border-border rounded-lg px-2 py-3 text-sm text-foreground"
           />
         </div>
         {!TARIFFS[tariff].isDelivery && (
           <div>
             <label className="text-sm font-display text-muted-foreground tracking-wider mb-2 block">ПАССАЖИРЫ</label>
-            <div className="flex items-center gap-2 bg-background border border-border rounded-lg px-3 py-3 text-sm">
+            <div className="flex items-center gap-2 bg-background border border-border rounded-lg px-2 py-3 text-sm">
               <button
                 onClick={() => { setPassengers(Math.max(1, passengers - 1)); }}
-                className="w-9 h-9 rounded-full bg-surface-hover flex items-center justify-center hover:bg-neon/20 transition-colors text-foreground font-bold text-lg leading-none"
+                className="w-7 h-7 rounded-full bg-surface-hover flex items-center justify-center hover:bg-neon/20 transition-colors text-foreground font-bold text-lg leading-none"
               >–</button>
               <span className="flex-1 text-center font-display font-bold text-foreground">{passengers}</span>
               <button
                 onClick={() => { setPassengers(Math.min(TARIFFS[tariff].maxPassengers, passengers + 1)); }}
-                className="w-9 h-9 rounded-full bg-surface-hover flex items-center justify-center hover:bg-neon/20 transition-colors text-foreground font-bold text-lg leading-none"
+                className="w-7 h-7 rounded-full bg-surface-hover flex items-center justify-center hover:bg-neon/20 transition-colors text-foreground font-bold text-lg leading-none"
               >+</button>
             </div>
             <div className="text-xs text-muted-foreground mt-1.5">
@@ -243,18 +243,18 @@ export default function CalculatorForm({
               </div>
             </button>
             {withChildren && (
-              <div className="flex items-center gap-3 mt-3 pl-8">
+              <div className="flex items-center gap-2 mt-3 pl-8">
                 <span className="text-sm text-muted-foreground">Детей:</span>
                 <button
                   type="button"
                   onClick={() => setChildrenCount(Math.max(1, childrenCount - 1))}
-                  className="w-9 h-9 rounded-full bg-surface-hover flex items-center justify-center hover:bg-neon/20 transition-colors text-foreground font-bold text-lg leading-none"
+                  className="w-7 h-7 rounded-full bg-surface-hover flex items-center justify-center hover:bg-neon/20 transition-colors text-foreground font-bold text-lg leading-none"
                 >–</button>
                 <span className="w-8 text-center font-display font-bold text-foreground">{childrenCount}</span>
                 <button
                   type="button"
                   onClick={() => setChildrenCount(Math.min(maxChildren, childrenCount + 1))}
-                  className="w-9 h-9 rounded-full bg-surface-hover flex items-center justify-center hover:bg-neon/20 transition-colors text-foreground font-bold text-lg leading-none"
+                  className="w-7 h-7 rounded-full bg-surface-hover flex items-center justify-center hover:bg-neon/20 transition-colors text-foreground font-bold text-lg leading-none"
                 >+</button>
                 <span className="text-xs text-muted-foreground ml-1">макс. {maxChildren}</span>
               </div>
@@ -278,15 +278,15 @@ export default function CalculatorForm({
               </div>
             </button>
             {withPet && (
-              <div className="grid grid-cols-3 gap-2 mt-3 pl-4 sm:pl-8">
+              <div className="grid grid-cols-3 gap-2 mt-3 pl-8">
                 {PET_OPTIONS.map((p, i) => (
                   <button
                     key={i}
                     type="button"
                     onClick={() => setPetOption(i)}
-                    className={`border rounded-lg p-2.5 text-center transition-all ${petOption === i ? "border-neon bg-neon/10 text-foreground" : "border-border bg-surface text-muted-foreground hover:border-white/30"}`}
+                    className={`border rounded-lg p-2 text-center transition-all ${petOption === i ? "border-neon bg-neon/10 text-foreground" : "border-border bg-surface text-muted-foreground hover:border-white/30"}`}
                   >
-                    <div className="font-display text-xs sm:text-sm font-semibold leading-tight">{p.label}</div>
+                    <div className="font-display text-sm font-semibold leading-tight">{p.label}</div>
                   </button>
                 ))}
               </div>

@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import Icon from "@/components/ui/icon";
 import Navbar from "@/components/transfer/Navbar";
 import HeroSection from "@/components/transfer/HeroSection";
 import CalculatorSection from "@/components/transfer/CalculatorSection";
@@ -196,6 +197,28 @@ export default function Index() {
       <ContactsSection />
       <PopularRoutesSection />
       <SeoTextSection />
+      <footer className="border-t border-border py-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col md:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="w-7 h-7 bg-neon rounded-sm flex items-center justify-center">
+              <Icon name="MapPin" size={14} className="text-background" />
+            </div>
+            <div className="flex flex-col leading-none">
+              <span className="font-display text-lg font-bold">
+                НАШЕ<span className="text-neon"> for </span><span style={{ color: '#003087' }}>Russia</span>
+              </span>
+              <span className="text-[10px] text-muted-foreground tracking-widest">TRANSFER</span>
+            </div>
+          </div>
+          <p className="text-sm text-muted-foreground text-center">
+            © 2024 НАШЕ for Russia Transfer. Поездки по России без агрегаторов.
+          </p>
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <Icon name="MapPin" size={12} className="text-neon" />
+            Работаем по всей России
+          </div>
+        </div>
+      </footer>
 
       <style>{`
         .font-display { font-family: 'Oswald', sans-serif; }

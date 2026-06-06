@@ -8,6 +8,12 @@ import { useEffect } from "react";
 import Index from "./pages/Index";
 import RoutePage from "./pages/Route";
 import NotFound from "./pages/NotFound";
+import func2url from "../backend/func2url.json";
+
+function YmlRedirect() {
+  useEffect(() => { window.location.replace(func2url["yml-feed"]); }, []);
+  return null;
+}
 
 const queryClient = new QueryClient();
 
@@ -27,6 +33,7 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/marshrut/:slug" element={<RoutePage />} />
+          <Route path="/yml" element={<YmlRedirect />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

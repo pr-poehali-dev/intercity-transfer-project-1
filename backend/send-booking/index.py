@@ -35,6 +35,23 @@ def send_vk_all(msg1: str, msg2: str):
         send_vk_to_user(uid, msg2, vk_token)
 
 
+def send_telegram(message: str):
+    bot_token = os.environ.get('TELEGRAM_BOT_TOKEN', '')
+    chat_id = os.environ.get('TELEGRAM_CHAT_ID', '')
+    if not (bot_token and chat_id):
+        print("Telegram secrets not configured, skipping Telegram")
+        return
+    resp = requests.post(
+        f'https://api.telegram.org/bot{bot_token}/sendMessage',
+        json={'chat_id': chat_id, 'text': message, 'parse_mode': 'HTML'},
+        timeout=15,
+    )
+    result = resp.json()
+    print(f"Telegram response: {result}")
+    if not result.get('ok'):
+        raise Exception(f"Telegram error: {result}")
+
+
 def handler(event: dict, context) -> dict:
     """Отправляет заявку на бронирование в VK двумя сообщениями всем получателям"""
     if event.get('httpMethod') == 'OPTIONS':
@@ -114,11 +131,11 @@ def handler(event: dict, context) -> dict:
         send_vk_all(msg1, msg2)
     except Exception as e:
         print(f"VK error: {e}")
-        return {
-            'statusCode': 500,
-            'headers': {'Access-Control-Allow-Origin': '*'},
-            'body': json.dumps({'ok': False, 'error': str(e)})
-        }
+
+    try:
+        send_telegram(msg1)
+    except Exception as e:
+        print(f"Telegram error: {e}")
 
     return {
         'statusCode': 200,

@@ -106,24 +106,7 @@ export default function CitySelect({ value, onChange, iconName, exclude }: CityS
             </div>
           </div>
 
-          {!filtered.isSearch && (
-            <div className="flex flex-wrap gap-1 p-3 border-b border-border max-h-32 overflow-y-auto">
-              {FEDERAL_DISTRICTS.map((d) => (
-                <button
-                  key={d.name}
-                  type="button"
-                  onClick={() => setActiveDistrict(d.name)}
-                  className={`text-sm px-3 py-1.5 rounded-full transition-all ${
-                    activeDistrict === d.name
-                      ? "bg-neon text-background font-semibold"
-                      : "bg-background border border-border text-muted-foreground hover:border-neon/40"
-                  }`}
-                >
-                  {d.name}
-                </button>
-              ))}
-            </div>
-          )}
+
 
           <div className="max-h-72 overflow-y-auto">
             {filtered.matches.length === 0 && !filtered.isSearch ? (

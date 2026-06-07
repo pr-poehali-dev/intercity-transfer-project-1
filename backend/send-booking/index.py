@@ -47,7 +47,13 @@ def handler(event: dict, context) -> dict:
     from_city = body.get('from_city', '—')
     via_city = body.get('via_city')
     to_city = body.get('to_city', '—')
-    date = body.get('date', '—')
+    raw_date = body.get('date', '—')
+    try:
+        parts = raw_date.split(' ')
+        d_parts = parts[0].split('-')
+        date = f"{d_parts[2]}.{d_parts[1]}.{d_parts[0][2:]}" + (f" {parts[1]}" if len(parts) > 1 else "")
+    except Exception:
+        date = raw_date
     passengers = body.get('passengers', '—')
     tariff = body.get('tariff', '—')
     price = body.get('price', '—')

@@ -100,7 +100,7 @@ export default function BookingModal({
 
             <div className="inline-flex items-center gap-2 bg-yellow-500/10 border border-yellow-500/40 rounded-lg px-3 py-2 mb-3 text-xs text-yellow-200 font-medium">
               <Icon name="TriangleAlert" size={13} className="flex-shrink-0 text-yellow-400" />
-              Точную стоимость подтвердит диспетчер · без учёта платных дорог
+              Без учёта платных дорог · точную стоимость подтвердит диспетчер
             </div>
 
             <div className="text-sm text-muted-foreground mb-3">

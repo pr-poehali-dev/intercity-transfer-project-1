@@ -109,7 +109,6 @@ export default function CalculatorSection({
       ? `${t.name} · ${MINIVAN_SUBTARIFFS[minivanSub].name}`
       : t.name;
     const services: string[] = [];
-    if (roundTrip) services.push("Поездка туда и обратно");
     if (isDelivery) {
       services.push(`Доставка: ${DELIVERY_OPTIONS[deliveryMode].name} (${DELIVERY_OPTIONS[deliveryMode].pricePerKm} ₽/км)`);
     } else {
@@ -126,6 +125,7 @@ export default function CalculatorSection({
           from_city: from,
           via_city: (withVia && via) ? via : undefined,
           to_city: to,
+          round_trip: roundTrip,
           date: time ? `${date} ${time}` : date,
           passengers: isDelivery ? "—" : passengers,
           tariff: tariffLabel,

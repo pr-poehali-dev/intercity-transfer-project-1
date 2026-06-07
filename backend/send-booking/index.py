@@ -47,6 +47,7 @@ def handler(event: dict, context) -> dict:
     from_city = body.get('from_city', '—')
     via_city = body.get('via_city')
     to_city = body.get('to_city', '—')
+    round_trip = body.get('round_trip')
     raw_date = body.get('date', '—')
     try:
         parts = raw_date.split(' ')
@@ -86,10 +87,11 @@ def handler(event: dict, context) -> dict:
         return "более 40 часов"
 
     duration = get_duration(distance)
-    via_line = f"🟡 Через: {via_city}\n\n" if via_city else ""
+    via_line = f"📍 Промежуточный пункт: {via_city}\n\n" if via_city else ""
+    roundtrip_line = "🔄 Туда и обратно\n\n" if round_trip else ""
+    services_line = f"➕ Доп. услуги: {services}\n\n" if services and services != '—' else ""
     distance_line = f"↕️ Расстояние: {distance} км\n\n" if distance else ""
     duration_line = f"⌛ В пути: {duration}\n\n" if duration else ""
-    services_line = f"➕ Доп. услуги: {services}\n\n" if services and services != '—' else ""
     comment_line = f"🗒 Комментарий: {comment}" if comment and comment != '—' else ""
 
     # Сообщение 1 — полная информация о заявке
@@ -99,12 +101,13 @@ def handler(event: dict, context) -> dict:
         f"🔵 Откуда: {from_city}\n\n"
         f"{via_line}"
         f"🟢 Куда: {to_city}\n\n"
+        f"{roundtrip_line}"
+        f"{services_line}"
         f"👥 Пассажиров: {passengers}\n\n"
         f"{distance_line}"
         f"{duration_line}"
         f"💰 Стоимость: {price} руб.\n\n"
         f"☎️ {phone} · {name}\n\n"
-        f"{services_line}"
         f"{comment_line}"
     )
 

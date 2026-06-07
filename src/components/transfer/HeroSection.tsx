@@ -8,13 +8,13 @@ export default function HeroSection({ onBookClick: _ }: HeroSectionProps) {
   return (
     <>
       {/* HERO */}
-      <section className="relative min-h-screen flex items-center pt-16 overflow-hidden">
+      <section className="relative min-h-screen flex items-start pt-20 overflow-hidden">
         <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${HERO_IMAGE})` }} />
         <div className="absolute inset-0 bg-gradient-to-r from-background via-background/85 to-background/30" />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent" />
         <div className="absolute top-0 right-0 w-1/3 h-1 bg-neon" />
 
-        <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 py-2 pb-20 -mt-36">
+        <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 pt-4 pb-20">
           <div className="max-w-2xl">
             <div className="inline-flex items-center gap-2 bg-neon/10 border border-neon/30 text-neon text-xs sm:text-sm font-display tracking-widest px-3 py-1.5 rounded-full mb-4 animate-fade-up">
               <span className="w-1.5 h-1.5 bg-neon rounded-full animate-pulse flex-shrink-0" />

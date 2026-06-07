@@ -146,7 +146,7 @@ def handler(event: dict, context) -> dict:
                 continue
 
             dist = road_distance(fc, tc, gh_key)
-            time.sleep(0.15)
+            time.sleep(5)
 
             if dist:
                 cur.execute(

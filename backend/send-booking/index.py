@@ -52,10 +52,12 @@ def handler(event: dict, context) -> dict:
     tariff = body.get('tariff', '—')
     price = body.get('price', '—')
     distance = body.get('distance')
+    duration = body.get('duration')
     services = body.get('services', '—')
     comment = body.get('comment', '—')
 
     distance_line = f"\nРасстояние: {distance} км" if distance else ""
+    duration_line = f"\nВремя в пути: {duration}" if duration else ""
     via_line = f"Через: {via_city}\n" if via_city else ""
     services_line = f"\nДоп. услуги: {services}" if services and services != '—' else ""
     comment_line = f"\nКомментарий: {comment}" if comment and comment != '—' else ""
@@ -68,7 +70,8 @@ def handler(event: dict, context) -> dict:
         f"Откуда: {from_city}\n"
         f"{via_line}"
         f"Куда: {to_city}"
-        f"{distance_line}\n"
+        f"{distance_line}"
+        f"{duration_line}\n"
         f"Дата: {date}\n"
         f"Пассажиры: {passengers}\n"
         f"Тариф: {tariff}"
@@ -94,7 +97,8 @@ def handler(event: dict, context) -> dict:
         f"Откуда: {from_city}\n"
         f"{via_line}"
         f"Куда: {to_city}"
-        f"{distance_line}\n"
+        f"{distance_line}"
+        f"{duration_line}\n"
         f"Дата: {date}\n"
         f"Тариф: {tariff}\n"
         f"Пассажиры: {passengers}"

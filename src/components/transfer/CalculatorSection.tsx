@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { TARIFFS, DELIVERY_OPTIONS, MINIVAN_SUBTARIFFS, getDistanceSurcharge, CHILD_SEAT_PRICE, PET_OPTIONS } from "./constants";
+import { getDurationByDistance } from "./routesData";
 import CalculatorForm from "./CalculatorForm";
 import BookingModal from "./BookingModal";
 import HowItWorks from "./HowItWorks";
@@ -130,6 +131,7 @@ export default function CalculatorSection({
           tariff: tariffLabel,
           price: finalPrice,
           distance,
+          duration: distance ? getDurationByDistance(distance) : undefined,
           services: services.length ? services.join("; ") : "—",
           comment: comment.trim() || "—",
         }),

@@ -52,10 +52,34 @@ def handler(event: dict, context) -> dict:
     tariff = body.get('tariff', '—')
     price = body.get('price', '—')
     distance = body.get('distance')
-    duration = body.get('duration')
     services = body.get('services', '—')
     comment = body.get('comment', '—')
 
+    def get_duration(dist):
+        if not dist: return None
+        d = int(dist)
+        if d <= 45:   return "30–40 минут"
+        if d <= 80:   return "1–1.5 часа"
+        if d <= 120:  return "1.5–2 часа"
+        if d <= 160:  return "2–2.5 часа"
+        if d <= 210:  return "2.5–3 часа"
+        if d <= 270:  return "3–4 часа"
+        if d <= 340:  return "4–5 часов"
+        if d <= 430:  return "5–6 часов"
+        if d <= 530:  return "6–7 часов"
+        if d <= 630:  return "7–8 часов"
+        if d <= 730:  return "8–10 часов"
+        if d <= 870:  return "10–12 часов"
+        if d <= 1050: return "12–14 часов"
+        if d <= 1250: return "14–16 часов"
+        if d <= 1450: return "16–18 часов"
+        if d <= 1700: return "19–22 часа"
+        if d <= 2000: return "22–26 часов"
+        if d <= 2400: return "26–30 часов"
+        if d <= 2800: return "30–36 часов"
+        return "более 40 часов"
+
+    duration = get_duration(distance)
     distance_line = f"\nРасстояние: {distance} км" if distance else ""
     duration_line = f"\nВремя в пути: {duration}" if duration else ""
     via_line = f"Через: {via_city}\n" if via_city else ""

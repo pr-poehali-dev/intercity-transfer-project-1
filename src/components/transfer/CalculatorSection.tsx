@@ -71,19 +71,25 @@ export default function CalculatorSection({
   const [validationError, setValidationError] = useState("");
 
   function handlePhoneChange(val: string) {
-    let v = val;
-    if (v && !v.startsWith("+")) v = "+" + v.replace(/^\+*/, "");
-    setPhone(v);
+    const digits = val.replace(/\D/g, "").slice(0, 11);
+    if (!digits) { setPhone("+"); return; }
+    let d = digits;
+    if (d.startsWith("8")) d = "7" + d.slice(1);
+    let formatted = "+" + d[0];
+    if (d.length > 1) formatted += " (" + d.slice(1, 4);
+    if (d.length >= 4) formatted += ") " + d.slice(4, 7);
+    if (d.length >= 7) formatted += "-" + d.slice(7, 9);
+    if (d.length >= 9) formatted += "-" + d.slice(9, 11);
+    setPhone(formatted);
   }
 
   function isPhoneValid(val: string) {
-    const digits = val.replace(/\D/g, "");
-    return val.startsWith("+") && digits.length >= 11 && digits.length <= 15;
+    return val.replace(/\D/g, "").length === 11;
   }
 
   async function handleBook() {
     if (!name.trim()) { setValidationError("Заполните имя"); return; }
-    if (!isPhoneValid(phone)) { setValidationError("Телефон должен начинаться с + и содержать от 11 до 15 цифр"); return; }
+    if (!isPhoneValid(phone)) { setValidationError("Введите корректный номер телефона (11 цифр)"); return; }
     setValidationError("");
     setError("");
     setSending(true);

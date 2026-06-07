@@ -7,9 +7,20 @@ export default function ContactsSection() {
   const [phone, setPhone] = useState("+");
 
   function handlePhoneChange(val: string) {
-    let v = val;
-    if (v && !v.startsWith("+")) v = "+" + v.replace(/^\+*/, "");
-    setPhone(v);
+    const digits = val.replace(/\D/g, "").slice(0, 11);
+    if (!digits) { setPhone("+"); return; }
+    let d = digits;
+    if (d.startsWith("8")) d = "7" + d.slice(1);
+    let formatted = "+" + d[0];
+    if (d.length > 1) formatted += " (" + d.slice(1, 4);
+    if (d.length >= 4) formatted += ") " + d.slice(4, 7);
+    if (d.length >= 7) formatted += "-" + d.slice(7, 9);
+    if (d.length >= 9) formatted += "-" + d.slice(9, 11);
+    setPhone(formatted);
+  }
+
+  function isPhoneValid(val: string) {
+    return val.replace(/\D/g, "").length === 11;
   }
   const [message, setMessage] = useState("");
   const [sending, setSending] = useState(false);
@@ -17,10 +28,8 @@ export default function ContactsSection() {
   const [error, setError] = useState("");
 
   async function handleSubmit() {
-    if (!name.trim() || !phone.trim()) {
-      setError("Заполните имя и телефон");
-      return;
-    }
+    if (!name.trim()) { setError("Заполните имя"); return; }
+    if (!isPhoneValid(phone)) { setError("Введите корректный номер телефона (11 цифр)"); return; }
     setError("");
     setSending(true);
     try {
@@ -125,9 +134,14 @@ export default function ContactsSection() {
                         type="tel"
                         value={phone}
                         onChange={(e) => handlePhoneChange(e.target.value)}
-                        placeholder="+7 (___) ___-__-__"
-                        className="w-full bg-background border border-border rounded-lg px-4 py-3 text-base text-foreground placeholder:text-muted-foreground/50"
+                        placeholder="+7 (999) 123-45-67"
+                        className={`w-full bg-background border rounded-lg px-4 py-3 text-base text-foreground placeholder:text-muted-foreground/50 ${
+                          phone.length > 1 && !isPhoneValid(phone) ? "border-red-500/60" : "border-border"
+                        }`}
                       />
+                      {phone.length > 1 && !isPhoneValid(phone) && (
+                        <div className="text-xs text-red-400 mt-1 px-1">Введите 11 цифр, например +7 (999) 123-45-67</div>
+                      )}
                     </div>
                     <div>
                       <label className="text-sm font-display text-muted-foreground tracking-wider mb-2 block">СООБЩЕНИЕ</label>

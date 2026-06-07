@@ -175,13 +175,13 @@ export default function BookingModal({
                 type="tel"
                 value={phone}
                 onChange={(e) => handlePhoneChange(e.target.value)}
-                placeholder="+7 999 123-45-67"
+                placeholder="+7 (999) 123-45-67"
                 className={`w-full bg-background border rounded-lg px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/60 ${
                   phone && !isPhoneValid(phone) ? "border-red-500/60" : "border-border"
                 }`}
               />
-              {phone && !isPhoneValid(phone) && (
-                <div className="text-xs text-red-400 -mt-1.5 px-1">Начните с + и введите от 11 до 15 цифр</div>
+              {phone.length > 1 && !isPhoneValid(phone) && (
+                <div className="text-xs text-red-400 -mt-1.5 px-1">Введите 11 цифр, например +7 (999) 123-45-67</div>
               )}
               <textarea
                 value={comment}

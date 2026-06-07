@@ -1,6 +1,7 @@
 import Icon from "@/components/ui/icon";
 import { TARIFFS, DELIVERY_OPTIONS, MINIVAN_SUBTARIFFS, getDistanceSurcharge, CHILD_SEAT_PRICE, PET_OPTIONS } from "./constants";
 import type { IconName } from "./constants";
+import { getDurationByDistance } from "./routesData";
 
 interface BookingModalProps {
   from: string;
@@ -142,11 +143,19 @@ export default function BookingModal({
             )}
 
             {distance && (
-              <div className="inline-flex items-center gap-2 bg-background border border-border rounded-lg px-3 py-2 mb-6">
-                <Icon name="Navigation" size={14} className="text-neon" />
-                <span className="text-sm text-foreground font-medium">
-                  Расстояние: {distance.toLocaleString("ru-RU")} км по дорогам
-                </span>
+              <div className="flex flex-wrap gap-2 mb-6">
+                <div className="inline-flex items-center gap-2 bg-background border border-border rounded-lg px-3 py-2">
+                  <Icon name="Navigation" size={14} className="text-neon" />
+                  <span className="text-sm text-foreground font-medium">
+                    {distance.toLocaleString("ru-RU")} км
+                  </span>
+                </div>
+                <div className="inline-flex items-center gap-2 bg-background border border-border rounded-lg px-3 py-2">
+                  <Icon name="Clock" size={14} className="text-neon" />
+                  <span className="text-sm text-foreground font-medium">
+                    {getDurationByDistance(distance)}
+                  </span>
+                </div>
               </div>
             )}
 

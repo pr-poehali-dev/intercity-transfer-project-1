@@ -98,8 +98,8 @@ export default function BookingModal({
               <span className="font-display text-lg sm:text-2xl text-muted-foreground">₽</span>
             </div>
 
-            <div className="inline-flex items-center gap-2 bg-muted/40 border border-border rounded-lg px-3 py-2 mb-3 text-xs text-foreground/70">
-              <Icon name="TriangleAlert" size={12} className="flex-shrink-0 text-yellow-500" />
+            <div className="inline-flex items-center gap-2 bg-yellow-500/10 border border-yellow-500/40 rounded-lg px-3 py-2 mb-3 text-xs text-yellow-200 font-medium">
+              <Icon name="TriangleAlert" size={13} className="flex-shrink-0 text-yellow-400" />
               Точную стоимость подтвердит диспетчер · без учёта платных дорог
             </div>
 

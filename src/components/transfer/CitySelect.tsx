@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 import Icon from "@/components/ui/icon";
-import { FEDERAL_DISTRICTS } from "./regions";
+import { FEDERAL_DISTRICTS, TERMINALS } from "./regions";
 import func2url from "../../../backend/func2url.json";
 
 interface CitySelectProps {
@@ -55,6 +55,19 @@ export default function CitySelect({ value, onChange, iconName, exclude }: CityS
       }
     }, 300);
     return () => clearTimeout(timer);
+  }, [search, exclude]);
+
+  const terminalMatches = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return [];
+    return TERMINALS.filter(
+      (t) =>
+        t.name.toLowerCase().includes(q) ||
+        t.city.toLowerCase().includes(q) ||
+        (t.type === "airport" && "аэропорт".includes(q)) ||
+        (t.type === "train" && "вокзал".includes(q)) ||
+        (t.type === "bus" && "автовокзал".includes(q))
+    ).filter((t) => t.name !== exclude);
   }, [search, exclude]);
 
   const filtered = useMemo(() => {
@@ -133,6 +146,29 @@ export default function CitySelect({ value, onChange, iconName, exclude }: CityS
                     </div>
                   </button>
                 ))}
+                {terminalMatches.length > 0 && (
+                  <div className="px-4 py-1.5 text-[10px] font-display tracking-widest text-neon border-y border-border uppercase bg-surface/95">
+                    Аэропорты, вокзалы, автовокзалы
+                  </div>
+                )}
+                {terminalMatches.map((t, i) => (
+                  <button
+                    key={`terminal-${i}`}
+                    type="button"
+                    onClick={() => pick(t.name)}
+                    className="w-full text-left px-4 py-2.5 text-base hover:bg-neon/10 transition-colors flex items-center gap-3"
+                  >
+                    <Icon
+                      name={t.type === "airport" ? "Plane" : t.type === "train" ? "Train" : "Bus"}
+                      size={14}
+                      className="text-neon flex-shrink-0"
+                    />
+                    <div>
+                      <div className="text-foreground font-medium">{t.name}</div>
+                      <div className="text-sm text-muted-foreground">{t.city}</div>
+                    </div>
+                  </button>
+                ))}
                 {(searching || remoteResults.length > 0) && (
                   <div className="px-4 py-1.5 text-[10px] font-display tracking-widest text-neon border-y border-border uppercase bg-surface/95 flex items-center gap-2">
                     Все нас. пункты России
@@ -150,7 +186,7 @@ export default function CitySelect({ value, onChange, iconName, exclude }: CityS
                     <div className="text-sm text-muted-foreground">{c.region || c.full}</div>
                   </button>
                 ))}
-                {!searching && filtered.matches.length === 0 && remoteResults.length === 0 && search.trim().length >= 2 && (
+                {!searching && filtered.matches.length === 0 && terminalMatches.length === 0 && remoteResults.length === 0 && search.trim().length >= 2 && (
                   <div className="px-4 py-6 text-center text-base text-muted-foreground">
                     Ничего не найдено
                   </div>

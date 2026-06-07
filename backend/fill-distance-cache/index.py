@@ -104,7 +104,7 @@ def handler(event: dict, context) -> dict:
 
     params = event.get('queryStringParameters') or {}
     batch = int(params.get('batch', 0))
-    batch_size = 10
+    batch_size = 5
     batch_routes = ROUTES[batch * batch_size:(batch + 1) * batch_size]
 
     dadata_key = os.environ.get('DADATA_API_KEY', '')
@@ -146,7 +146,7 @@ def handler(event: dict, context) -> dict:
                 continue
 
             dist = road_distance(fc, tc, gh_key)
-            time.sleep(5)
+            time.sleep(3)
 
             if dist:
                 cur.execute(

@@ -58,7 +58,6 @@ export default function ContactsSection() {
               {[
                 { name: "Максим", value: "+7 996 160-65-67", tel: "+79961606567" },
                 { name: "Иван", value: "+7 936 525-00-50", tel: "+79365250050" },
-                { name: "Дмитрий", value: "+7 930 867-56-66", tel: "+79308675666" },
               ].map((c, i) => (
                 <div
                   key={i}

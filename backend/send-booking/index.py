@@ -9,11 +9,18 @@ def send_telegram(message: str):
     if not (bot_token and chat_id):
         print("Telegram secrets not configured, skipping Telegram")
         return
-    resp = requests.post(
-        f'https://api.telegram.org/bot{bot_token}/sendMessage',
-        json={'chat_id': chat_id, 'text': message, 'parse_mode': 'HTML'},
-        timeout=15,
-    )
+    for attempt in range(3):
+        try:
+            resp = requests.post(
+                f'https://api.telegram.org/bot{bot_token}/sendMessage',
+                json={'chat_id': chat_id, 'text': message, 'parse_mode': 'HTML'},
+                timeout=8,
+            )
+            break
+        except Exception as e:
+            print(f"Telegram attempt {attempt+1} failed: {e}")
+            if attempt == 2:
+                raise
     result = resp.json()
     print(f"Telegram response: {result}")
     if not result.get('ok'):

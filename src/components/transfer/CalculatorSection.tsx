@@ -63,7 +63,7 @@ export default function CalculatorSection({
   sectionRef,
 }: CalculatorSectionProps) {
   const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
+  const [phone, setPhone] = useState("+");
   const [comment, setComment] = useState("");
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);

@@ -193,6 +193,14 @@ export const ALL_CITIES = FEDERAL_DISTRICTS.flatMap((d) =>
   d.cities.map((c) => ({ ...c, district: d.name }))
 );
 
+/** Возвращает название города для расчёта маршрута.
+ *  Если передан терминал (аэропорт/вокзал/автовокзал) — возвращает его город.
+ *  Иначе возвращает строку как есть. */
+export function resolveCity(value: string): string {
+  const terminal = TERMINALS.find((t) => t.name === value);
+  return terminal ? terminal.city : value;
+}
+
 export interface Terminal {
   name: string;
   city: string;

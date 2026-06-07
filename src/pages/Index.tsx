@@ -6,6 +6,7 @@ import CalculatorSection from "@/components/transfer/CalculatorSection";
 import PopularRoutesSection from "@/components/transfer/PopularRoutesSection";
 import ContactsSection from "@/components/transfer/ContactsSection";
 import { TARIFFS, DELIVERY_OPTIONS, MINIVAN_SUBTARIFFS, getDistance, getDistanceSurcharge, CHILD_SEAT_PRICE, PET_OPTIONS } from "@/components/transfer/constants";
+import { resolveCity } from "@/components/transfer/regions";
 import SeoTextSection from "@/components/transfer/SeoTextSection";
 import func2url from "../../backend/func2url.json";
 
@@ -102,16 +103,19 @@ export default function Index() {
     if (!from || !to || calculating) return;
     if (!roundTrip && norm(from) === norm(to)) return;
     setCalculating(true);
+    const fromCity = resolveCity(from);
+    const toCity = resolveCity(to);
+    const viaCity = resolveCity(via);
     let totalDist: number;
-    if (withVia && via && norm(via) !== norm(from) && norm(via) !== norm(to)) {
-      const d1 = await fetchDist(from, via);
-      const d2 = await fetchDist(via, to);
+    if (withVia && via && norm(viaCity) !== norm(fromCity) && norm(viaCity) !== norm(toCity)) {
+      const d1 = await fetchDist(fromCity, viaCity);
+      const d2 = await fetchDist(viaCity, toCity);
       totalDist = d1 + d2;
     } else {
-      totalDist = await fetchDist(from, to);
+      totalDist = await fetchDist(fromCity, toCity);
     }
     if (roundTrip) totalDist *= 1.9;
-    const hasViaStop = withVia && via && norm(via) !== norm(from) && norm(via) !== norm(to);
+    const hasViaStop = withVia && via && norm(viaCity) !== norm(fromCity) && norm(viaCity) !== norm(toCity);
     setPrice(priceFromDistance(totalDist) + (hasViaStop ? 1000 : 0));
     setDistance(totalDist);
     setCalculated(true);

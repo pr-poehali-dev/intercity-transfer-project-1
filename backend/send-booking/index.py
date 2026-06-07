@@ -86,28 +86,26 @@ def handler(event: dict, context) -> dict:
         return "более 40 часов"
 
     duration = get_duration(distance)
-    distance_line = f"\nРасстояние: {distance} км" if distance else ""
-    duration_line = f"\nВремя в пути: {duration}" if duration else ""
-    via_line = f"Через: {via_city}\n" if via_city else ""
-    services_line = f"\nДоп. услуги: {services}" if services and services != '—' else ""
-    comment_line = f"\nКомментарий: {comment}" if comment and comment != '—' else ""
+    via_line = f"🟡 Через: {via_city}\n\n" if via_city else ""
+    distance_line = f"↕️ Расстояние: {distance} км\n\n" if distance else ""
+    duration_line = f"⌛ В пути: {duration}\n\n" if duration else ""
+    services_line = f"➕ Доп. услуги: {services}\n\n" if services and services != '—' else ""
+    comment_line = f"🗒 Комментарий: {comment}" if comment and comment != '—' else ""
 
     # Сообщение 1 — полная информация о заявке
     msg1 = (
-        f"🚗 Новое бронирование!\n\n"
-        f"Имя: {name}\n"
-        f"Телефон: {phone}\n"
-        f"Откуда: {from_city}\n"
+        f"🕛 {date}\n\n"
+        f"🚘 Тариф: {tariff}\n\n"
+        f"🔵 Откуда: {from_city}\n\n"
         f"{via_line}"
-        f"Куда: {to_city}"
+        f"🟢 Куда: {to_city}\n\n"
+        f"👥 Пассажиров: {passengers}\n\n"
         f"{distance_line}"
-        f"{duration_line}\n"
-        f"Дата: {date}\n"
-        f"Пассажиры: {passengers}\n"
-        f"Тариф: {tariff}"
+        f"{duration_line}"
+        f"💰 Стоимость: {price} руб.\n\n"
+        f"☎️ {phone} · {name}\n\n"
         f"{services_line}"
-        f"{comment_line}\n"
-        f"Стоимость: {price} руб."
+        f"{comment_line}"
     )
 
     try:

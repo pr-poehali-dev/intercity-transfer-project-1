@@ -5,7 +5,7 @@ import requests
 
 def send_telegram(message: str):
     bot_token = os.environ.get('TELEGRAM_BOT_TOKEN', '')
-    chat_id = '@nashetransfer'
+    chat_id = '-1003992864128'
     if not (bot_token and chat_id):
         print("Telegram secrets not configured, skipping Telegram")
         return

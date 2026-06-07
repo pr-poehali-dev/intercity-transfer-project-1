@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import Icon from "@/components/ui/icon";
-import { ROUTES } from "./routesData";
+import { ROUTES_WITH_DURATION as ROUTES } from "./routesData";
 
 const GROUPS = [
   { label: "Из Москвы", filter: (slug: string) => slug.startsWith("moskva-") },

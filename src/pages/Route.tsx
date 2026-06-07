@@ -2,7 +2,11 @@ import { useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import Icon from "@/components/ui/icon";
 import Navbar from "@/components/transfer/Navbar";
-import { getRouteBySlug, ROUTES } from "@/components/transfer/routesData";
+import { ROUTES_WITH_DURATION as ROUTES } from "@/components/transfer/routesData";
+
+function getRouteBySlug(slug: string) {
+  return ROUTES.find((r) => r.slug === slug);
+}
 import { TARIFFS, MINIVAN_SUBTARIFFS } from "@/components/transfer/constants";
 
 export default function RoutePage() {

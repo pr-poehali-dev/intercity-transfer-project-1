@@ -4,7 +4,13 @@ import func2url from "../../../backend/func2url.json";
 
 export default function ContactsSection() {
   const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
+  const [phone, setPhone] = useState("+");
+
+  function handlePhoneChange(val: string) {
+    let v = val;
+    if (v && !v.startsWith("+")) v = "+" + v.replace(/^\+*/, "");
+    setPhone(v);
+  }
   const [message, setMessage] = useState("");
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
@@ -118,7 +124,7 @@ export default function ContactsSection() {
                       <input
                         type="tel"
                         value={phone}
-                        onChange={(e) => setPhone(e.target.value)}
+                        onChange={(e) => handlePhoneChange(e.target.value)}
                         placeholder="+7 (___) ___-__-__"
                         className="w-full bg-background border border-border rounded-lg px-4 py-3 text-base text-foreground placeholder:text-muted-foreground/50"
                       />

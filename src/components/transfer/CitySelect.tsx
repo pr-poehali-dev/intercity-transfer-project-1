@@ -85,8 +85,10 @@ export default function CitySelect({ value, onChange, iconName, exclude }: CityS
     return { isSearch: false, matches: cities.map((c) => ({ ...c, district: activeDistrict })) };
   }, [search, activeDistrict, exclude]);
 
-  function pick(name: string) {
-    onChange(name);
+  function pick(name: string, region?: string) {
+    const clean = (region || "").trim();
+    const value = clean && !name.includes("(") ? `${name} (${clean})` : name;
+    onChange(value);
     setOpen(false);
     setSearch("");
   }
@@ -137,7 +139,7 @@ export default function CitySelect({ value, onChange, iconName, exclude }: CityS
                   <button
                     key={`local-${c.name}-${c.region}`}
                     type="button"
-                    onClick={() => pick(c.name)}
+                    onClick={() => pick(c.name, c.region)}
                     className="w-full text-left px-4 py-2.5 text-base hover:bg-neon/10 transition-colors flex items-center justify-between group"
                   >
                     <div>
@@ -155,7 +157,7 @@ export default function CitySelect({ value, onChange, iconName, exclude }: CityS
                   <button
                     key={`terminal-${i}`}
                     type="button"
-                    onClick={() => pick(t.name)}
+                    onClick={() => pick(t.name, t.city)}
                     className="w-full text-left px-4 py-2.5 text-base hover:bg-neon/10 transition-colors flex items-center gap-3"
                   >
                     <Icon
@@ -179,7 +181,7 @@ export default function CitySelect({ value, onChange, iconName, exclude }: CityS
                   <button
                     key={`remote-${i}-${c.name}`}
                     type="button"
-                    onClick={() => pick(c.name)}
+                    onClick={() => pick(c.name, c.region)}
                     className="w-full text-left px-4 py-2.5 text-base hover:bg-neon/10 transition-colors"
                   >
                     <div className="text-foreground font-medium">{c.name}</div>
@@ -218,7 +220,7 @@ export default function CitySelect({ value, onChange, iconName, exclude }: CityS
                       <button
                         key={`${c.name}-${c.region}`}
                         type="button"
-                        onClick={() => pick(c.name)}
+                        onClick={() => pick(c.name, c.region)}
                         className="w-full text-left px-4 py-2.5 text-base hover:bg-neon/10 transition-colors"
                       >
                         <span className="text-foreground font-medium">{c.name}</span>

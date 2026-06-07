@@ -87,7 +87,7 @@ def handler(event: dict, context) -> dict:
         return "более 40 часов"
 
     duration = get_duration(distance)
-    via_line = f"📍 Промежуточный пункт: {via_city}\n\n" if via_city else ""
+    via_line = f"📍 Точка: {via_city}\n\n" if via_city else ""
     roundtrip_line = "🔄 Туда и обратно\n\n" if round_trip else ""
     services_line = f"➕ Доп. услуги: {services}\n\n" if services and services != '—' else ""
     distance_line = f"↕️ Расстояние: {distance} км\n\n" if distance else ""

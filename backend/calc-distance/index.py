@@ -1,6 +1,9 @@
 import json
 import os
 import urllib.request
+import urllib.error
+import time
+from concurrent.futures import ThreadPoolExecutor
 import psycopg2
 
 
@@ -24,7 +27,7 @@ def geocode(query: str, api_key: str):
             'Authorization': f'Token {api_key}',
         }
     )
-    with urllib.request.urlopen(req, timeout=5) as resp:
+    with urllib.request.urlopen(req, timeout=8) as resp:
         data = json.loads(resp.read())
 
     items = data.get('suggestions', [])
@@ -49,13 +52,20 @@ def road_distance(from_coords, to_coords, gh_key: str):
         f'&key={gh_key}'
     )
     req = urllib.request.Request(url, headers={'User-Agent': 'transfer-app'})
-    with urllib.request.urlopen(req, timeout=10) as resp:
-        data = json.loads(resp.read())
-    paths = data.get('paths', [])
-    if not paths:
-        return None
-    meters = paths[0].get('distance', 0)
-    return round(meters / 1000)
+    last_err = None
+    for attempt in range(3):
+        try:
+            with urllib.request.urlopen(req, timeout=8) as resp:
+                data = json.loads(resp.read())
+            paths = data.get('paths', [])
+            if not paths:
+                return None
+            meters = paths[0].get('distance', 0)
+            return round(meters / 1000)
+        except (urllib.error.URLError, TimeoutError, OSError) as e:
+            last_err = e
+            time.sleep(0.5 * (attempt + 1))
+    raise last_err
 
 
 def get_cached(conn, from_city: str, to_city: str):
@@ -133,8 +143,11 @@ def handler(event: dict, context) -> dict:
         }
 
     try:
-        from_coords = geocode(from_city, dadata_key)
-        to_coords = geocode(to_city, dadata_key)
+        with ThreadPoolExecutor(max_workers=2) as ex:
+            f_from = ex.submit(geocode, from_city, dadata_key)
+            f_to = ex.submit(geocode, to_city, dadata_key)
+            from_coords = f_from.result()
+            to_coords = f_to.result()
         if not from_coords or not to_coords:
             if conn:
                 conn.close()
@@ -145,6 +158,7 @@ def handler(event: dict, context) -> dict:
             }
         dist = road_distance(from_coords, to_coords, gh_key)
     except Exception as e:
+        print(f"calc-distance error for {from_city} -> {to_city}: {type(e).__name__}: {e}")
         if conn:
             conn.close()
         return {

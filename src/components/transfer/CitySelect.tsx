@@ -5,7 +5,7 @@ import func2url from "../../../backend/func2url.json";
 
 interface CitySelectProps {
   value: string;
-  onChange: (v: string) => void;
+  onChange: (v: string, region?: string) => void;
   iconName: "MapPin" | "Navigation";
   exclude?: string;
 }
@@ -86,9 +86,7 @@ export default function CitySelect({ value, onChange, iconName, exclude }: CityS
   }, [search, activeDistrict, exclude]);
 
   function pick(name: string, region?: string) {
-    const clean = (region || "").trim();
-    const value = clean && !name.includes("(") ? `${name} (${clean})` : name;
-    onChange(value);
+    onChange(name, (region || "").trim());
     setOpen(false);
     setSearch("");
   }

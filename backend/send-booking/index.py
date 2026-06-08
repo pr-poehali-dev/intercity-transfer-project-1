@@ -47,7 +47,20 @@ def handler(event: dict, context) -> dict:
     from_city = body.get('from_city', '—')
     via_city = body.get('via_city')
     to_city = body.get('to_city', '—')
+    from_region = body.get('from_region')
+    via_region = body.get('via_region')
+    to_region = body.get('to_region')
     round_trip = body.get('round_trip')
+
+    def with_region(city, region):
+        if city and region and region.strip() and region.strip() != city.strip():
+            return f"{city} ({region})"
+        return city
+
+    from_city = with_region(from_city, from_region)
+    to_city = with_region(to_city, to_region)
+    if via_city:
+        via_city = with_region(via_city, via_region)
     raw_date = body.get('date', '—')
     try:
         parts = raw_date.split(' ')

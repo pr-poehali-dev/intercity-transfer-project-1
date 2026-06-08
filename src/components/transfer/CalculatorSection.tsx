@@ -8,11 +8,14 @@ import func2url from "../../../backend/func2url.json";
 
 interface CalculatorSectionProps {
   from: string;
-  setFrom: (v: string) => void;
+  setFrom: (v: string, region?: string) => void;
   to: string;
-  setTo: (v: string) => void;
+  setTo: (v: string, region?: string) => void;
   via: string;
-  setVia: (v: string) => void;
+  setVia: (v: string, region?: string) => void;
+  fromRegion: string;
+  toRegion: string;
+  viaRegion: string;
   withVia: boolean;
   setWithVia: (v: boolean) => void;
   roundTrip: boolean;
@@ -49,7 +52,7 @@ interface CalculatorSectionProps {
 }
 
 export default function CalculatorSection({
-  from, setFrom, to, setTo, via, setVia, withVia, setWithVia, roundTrip, setRoundTrip,
+  from, setFrom, to, setTo, via, setVia, fromRegion, toRegion, viaRegion, withVia, setWithVia, roundTrip, setRoundTrip,
   tariff, setTariff,
   passengers, setPassengers,
   withChildren, setWithChildren,
@@ -123,8 +126,11 @@ export default function CalculatorSection({
           name,
           phone,
           from_city: from,
+          from_region: fromRegion || undefined,
           via_city: (withVia && via) ? via : undefined,
+          via_region: (withVia && via) ? (viaRegion || undefined) : undefined,
           to_city: to,
+          to_region: toRegion || undefined,
           round_trip: roundTrip,
           date: time ? `${date} ${time}` : date,
           passengers: isDelivery ? "—" : passengers,

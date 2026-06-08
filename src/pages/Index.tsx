@@ -14,6 +14,9 @@ export default function Index() {
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [via, setVia] = useState("");
+  const [fromRegion, setFromRegion] = useState("");
+  const [toRegion, setToRegion] = useState("");
+  const [viaRegion, setViaRegion] = useState("");
   const [withVia, setWithVia] = useState(false);
   const [roundTrip, setRoundTrip] = useState(false);
   const [tariff, setTariff] = useState(0);
@@ -133,10 +136,10 @@ export default function Index() {
     scrollToBook();
   }
 
-  function handleSetFrom(v: string) { setFrom(v); setCalculated(false); }
-  function handleSetTo(v: string) { setTo(v); setCalculated(false); }
-  function handleSetVia(v: string) { setVia(v); setCalculated(false); }
-  function handleSetWithVia(v: boolean) { setWithVia(v); setCalculated(false); if (!v) setVia(""); }
+  function handleSetFrom(v: string, region?: string) { setFrom(v); setFromRegion(region || ""); setCalculated(false); }
+  function handleSetTo(v: string, region?: string) { setTo(v); setToRegion(region || ""); setCalculated(false); }
+  function handleSetVia(v: string, region?: string) { setVia(v); setViaRegion(region || ""); setCalculated(false); }
+  function handleSetWithVia(v: boolean) { setWithVia(v); setCalculated(false); if (!v) { setVia(""); setViaRegion(""); } }
   function handleSetRoundTrip(v: boolean) { setRoundTrip(v); setCalculated(false); }
   function handleSetTariff(v: number) {
     setTariff(v);
@@ -164,6 +167,9 @@ export default function Index() {
         setTo={handleSetTo}
         via={via}
         setVia={handleSetVia}
+        fromRegion={fromRegion}
+        toRegion={toRegion}
+        viaRegion={viaRegion}
         withVia={withVia}
         setWithVia={handleSetWithVia}
         roundTrip={roundTrip}

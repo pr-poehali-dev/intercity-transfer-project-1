@@ -101,6 +101,20 @@ export default function Index() {
     return dist;
   }
 
+  async function fetchDistMulti(points: string[], fallback: number): Promise<number> {
+    let dist = fallback;
+    try {
+      const res = await fetch(func2url["calc-distance"], {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ points }),
+      });
+      const data = await res.json();
+      if (typeof data.distance === "number" && data.distance > 0) dist = data.distance;
+    } catch { /* fallback */ }
+    return dist;
+  }
+
   async function calculate() {
     const norm = (s: string) => s.trim().toLowerCase();
     if (!from || !to || calculating) return;
@@ -111,9 +125,8 @@ export default function Index() {
     const viaCity = resolveCity(via);
     let totalDist: number;
     if (withVia && via && norm(viaCity) !== norm(fromCity) && norm(viaCity) !== norm(toCity)) {
-      const d1 = await fetchDist(fromCity, viaCity);
-      const d2 = await fetchDist(viaCity, toCity);
-      totalDist = d1 + d2;
+      const fallback = getDistance(fromCity, viaCity) + getDistance(viaCity, toCity);
+      totalDist = await fetchDistMulti([fromCity, viaCity, toCity], fallback);
     } else {
       totalDist = await fetchDist(fromCity, toCity);
     }

@@ -23,6 +23,15 @@
       "expectedStatus": 200,
       "expectedBody": {"distance": 708},
       "bodyMatcher": "partial"
+    },
+    {
+      "name": "Multi points needs at least 2",
+      "method": "POST",
+      "path": "/",
+      "body": {"points": ["Москва"]},
+      "expectedStatus": 400,
+      "expectedBody": {"error": "need at least 2 points"},
+      "bodyMatcher": "partial"
     }
   ]
 }

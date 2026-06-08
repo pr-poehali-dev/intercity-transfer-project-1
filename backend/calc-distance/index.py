@@ -93,6 +93,67 @@ def save_cache(conn, from_city: str, to_city: str, dist: int):
     conn.commit()
 
 
+def segment_distance(from_city, to_city, dadata_key, gh_key, dsn):
+    """Расстояние одного отрезка: кэш -> геокод -> GraphHopper -> сохранить кэш"""
+    try:
+        conn = psycopg2.connect(dsn)
+    except Exception:
+        conn = None
+    if conn:
+        cached = get_cached(conn, from_city, to_city)
+        if cached is not None:
+            conn.close()
+            return cached
+    with ThreadPoolExecutor(max_workers=2) as ex:
+        f_from = ex.submit(geocode, from_city, dadata_key)
+        f_to = ex.submit(geocode, to_city, dadata_key)
+        from_coords = f_from.result()
+        to_coords = f_to.result()
+    if not from_coords or not to_coords:
+        if conn:
+            conn.close()
+        raise ValueError(f'Координаты не найдены: {from_city} / {to_city}')
+    dist = road_distance(from_coords, to_coords, gh_key)
+    if dist and conn:
+        try:
+            save_cache(conn, from_city, to_city, dist)
+        except Exception:
+            pass
+    if conn:
+        conn.close()
+    return dist
+
+
+def calc_multi(cities, dadata_key, gh_key, dsn):
+    """Сумма расстояний по цепочке городов. Все отрезки считаются параллельно."""
+    if not dadata_key or not gh_key:
+        return {
+            'statusCode': 200,
+            'headers': {'Access-Control-Allow-Origin': '*'},
+            'body': json.dumps({'distance': None, 'error': 'API keys not configured'})
+        }
+    segments = [(cities[i], cities[i + 1]) for i in range(len(cities) - 1)]
+    try:
+        with ThreadPoolExecutor(max_workers=len(segments)) as ex:
+            results = list(ex.map(
+                lambda s: segment_distance(s[0], s[1], dadata_key, gh_key, dsn),
+                segments
+            ))
+        total = sum(r for r in results if r)
+    except Exception as e:
+        print(f"calc-distance multi error for {cities}: {type(e).__name__}: {e}")
+        return {
+            'statusCode': 200,
+            'headers': {'Access-Control-Allow-Origin': '*'},
+            'body': json.dumps({'distance': None, 'error': str(e)})
+        }
+    return {
+        'statusCode': 200,
+        'headers': {'Access-Control-Allow-Origin': '*'},
+        'body': json.dumps({'distance': total, 'segments': results})
+    }
+
+
 def handler(event: dict, context) -> dict:
     """Расчёт расстояния по дорогам через GraphHopper с кешированием в PostgreSQL"""
     if event.get('httpMethod') == 'OPTIONS':
@@ -110,6 +171,21 @@ def handler(event: dict, context) -> dict:
     body = json.loads(event.get('body') or '{}')
     from_city = body.get('from', '').strip()
     to_city = body.get('to', '').strip()
+    points = body.get('points')
+
+    dadata_key = os.environ.get('DADATA_API_KEY', '')
+    gh_key = os.environ.get('GRAPHHOPPER_API_KEY', '')
+    dsn = os.environ.get('DATABASE_URL', '')
+
+    if isinstance(points, list):
+        cities = [str(p).strip() for p in points if str(p).strip()]
+        if len(cities) < 2:
+            return {
+                'statusCode': 400,
+                'headers': {'Access-Control-Allow-Origin': '*'},
+                'body': json.dumps({'error': 'need at least 2 points'})
+            }
+        return calc_multi(cities, dadata_key, gh_key, dsn)
 
     if not from_city or not to_city:
         return {
@@ -117,10 +193,6 @@ def handler(event: dict, context) -> dict:
             'headers': {'Access-Control-Allow-Origin': '*'},
             'body': json.dumps({'error': 'from and to are required'})
         }
-
-    dadata_key = os.environ.get('DADATA_API_KEY', '')
-    gh_key = os.environ.get('GRAPHHOPPER_API_KEY', '')
-    dsn = os.environ.get('DATABASE_URL', '')
 
     try:
         conn = psycopg2.connect(dsn)

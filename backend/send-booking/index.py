@@ -105,7 +105,7 @@ def handler(event: dict, context) -> dict:
     services_line = f"➕ Доп. услуги: {services}\n\n" if services and services != '—' else ""
     distance_line = f"↕️ Расстояние: {distance} км\n\n" if distance else ""
     duration_line = f"⌛ В пути: {duration}\n\n" if duration else ""
-    comment_line = f"🗒 Комментарий: {comment}" if comment and comment != '—' else ""
+    comment_line = f"🗒 Комментарий: {comment}\n\n" if comment and comment != '—' else ""
 
     # Сообщение 1 — полная информация о заявке
     msg1 = (
@@ -120,8 +120,8 @@ def handler(event: dict, context) -> dict:
         f"{distance_line}"
         f"{duration_line}"
         f"💰 Стоимость: {price} руб.\n\n"
-        f"☎️ {phone} · {name}\n\n"
         f"{comment_line}"
+        f"☎️ {phone} · {name}"
     )
 
     try:

@@ -115,6 +115,11 @@ export default function Index() {
     return dist;
   }
 
+  function cityWithRegion(city: string, region: string): string {
+    const resolved = resolveCity(city);
+    return region ? `${resolved}, ${region}` : resolved;
+  }
+
   async function calculate() {
     const norm = (s: string) => s.trim().toLowerCase();
     if (!from || !to || calculating) return;
@@ -123,12 +128,15 @@ export default function Index() {
     const fromCity = resolveCity(from);
     const toCity = resolveCity(to);
     const viaCity = resolveCity(via);
+    const fromFull = cityWithRegion(from, fromRegion);
+    const toFull = cityWithRegion(to, toRegion);
+    const viaFull = cityWithRegion(via, viaRegion);
     let totalDist: number;
     if (withVia && via && norm(viaCity) !== norm(fromCity) && norm(viaCity) !== norm(toCity)) {
       const fallback = getDistance(fromCity, viaCity) + getDistance(viaCity, toCity);
-      totalDist = await fetchDistMulti([fromCity, viaCity, toCity], fallback);
+      totalDist = await fetchDistMulti([fromFull, viaFull, toFull], fallback);
     } else {
-      totalDist = await fetchDist(fromCity, toCity);
+      totalDist = await fetchDist(fromFull, toFull);
     }
     if (roundTrip) totalDist *= 1.9;
     const hasViaStop = withVia && via && norm(viaCity) !== norm(fromCity) && norm(viaCity) !== norm(toCity);

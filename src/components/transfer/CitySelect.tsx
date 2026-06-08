@@ -112,7 +112,7 @@ export default function CitySelect({ value, onChange, iconName, exclude }: CityS
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Поиск города или региона..."
+                placeholder="Можно даже и село..."
                 autoFocus
                 className="w-full bg-background border border-border rounded-lg pl-9 pr-3 py-2.5 text-base text-foreground placeholder:text-muted-foreground/60"
               />

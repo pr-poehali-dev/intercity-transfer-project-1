@@ -14,7 +14,7 @@ def geocode(query: str, api_key: str):
         'count': 1,
         'from_bound': {'value': 'city'},
         'to_bound': {'value': 'house'},
-        'locations': [{'country': '*'}],
+        'locations': [{'country': 'Россия'}],
     }).encode('utf-8')
 
     req = urllib.request.Request(
@@ -50,7 +50,6 @@ def road_distance(from_coords, to_coords, gh_key: str):
         f'https://graphhopper.com/api/1/route'
         f'?point={flat},{flon}&point={tlat},{tlon}'
         f'&profile=car&locale=ru&calc_points=false'
-        f'&ch.disable=true&snap_prevention=ferry'
         f'&key={gh_key}'
     )
     req = urllib.request.Request(url, headers={'User-Agent': 'transfer-app'})

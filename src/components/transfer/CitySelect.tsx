@@ -99,7 +99,7 @@ export default function CitySelect({ value, onChange, iconName, exclude }: CityS
         className="w-full bg-background border border-border rounded-lg pl-9 pr-9 py-3 text-base text-left text-foreground cursor-pointer hover:border-white/30 transition-colors flex items-center"
       >
         <Icon name={iconName} size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-neon pointer-events-none" />
-        <span className="truncate">{value || "Выберите нас. пункт"}</span>
+        <span className="truncate">{value || "Город, село, аэропорт..."}</span>
         <Icon name="ChevronRight" size={14} className={`absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-transform ${open ? "rotate-90" : "rotate-90"}`} />
       </button>
 

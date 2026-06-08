@@ -13,7 +13,7 @@ def geocode(query: str, api_key: str):
         'query': query,
         'count': 1,
         'from_bound': {'value': 'city'},
-        'to_bound': {'value': 'settlement'},
+        'to_bound': {'value': 'house'},
         'locations': [{'country': '*'}],
     }).encode('utf-8')
 
@@ -38,6 +38,7 @@ def geocode(query: str, api_key: str):
     lon = d.get('geo_lon')
     if not lat or not lon:
         return None
+    print(f"geocode '{query}' -> {items[0].get('value')} ({lat},{lon})")
     return float(lat), float(lon)
 
 
@@ -48,20 +49,23 @@ def road_distance(from_coords, to_coords, gh_key: str):
     url = (
         f'https://graphhopper.com/api/1/route'
         f'?point={flat},{flon}&point={tlat},{tlon}'
-        f'&vehicle=car&locale=ru&calc_points=false'
+        f'&profile=car&locale=ru&calc_points=false'
+        f'&ch.disable=true&snap_prevention=ferry'
         f'&key={gh_key}'
     )
     req = urllib.request.Request(url, headers={'User-Agent': 'transfer-app'})
     last_err = None
     for attempt in range(3):
         try:
-            with urllib.request.urlopen(req, timeout=8) as resp:
+            with urllib.request.urlopen(req, timeout=12) as resp:
                 data = json.loads(resp.read())
             paths = data.get('paths', [])
             if not paths:
                 return None
             meters = paths[0].get('distance', 0)
-            return round(meters / 1000)
+            km = round(meters / 1000)
+            print(f"GH route {flat},{flon} -> {tlat},{tlon} = {km} km")
+            return km
         except (urllib.error.URLError, TimeoutError, OSError) as e:
             last_err = e
             time.sleep(0.5 * (attempt + 1))
@@ -74,7 +78,8 @@ def get_cached(conn, from_city: str, to_city: str):
     with conn.cursor() as cur:
         cur.execute(
             f"SELECT distance_km FROM {schema}.distance_cache "
-            f"WHERE (from_city = %s AND to_city = %s) OR (from_city = %s AND to_city = %s) LIMIT 1",
+            f"WHERE ((from_city = %s AND to_city = %s) OR (from_city = %s AND to_city = %s)) "
+            f"AND distance_km > 0 LIMIT 1",
             (from_city, to_city, to_city, from_city)
         )
         row = cur.fetchone()
@@ -87,7 +92,8 @@ def save_cache(conn, from_city: str, to_city: str, dist: int):
     with conn.cursor() as cur:
         cur.execute(
             f"INSERT INTO {schema}.distance_cache (from_city, to_city, distance_km) "
-            f"VALUES (%s, %s, %s) ON CONFLICT (from_city, to_city) DO NOTHING",
+            f"VALUES (%s, %s, %s) ON CONFLICT (from_city, to_city) DO UPDATE "
+            f"SET distance_km = EXCLUDED.distance_km",
             (from_city, to_city, dist)
         )
     conn.commit()

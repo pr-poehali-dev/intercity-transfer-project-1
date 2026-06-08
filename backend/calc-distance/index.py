@@ -3,6 +3,7 @@ import os
 import urllib.request
 import urllib.error
 import time
+import math
 from concurrent.futures import ThreadPoolExecutor
 import psycopg2
 
@@ -40,6 +41,28 @@ def geocode(query: str, api_key: str):
         return None
     print(f"geocode '{query}' -> {items[0].get('value')} ({lat},{lon})")
     return float(lat), float(lon)
+
+
+def haversine_km(c1, c2) -> float:
+    """Расстояние по прямой между двумя точками (км)"""
+    lat1, lon1 = math.radians(c1[0]), math.radians(c1[1])
+    lat2, lon2 = math.radians(c2[0]), math.radians(c2[1])
+    dlat, dlon = lat2 - lat1, lon2 - lon1
+    a = math.sin(dlat / 2) ** 2 + math.cos(lat1) * math.cos(lat2) * math.sin(dlon / 2) ** 2
+    return 6371 * 2 * math.asin(math.sqrt(a))
+
+
+def is_sane_distance(road_km: int, from_coords, to_coords) -> bool:
+    """Проверяет адекватность дорожного расстояния.
+    Дорожное расстояние должно быть >= прямой и не более чем в 4 раза больше неё."""
+    straight = haversine_km(from_coords, to_coords)
+    if straight < 1:
+        return road_km < 50
+    ratio = road_km / straight
+    ok = 0.9 <= ratio <= 4.0
+    if not ok:
+        print(f"SANITY FAIL: road={road_km} km, straight={straight:.0f} km, ratio={ratio:.2f}")
+    return ok
 
 
 def road_distance(from_coords, to_coords, gh_key: str):
@@ -120,10 +143,14 @@ def segment_distance(from_city, to_city, dadata_key, gh_key, dsn):
         raise ValueError(f'Координаты не найдены: {from_city} / {to_city}')
     dist = road_distance(from_coords, to_coords, gh_key)
     if dist and conn:
-        try:
-            save_cache(conn, from_city, to_city, dist)
-        except Exception:
-            pass
+        if is_sane_distance(dist, from_coords, to_coords):
+            try:
+                save_cache(conn, from_city, to_city, dist)
+            except Exception:
+                pass
+        else:
+            print(f"SKIP CACHE (insane): {from_city} -> {to_city} = {dist} km")
+            dist = None
     if conn:
         conn.close()
     return dist
@@ -245,10 +272,14 @@ def handler(event: dict, context) -> dict:
         }
 
     if dist and conn:
-        try:
-            save_cache(conn, from_city, to_city, dist)
-        except Exception:
-            pass
+        if is_sane_distance(dist, from_coords, to_coords):
+            try:
+                save_cache(conn, from_city, to_city, dist)
+            except Exception:
+                pass
+        else:
+            print(f"SKIP CACHE (insane): {from_city} -> {to_city} = {dist} km")
+            dist = None
         conn.close()
 
     return {

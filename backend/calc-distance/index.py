@@ -13,8 +13,8 @@ def geocode(query: str, api_key: str):
     payload = json.dumps({
         'query': query,
         'count': 1,
-        'from_bound': {'value': 'city'},
-        'to_bound': {'value': 'house'},
+        'from_bound': {'value': 'region'},
+        'to_bound': {'value': 'settlement'},
         'locations': [{'country': 'Россия'}],
     }).encode('utf-8')
 

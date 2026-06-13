@@ -28,6 +28,13 @@
       "expectedStatus": 200
     },
     {
+      "name": "Calc Moscow to small town Hotkovo",
+      "method": "POST",
+      "path": "/",
+      "body": {"from": "Москва, Москва", "to": "г Хотьково, Московская область"},
+      "expectedStatus": 200
+    },
+    {
       "name": "Multi points needs at least 2",
       "method": "POST",
       "path": "/",

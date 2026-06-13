@@ -68,7 +68,7 @@ export default function CalculatorForm({
     <div className="reveal bg-surface border border-border rounded-2xl p-4 sm:p-8">
       <div className="mb-4">
         <a
-          href="#contacts"
+          href="#zayavka"
           className="inline-flex items-center gap-2 text-sm font-display font-semibold text-neon border border-neon/40 bg-neon/10 rounded-lg px-4 py-2.5 hover:bg-neon/20 transition-colors"
         >
           <Icon name="HelpCircle" size={16} className="flex-shrink-0" />

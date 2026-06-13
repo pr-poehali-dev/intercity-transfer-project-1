@@ -108,7 +108,7 @@ export default function ContactsSection() {
               ))}
             </div>
 
-            <div className="reveal">
+            <div className="reveal" id="zayavka" style={{ scrollMarginTop: "80px" }}>
               <div className="bg-surface border border-border rounded-2xl p-4 sm:p-8 h-full">
                 <h3 className="font-display text-xl font-bold mb-6">ОСТАВЬТЕ ЗАЯВКУ</h3>
                 {sent ? (

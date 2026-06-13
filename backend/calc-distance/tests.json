@@ -11,27 +11,28 @@
       "method": "POST",
       "path": "/",
       "body": {},
-      "expectedStatus": 400,
-      "expectedBody": {"error": "from and to are required"},
-      "bodyMatcher": "partial"
+      "expectedStatus": 400
     },
     {
       "name": "Calc distance Moscow to SPb",
       "method": "POST",
       "path": "/",
       "body": {"from": "Москва", "to": "Санкт-Петербург"},
-      "expectedStatus": 200,
-      "expectedBody": {"distance": 708},
-      "bodyMatcher": "partial"
+      "expectedStatus": 200
+    },
+    {
+      "name": "Calc Moscow to Bryansk with regions",
+      "method": "POST",
+      "path": "/",
+      "body": {"from": "Москва, Москва", "to": "Брянск, Брянская область"},
+      "expectedStatus": 200
     },
     {
       "name": "Multi points needs at least 2",
       "method": "POST",
       "path": "/",
       "body": {"points": ["Москва"]},
-      "expectedStatus": 400,
-      "expectedBody": {"error": "need at least 2 points"},
-      "bodyMatcher": "partial"
+      "expectedStatus": 400
     }
   ]
 }

@@ -43,6 +43,18 @@ def geocode(query: str, api_key: str):
     return float(lat), float(lon)
 
 
+def geocode_safe(query: str, api_key: str):
+    """Геокод с фоллбэком на чистое название города без региона"""
+    coords = geocode(query, api_key)
+    if coords:
+        return coords
+    short = query.split(',')[0].strip()
+    if short and short != query:
+        print(f"geocode fallback: '{query}' -> '{short}'")
+        return geocode(short, api_key)
+    return None
+
+
 def haversine_km(c1, c2) -> float:
     """Расстояние по прямой между двумя точками (км)"""
     lat1, lon1 = math.radians(c1[0]), math.radians(c1[1])
@@ -94,18 +106,31 @@ def road_distance(from_coords, to_coords, gh_key: str):
     raise last_err
 
 
+def short_city(name: str) -> str:
+    """Чистое название города без региона (часть до первой запятой)"""
+    return name.split(',')[0].strip()
+
+
 def get_cached(conn, from_city: str, to_city: str):
-    """Получить расстояние из кеша (проверяем оба направления)"""
+    """Получить расстояние из кеша (проверяем оба направления и короткие названия)"""
     schema = os.environ.get('MAIN_DB_SCHEMA', 'public')
+    f_short = short_city(from_city)
+    t_short = short_city(to_city)
+    variants = {
+        (from_city, to_city), (to_city, from_city),
+        (f_short, t_short), (t_short, f_short),
+    }
     with conn.cursor() as cur:
-        cur.execute(
-            f"SELECT distance_km FROM {schema}.distance_cache "
-            f"WHERE ((from_city = %s AND to_city = %s) OR (from_city = %s AND to_city = %s)) "
-            f"AND distance_km > 0 LIMIT 1",
-            (from_city, to_city, to_city, from_city)
-        )
-        row = cur.fetchone()
-    return row[0] if row else None
+        for a, b in variants:
+            cur.execute(
+                f"SELECT distance_km FROM {schema}.distance_cache "
+                f"WHERE from_city = %s AND to_city = %s AND distance_km > 0 LIMIT 1",
+                (a, b)
+            )
+            row = cur.fetchone()
+            if row:
+                return row[0]
+    return None
 
 
 def save_cache(conn, from_city: str, to_city: str, dist: int):
@@ -133,8 +158,8 @@ def segment_distance(from_city, to_city, dadata_key, gh_key, dsn):
             conn.close()
             return cached
     with ThreadPoolExecutor(max_workers=2) as ex:
-        f_from = ex.submit(geocode, from_city, dadata_key)
-        f_to = ex.submit(geocode, to_city, dadata_key)
+        f_from = ex.submit(geocode_safe, from_city, dadata_key)
+        f_to = ex.submit(geocode_safe, to_city, dadata_key)
         from_coords = f_from.result()
         to_coords = f_to.result()
     if not from_coords or not to_coords:
@@ -248,8 +273,8 @@ def handler(event: dict, context) -> dict:
 
     try:
         with ThreadPoolExecutor(max_workers=2) as ex:
-            f_from = ex.submit(geocode, from_city, dadata_key)
-            f_to = ex.submit(geocode, to_city, dadata_key)
+            f_from = ex.submit(geocode_safe, from_city, dadata_key)
+            f_to = ex.submit(geocode_safe, to_city, dadata_key)
             from_coords = f_from.result()
             to_coords = f_to.result()
         if not from_coords or not to_coords:

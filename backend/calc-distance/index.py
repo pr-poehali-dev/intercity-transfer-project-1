@@ -212,7 +212,7 @@ def calc_multi(cities, dadata_key, gh_key, dsn):
 
 
 def handler(event: dict, context) -> dict:
-    """Расчёт расстояния по дорогам через GraphHopper с кешированием в PostgreSQL"""
+    """Расчёт расстояния по дорогам через GraphHopper с кешированием в БД."""
     if event.get('httpMethod') == 'OPTIONS':
         return {
             'statusCode': 200,

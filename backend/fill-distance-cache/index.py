@@ -183,7 +183,7 @@ def road_distance(from_coords, to_coords, gh_key: str):
 
 
 def handler(event: dict, context) -> dict:
-    """Массовое заполнение кеша расстояний через GraphHopper. Параметр batch=0..N для постраничного запуска."""
+    """Массовое заполнение кеша расстояний через GraphHopper. Параметр batch=0..N для постраничного запуска (пакетами)."""
     if event.get('httpMethod') == 'OPTIONS':
         return {'statusCode': 200, 'headers': {'Access-Control-Allow-Origin': '*'}, 'body': ''}
 

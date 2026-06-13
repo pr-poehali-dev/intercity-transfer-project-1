@@ -28,7 +28,7 @@ def send_telegram(message: str):
 
 
 def handler(event: dict, context) -> dict:
-    """Отправляет заявку на бронирование в Telegram"""
+    """Отправляет заявку на бронирование в Telegram."""
     if event.get('httpMethod') == 'OPTIONS':
         return {
             'statusCode': 200,

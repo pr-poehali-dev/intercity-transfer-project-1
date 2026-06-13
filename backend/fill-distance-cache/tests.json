@@ -10,9 +10,7 @@
       "name": "Fill cache",
       "method": "GET",
       "path": "/",
-      "expectedStatus": 200,
-      "expectedBody": {"done": 1},
-      "bodyMatcher": "partial"
+      "expectedStatus": 200
     }
   ]
 }

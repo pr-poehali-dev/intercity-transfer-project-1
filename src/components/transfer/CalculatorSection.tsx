@@ -45,6 +45,7 @@ interface CalculatorSectionProps {
   distance: number | null;
   calculated: boolean;
   calculating: boolean;
+  distanceError: boolean;
   onCalculate: () => void;
   onClose: () => void;
   onRouteSelect: (from: string, to: string) => void;
@@ -62,7 +63,7 @@ export default function CalculatorSection({
   minivanSub, setMinivanSub,
   date, setDate,
   time, setTime,
-  price, distance, calculated, calculating,
+  price, distance, calculated, calculating, distanceError,
   onCalculate, onClose, onRouteSelect,
   sectionRef,
 }: CalculatorSectionProps) {
@@ -186,6 +187,7 @@ export default function CalculatorSection({
               date={date} setDate={setDate}
               time={time} setTime={setTime}
               calculating={calculating}
+              distanceError={distanceError}
               onCalculate={onCalculate}
             />
           </div>

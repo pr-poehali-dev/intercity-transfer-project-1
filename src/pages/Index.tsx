@@ -5,7 +5,7 @@ import HeroSection from "@/components/transfer/HeroSection";
 import CalculatorSection from "@/components/transfer/CalculatorSection";
 import PopularRoutesSection from "@/components/transfer/PopularRoutesSection";
 import ContactsSection from "@/components/transfer/ContactsSection";
-import { TARIFFS, DELIVERY_OPTIONS, MINIVAN_SUBTARIFFS, getDistance, getDistanceSurcharge, CHILD_SEAT_PRICE, PET_OPTIONS } from "@/components/transfer/constants";
+import { TARIFFS, DELIVERY_OPTIONS, MINIVAN_SUBTARIFFS, getDistanceSurcharge, CHILD_SEAT_PRICE, PET_OPTIONS } from "@/components/transfer/constants";
 import { resolveCity } from "@/components/transfer/regions";
 import SeoTextSection from "@/components/transfer/SeoTextSection";
 import func2url from "../../backend/func2url.json";
@@ -33,6 +33,7 @@ export default function Index() {
   const [distance, setDistance] = useState<number | null>(null);
   const [calculated, setCalculated] = useState(false);
   const [calculating, setCalculating] = useState(false);
+  const [distanceError, setDistanceError] = useState(false);
 
   const bookRef = useRef<HTMLDivElement>(null);
 
@@ -87,8 +88,7 @@ export default function Index() {
     return Math.round((dist * ratePerKm * surcharge) / 50) * 50 + extras;
   }
 
-  async function fetchDist(a: string, b: string): Promise<number> {
-    let dist = getDistance(a, b);
+  async function fetchDist(a: string, b: string): Promise<number | null> {
     try {
       const res = await fetch(func2url["calc-distance"], {
         method: "POST",
@@ -96,13 +96,12 @@ export default function Index() {
         body: JSON.stringify({ from: a, to: b }),
       });
       const data = await res.json();
-      if (typeof data.distance === "number" && data.distance > 0) dist = data.distance;
-    } catch { /* fallback */ }
-    return dist;
+      if (typeof data.distance === "number" && data.distance > 0) return data.distance;
+    } catch { /* no fallback */ }
+    return null;
   }
 
-  async function fetchDistMulti(points: string[], fallback: number): Promise<number> {
-    let dist = fallback;
+  async function fetchDistMulti(points: string[]): Promise<number | null> {
     try {
       const res = await fetch(func2url["calc-distance"], {
         method: "POST",
@@ -110,9 +109,9 @@ export default function Index() {
         body: JSON.stringify({ points }),
       });
       const data = await res.json();
-      if (typeof data.distance === "number" && data.distance > 0) dist = data.distance;
-    } catch { /* fallback */ }
-    return dist;
+      if (typeof data.distance === "number" && data.distance > 0) return data.distance;
+    } catch { /* no fallback */ }
+    return null;
   }
 
   function cityWithRegion(city: string, region: string): string {
@@ -131,15 +130,23 @@ export default function Index() {
     const fromFull = cityWithRegion(from, fromRegion);
     const toFull = cityWithRegion(to, toRegion);
     const viaFull = cityWithRegion(via, viaRegion);
-    let totalDist: number;
-    if (withVia && via && norm(viaCity) !== norm(fromCity) && norm(viaCity) !== norm(toCity)) {
-      const fallback = getDistance(fromCity, viaCity) + getDistance(viaCity, toCity);
-      totalDist = await fetchDistMulti([fromFull, viaFull, toFull], fallback);
+    const hasViaStop = withVia && via && norm(viaCity) !== norm(fromCity) && norm(viaCity) !== norm(toCity);
+    let totalDist: number | null;
+    if (hasViaStop) {
+      totalDist = await fetchDistMulti([fromFull, viaFull, toFull]);
     } else {
       totalDist = await fetchDist(fromFull, toFull);
     }
+    if (totalDist === null) {
+      setPrice(null);
+      setDistance(null);
+      setCalculated(false);
+      setDistanceError(true);
+      setCalculating(false);
+      return;
+    }
+    setDistanceError(false);
     if (roundTrip) totalDist *= 1.9;
-    const hasViaStop = withVia && via && norm(viaCity) !== norm(fromCity) && norm(viaCity) !== norm(toCity);
     setPrice(priceFromDistance(totalDist) + (hasViaStop ? 1000 : 0));
     setDistance(totalDist);
     setCalculated(true);
@@ -157,9 +164,9 @@ export default function Index() {
     scrollToBook();
   }
 
-  function handleSetFrom(v: string, region?: string) { setFrom(v); setFromRegion(region || ""); setCalculated(false); }
-  function handleSetTo(v: string, region?: string) { setTo(v); setToRegion(region || ""); setCalculated(false); }
-  function handleSetVia(v: string, region?: string) { setVia(v); setViaRegion(region || ""); setCalculated(false); }
+  function handleSetFrom(v: string, region?: string) { setFrom(v); setFromRegion(region || ""); setCalculated(false); setDistanceError(false); }
+  function handleSetTo(v: string, region?: string) { setTo(v); setToRegion(region || ""); setCalculated(false); setDistanceError(false); }
+  function handleSetVia(v: string, region?: string) { setVia(v); setViaRegion(region || ""); setCalculated(false); setDistanceError(false); }
   function handleSetWithVia(v: boolean) { setWithVia(v); setCalculated(false); if (!v) { setVia(""); setViaRegion(""); } }
   function handleSetRoundTrip(v: boolean) { setRoundTrip(v); setCalculated(false); }
   function handleSetTariff(v: number) {
@@ -220,6 +227,7 @@ export default function Index() {
         distance={distance}
         calculated={calculated}
         calculating={calculating}
+        distanceError={distanceError}
         onCalculate={calculate}
         onClose={() => setCalculated(false)}
         onRouteSelect={handleRouteSelect}

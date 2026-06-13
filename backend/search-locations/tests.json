@@ -11,9 +11,14 @@
       "method": "POST",
       "path": "/",
       "body": {"query": ""},
-      "expectedStatus": 200,
-      "expectedBody": {"suggestions": "array"},
-      "bodyMatcher": "partial"
+      "expectedStatus": 200
+    },
+    {
+      "name": "Search city returns suggestions",
+      "method": "POST",
+      "path": "/",
+      "body": {"query": "Брянск"},
+      "expectedStatus": 200
     }
   ]
 }

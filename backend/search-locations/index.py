@@ -4,7 +4,7 @@ import urllib.request
 
 
 def handler(event: dict, context) -> dict:
-    """Поиск населённых пунктов России через DaData"""
+    """Поиск населённых пунктов России через DaData."""
     if event.get('httpMethod') == 'OPTIONS':
         return {
             'statusCode': 200,

@@ -79,7 +79,7 @@ export default function BookingModal({
           <div className="text-center py-6">
             <Icon name="CheckCircle2" size={64} className="text-neon mx-auto mb-4" />
             <div className="font-display text-2xl font-bold mb-2">Заявка принята!</div>
-            <p className="text-sm text-muted-foreground mb-6">Мы перезвоним вам в течение 15 минут</p>
+            <p className="text-sm text-muted-foreground mb-6">Мы перезвоним вам в течение 5 минут</p>
             <button
               onClick={onSuccessClose}
               className="bg-neon text-background font-display font-bold px-8 py-3 rounded-xl hover:opacity-90 transition-all"

@@ -95,9 +95,16 @@ export default function Index() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ from: a, to: b }),
       });
+      if (!res.ok) {
+        console.error("calc-distance HTTP", res.status, await res.text().catch(() => ""));
+        return null;
+      }
       const data = await res.json();
+      console.log("calc-distance result", a, "->", b, data);
       if (typeof data.distance === "number" && data.distance > 0) return data.distance;
-    } catch { /* no fallback */ }
+    } catch (e) {
+      console.error("calc-distance fetch failed:", e);
+    }
     return null;
   }
 
@@ -108,9 +115,16 @@ export default function Index() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ points }),
       });
+      if (!res.ok) {
+        console.error("calc-distance HTTP", res.status, await res.text().catch(() => ""));
+        return null;
+      }
       const data = await res.json();
+      console.log("calc-distance multi result", points, data);
       if (typeof data.distance === "number" && data.distance > 0) return data.distance;
-    } catch { /* no fallback */ }
+    } catch (e) {
+      console.error("calc-distance fetch failed:", e);
+    }
     return null;
   }
 

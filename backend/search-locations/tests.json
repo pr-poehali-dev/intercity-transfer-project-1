@@ -19,6 +19,13 @@
       "path": "/",
       "body": {"query": "Брянск"},
       "expectedStatus": 200
+    },
+    {
+      "name": "Search small town Hotkovo",
+      "method": "POST",
+      "path": "/",
+      "body": {"query": "Хотьково"},
+      "expectedStatus": 200
     }
   ]
 }

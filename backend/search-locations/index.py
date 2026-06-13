@@ -37,10 +37,11 @@ def handler(event: dict, context) -> dict:
 
     payload = json.dumps({
         'query': query,
-        'count': 15,
+        'count': 20,
         'from_bound': {'value': 'city'},
         'to_bound': {'value': 'settlement'},
-        'locations': [{'country': '*'}],
+        'restrict_value': True,
+        'locations': [{'country': 'Россия'}],
     }).encode('utf-8')
 
     req = urllib.request.Request(
@@ -65,13 +66,23 @@ def handler(event: dict, context) -> dict:
         }
 
     suggestions = []
+    seen = set()
     for item in data.get('suggestions', []):
         d = item.get('data', {})
-        city = d.get('city') or d.get('settlement') or d.get('city_district')
+        city = (
+            d.get('city')
+            or d.get('settlement')
+            or d.get('city_district')
+            or d.get('area')
+        )
         if not city:
             continue
         region = d.get('region_with_type') or d.get('region', '')
         full = item.get('value', '')
+        key = (city, region)
+        if key in seen:
+            continue
+        seen.add(key)
         suggestions.append({
             'name': city,
             'region': region,

@@ -26,6 +26,13 @@
       "path": "/",
       "body": {"query": "Хотьково"},
       "expectedStatus": 200
+    },
+    {
+      "name": "Search village",
+      "method": "POST",
+      "path": "/",
+      "body": {"query": "Простоквашино"},
+      "expectedStatus": 200
     }
   ]
 }

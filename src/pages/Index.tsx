@@ -41,7 +41,6 @@ export default function Index() {
 
   useEffect(() => {
     const today = new Date();
-    today.setDate(today.getDate() + 1);
     setDate(today.toISOString().split("T")[0]);
   }, []);
 

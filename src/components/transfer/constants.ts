@@ -56,7 +56,9 @@ export function getDistanceSurcharge(distance: number): number {
 }
 
 export function getLongRouteDiscount(distance: number): number {
-  if (distance >= 1000) return distance - 1000;
+  if (distance >= 2000) return distance * 3;
+  if (distance >= 1500) return distance * 2;
+  if (distance >= 1000) return distance * 1;
   return 0;
 }
 

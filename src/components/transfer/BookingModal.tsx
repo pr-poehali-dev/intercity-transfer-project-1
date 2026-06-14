@@ -56,9 +56,11 @@ export default function BookingModal({
     : isMinivan ? MINIVAN_SUBTARIFFS[minivanSub].pricePerKm
     : cur.pricePerKm;
   const extras = isDelivery ? 0 : ((withChildren ? childrenCount * CHILD_SEAT_PRICE : 0) + (withPet ? PET_OPTIONS[petOption].price : 0));
-  const shownPrice = distance
-    ? Math.round((distance * ratePerKm * getDistanceSurcharge(distance)) / 50) * 50 + extras - getLongRouteDiscount(distance)
+  const basePrice = distance
+    ? Math.round((distance * ratePerKm * getDistanceSurcharge(distance)) / 50) * 50 + extras
     : price;
+  const discount = distance ? getLongRouteDiscount(distance) : 0;
+  const shownPrice = basePrice != null ? basePrice - discount : price;
 
   return (
     <div
@@ -105,6 +107,17 @@ export default function BookingModal({
             ) : (
               <>
                 <div className="text-xs font-display text-neon tracking-widest mb-4">СТОИМОСТЬ ПОЕЗДКИ</div>
+                {discount > 0 && basePrice != null && (
+                  <div className="flex items-baseline gap-2 mb-1 flex-wrap">
+                    <span className="font-display text-xl sm:text-2xl text-muted-foreground line-through decoration-2">
+                      {basePrice.toLocaleString("ru-RU")} ₽
+                    </span>
+                    <span className="inline-flex items-center gap-1 bg-neon/15 text-neon text-xs font-bold px-2 py-0.5 rounded-md">
+                      <Icon name="TrendingDown" size={12} />
+                      −{discount.toLocaleString("ru-RU")} ₽
+                    </span>
+                  </div>
+                )}
                 <div className="flex items-baseline gap-2 mb-2 flex-wrap">
                   <span className="font-display text-lg sm:text-2xl text-muted-foreground">от</span>
                   <span className="font-display text-4xl sm:text-6xl font-bold text-neon glow-neon-text">
@@ -112,6 +125,12 @@ export default function BookingModal({
                   </span>
                   <span className="font-display text-lg sm:text-2xl text-muted-foreground">₽</span>
                 </div>
+                {discount > 0 && (
+                  <div className="inline-flex items-center gap-2 bg-neon/10 border border-neon/40 rounded-lg px-3 py-2 mb-3 text-xs text-foreground font-medium">
+                    <Icon name="Sparkles" size={13} className="flex-shrink-0 text-neon" />
+                    Скидка за дальнюю поездку уже учтена в цене
+                  </div>
+                )}
 
                 <div className="inline-flex items-center gap-2 bg-yellow-500/10 border border-yellow-500/40 rounded-lg px-3 py-2 mb-3 text-xs text-yellow-200 font-medium">
                   <Icon name="TriangleAlert" size={13} className="flex-shrink-0 text-yellow-400" />

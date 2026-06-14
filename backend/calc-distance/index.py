@@ -12,7 +12,7 @@ def region_key(region: str) -> str:
     """Нормализует название региона до ядра без типа: 'Орловская обл' -> 'орловск'."""
     if not region:
         return ''
-    low = region.lower()
+    low = region.lower().replace('ё', 'е')
     for t in ('область', 'обл.', 'обл', 'край', 'республика', 'респ.', 'респ',
               'автономный округ', 'ао', 'округ', 'г.', 'г '):
         low = low.replace(t, ' ')
@@ -174,14 +174,21 @@ def road_distance(from_coords, to_coords, gh_key: str):
     raise last_err
 
 
+def norm_yo(s: str) -> str:
+    """Нормализует букву ё→е, чтобы 'Орёл' и 'Орел' использовали один ключ кеша."""
+    return (s or '').replace('ё', 'е').replace('Ё', 'Е')
+
+
 def short_city(name: str) -> str:
     """Чистое название города без региона (часть до первой запятой)"""
-    return name.split(',')[0].strip()
+    return norm_yo(name.split(',')[0].strip())
 
 
 def get_cached(conn, from_city: str, to_city: str):
     """Получить расстояние из кеша (проверяем оба направления и короткие названия)"""
     schema = os.environ.get('MAIN_DB_SCHEMA', 'public')
+    from_city = norm_yo(from_city)
+    to_city = norm_yo(to_city)
     f_short = short_city(from_city)
     t_short = short_city(to_city)
     variants = {
@@ -204,6 +211,8 @@ def get_cached(conn, from_city: str, to_city: str):
 def save_cache(conn, from_city: str, to_city: str, dist: int):
     """Сохранить расстояние в кеш"""
     schema = os.environ.get('MAIN_DB_SCHEMA', 'public')
+    from_city = norm_yo(from_city)
+    to_city = norm_yo(to_city)
     with conn.cursor() as cur:
         cur.execute(
             f"INSERT INTO {schema}.distance_cache (from_city, to_city, distance_km) "

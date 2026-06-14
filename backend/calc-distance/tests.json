@@ -49,6 +49,13 @@
       "expectedStatus": 200
     },
     {
+      "name": "Chernorechye to Orenburg airport",
+      "method": "POST",
+      "path": "/",
+      "body": {"from": "село Черноречье, Оренбургская обл", "to": "Аэропорт Оренбург Центральный (REN)"},
+      "expectedStatus": 200
+    },
+    {
       "name": "Multi points needs at least 2",
       "method": "POST",
       "path": "/",

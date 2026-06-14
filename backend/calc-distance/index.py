@@ -6,6 +6,7 @@ import time
 import math
 from concurrent.futures import ThreadPoolExecutor
 import psycopg2
+from airports import airport_coords
 
 
 def region_key(region: str) -> str:
@@ -141,7 +142,13 @@ def geocode_safe(query: str, api_key: str):
     """Геокод с жёсткой привязкой к региону, чтобы не попасть
     в одноимённый населённый пункт в другой области.
     Возвращает (lat, lon, label) либо None."""
-    # Аэропорты/вокзалы ищем как объект, а не как населённый пункт
+    # Аэропорт по IATA-коду из справочника — самый точный путь
+    ap = airport_coords(query)
+    if ap:
+        print(f"airport '{query}' -> ({ap[0]},{ap[1]})")
+        return ap
+
+    # Аэропорты/вокзалы без кода ищем как объект, а не как населённый пункт
     low_q = query.lower()
     if low_q.startswith('аэропорт') or low_q.startswith('вокзал') or low_q.startswith('жд '):
         res = geocode_airport(query, api_key)

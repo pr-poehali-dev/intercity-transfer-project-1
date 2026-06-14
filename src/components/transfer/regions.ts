@@ -208,10 +208,9 @@ export function resolveCity(value: string): string {
 export function resolveGeocodeQuery(value: string): string {
   const terminal = TERMINALS.find((t) => t.name === value);
   if (!terminal) return value;
-  if (terminal.type === "airport") {
-    // убираем код в скобках: "Аэропорт Оренбург Центральный (REN)" -> "Аэропорт Оренбург Центральный"
-    return terminal.name.replace(/\s*\([^)]*\)\s*$/, "").trim();
-  }
+  // Для аэропорта отдаём полное название С КОДОМ (REN) — по нему backend
+  // берёт точные координаты аэропорта из справочника.
+  if (terminal.type === "airport") return terminal.name;
   return terminal.city;
 }
 

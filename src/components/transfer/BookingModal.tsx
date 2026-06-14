@@ -1,5 +1,5 @@
 import Icon from "@/components/ui/icon";
-import { TARIFFS, DELIVERY_OPTIONS, MINIVAN_SUBTARIFFS, getDistanceSurcharge, CHILD_SEAT_PRICE, PET_OPTIONS } from "./constants";
+import { TARIFFS, DELIVERY_OPTIONS, MINIVAN_SUBTARIFFS, getDistanceSurcharge, getLongRouteDiscount, CHILD_SEAT_PRICE, PET_OPTIONS } from "./constants";
 import type { IconName } from "./constants";
 import { getDurationByDistance } from "./routesData";
 
@@ -57,7 +57,7 @@ export default function BookingModal({
     : cur.pricePerKm;
   const extras = isDelivery ? 0 : ((withChildren ? childrenCount * CHILD_SEAT_PRICE : 0) + (withPet ? PET_OPTIONS[petOption].price : 0));
   const shownPrice = distance
-    ? Math.round((distance * ratePerKm * getDistanceSurcharge(distance)) / 50) * 50 + extras
+    ? Math.round((distance * ratePerKm * getDistanceSurcharge(distance)) / 50) * 50 + extras - getLongRouteDiscount(distance)
     : price;
 
   return (

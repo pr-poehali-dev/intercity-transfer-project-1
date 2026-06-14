@@ -55,6 +55,11 @@ export function getDistanceSurcharge(distance: number): number {
   return 1;
 }
 
+export function getLongRouteDiscount(distance: number): number {
+  if (distance >= 1000) return distance - 1000;
+  return 0;
+}
+
 export type IconName =
   | "MapPin" | "Navigation" | "Car" | "Star" | "Users" | "Truck" | "Baby" | "Dog"
   | "Package" | "PackageSearch" | "Zap" | "Gem" | "Bus" | "ArrowRight2"

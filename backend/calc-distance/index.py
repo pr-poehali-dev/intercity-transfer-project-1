@@ -108,9 +108,9 @@ def parse_region(query: str):
     return None
 
 
-def geocode_airport(query: str, api_key: str):
-    """Геокод аэропорта/вокзала: ищем сам объект (не населённый пункт),
-    поэтому расширяем границы поиска до уровня дома/объекта."""
+def geocode_terminal(query: str, api_key: str):
+    """Геокод аэропорта/вокзала/автовокзала: ищем сам объект,
+    а не населённый пункт, поэтому не задаём границы settlement."""
     payload = json.dumps({
         'query': query,
         'count': 5,
@@ -126,14 +126,14 @@ def geocode_airport(query: str, api_key: str):
         with urllib.request.urlopen(req, timeout=8) as resp:
             data = json.loads(resp.read())
     except Exception as e:
-        print(f"geocode_airport error '{query}': {e}")
+        print(f"geocode_terminal error '{query}': {e}")
         return None
     for item in data.get('suggestions', []):
         d = item.get('data', {})
         lat, lon = d.get('geo_lat'), d.get('geo_lon')
         if lat and lon:
             label = item.get('value') or query
-            print(f"geocode_airport '{query}' -> {label} ({lat},{lon})")
+            print(f"geocode_terminal '{query}' -> {label} ({lat},{lon})")
             return float(lat), float(lon), label
     return None
 
@@ -148,10 +148,13 @@ def geocode_safe(query: str, api_key: str):
         print(f"airport '{query}' -> ({ap[0]},{ap[1]})")
         return ap
 
-    # Аэропорты/вокзалы без кода ищем как объект, а не как населённый пункт
+    # Аэропорты/вокзалы/автовокзалы без кода ищем как объект,
+    # а не как населённый пункт
     low_q = query.lower()
-    if low_q.startswith('аэропорт') or low_q.startswith('вокзал') or low_q.startswith('жд '):
-        res = geocode_airport(query, api_key)
+    if (low_q.startswith('аэропорт') or low_q.startswith('вокзал')
+            or low_q.startswith('жд ') or low_q.startswith('автовокзал')
+            or low_q.startswith('автостанция') or low_q.startswith('ж/д')):
+        res = geocode_terminal(query, api_key)
         if res:
             return res
 

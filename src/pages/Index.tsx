@@ -126,9 +126,9 @@ export default function Index() {
 
   function cityWithRegion(city: string, region: string): string {
     const geo = resolveGeocodeQuery(city);
-    // Если это аэропорт (название изменилось и начинается с "Аэропорт"),
-    // регион не добавляем — название терминала самодостаточно для геокодера.
-    if (geo !== city && geo.startsWith("Аэропорт")) return geo;
+    // Для терминалов (аэропорт/вокзал/автовокзал) строка уже самодостаточна —
+    // регион не добавляем, иначе геокодер запутается.
+    if (geo !== city) return geo;
     return region ? `${geo}, ${region}` : geo;
   }
 

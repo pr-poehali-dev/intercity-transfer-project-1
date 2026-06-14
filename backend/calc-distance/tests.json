@@ -56,6 +56,20 @@
       "expectedStatus": 200
     },
     {
+      "name": "Train station to airport Moscow",
+      "method": "POST",
+      "path": "/",
+      "body": {"from": "Казанский вокзал, Москва", "to": "Аэропорт Домодедово (DME)"},
+      "expectedStatus": 200
+    },
+    {
+      "name": "Bus station route",
+      "method": "POST",
+      "path": "/",
+      "body": {"from": "Автовокзал Краснодар, Краснодар", "to": "Сочи, Краснодарский край"},
+      "expectedStatus": 200
+    },
+    {
       "name": "Multi points needs at least 2",
       "method": "POST",
       "path": "/",

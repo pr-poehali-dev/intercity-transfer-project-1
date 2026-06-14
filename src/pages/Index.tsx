@@ -254,8 +254,8 @@ export default function Index() {
         onRouteSelect={handleRouteSelect}
         sectionRef={bookRef}
       />
-      <ContactsSection />
       <PopularRoutesSection />
+      <ContactsSection />
       <SeoTextSection />
       <footer className="border-t border-border py-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col md:flex-row items-center justify-between gap-4">

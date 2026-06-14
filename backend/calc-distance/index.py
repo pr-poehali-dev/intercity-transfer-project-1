@@ -44,14 +44,37 @@ def geocode(query: str, api_key: str):
 
 
 def geocode_safe(query: str, api_key: str):
-    """Геокод с фоллбэком на чистое название города без региона"""
+    """Геокод с фоллбэками. ВАЖНО: сохраняем регион, чтобы не попасть
+    в одноимённый населённый пункт в другой области."""
     coords = geocode(query, api_key)
     if coords:
         return coords
-    short = query.split(',')[0].strip()
-    if short and short != query:
-        print(f"geocode fallback: '{query}' -> '{short}'")
-        return geocode(short, api_key)
+
+    parts = [p.strip() for p in query.split(',') if p.strip()]
+    if not parts:
+        return None
+    name = parts[0]
+    # Регион — часть со словами обл/край/респ/область/АО и т.п.
+    region = None
+    for p in parts[1:]:
+        low = p.lower()
+        if any(k in low for k in ('обл', 'край', 'респ', 'область', 'ао', 'округ')):
+            region = p
+            break
+
+    # 1) название + регion (без района и типа)
+    if region:
+        q2 = f"{name}, {region}"
+        if q2 != query:
+            print(f"geocode fallback: '{query}' -> '{q2}'")
+            coords = geocode(q2, api_key)
+            if coords:
+                return coords
+
+    # 2) только название (последний шанс)
+    if name != query:
+        print(f"geocode fallback: '{query}' -> '{name}'")
+        return geocode(name, api_key)
     return None
 
 

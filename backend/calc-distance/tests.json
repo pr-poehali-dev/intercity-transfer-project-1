@@ -35,6 +35,13 @@
       "expectedStatus": 200
     },
     {
+      "name": "Chernorechye Orenburg region to Orenburg",
+      "method": "POST",
+      "path": "/",
+      "body": {"from": "село Черноречье, Оренбургская обл, Оренбургский р-н", "to": "Оренбург, Оренбургская область"},
+      "expectedStatus": 200
+    },
+    {
       "name": "Multi points needs at least 2",
       "method": "POST",
       "path": "/",

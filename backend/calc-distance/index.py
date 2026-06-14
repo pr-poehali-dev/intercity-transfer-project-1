@@ -51,15 +51,15 @@ def names_match(query_name: str, found_name: str) -> bool:
     return False
 
 
-def geocode(query: str, api_key: str, locations=None):
-    """Получить координаты населённого пункта через DaData.
-    Возвращает (lat, lon, label, region_value, settlement_name) либо None."""
+def geocode_candidates(query: str, api_key: str, count: int = 10):
+    """Возвращает список кандидатов от DaData:
+    [(lat, lon, label, region_value, settlement_name), ...]."""
     payload = json.dumps({
         'query': query,
-        'count': 1,
+        'count': count,
         'from_bound': {'value': 'region'},
         'to_bound': {'value': 'settlement'},
-        'locations': locations or [{'country': 'Россия'}],
+        'locations': [{'country': 'Россия'}],
     }).encode('utf-8')
 
     req = urllib.request.Request(
@@ -75,20 +75,26 @@ def geocode(query: str, api_key: str, locations=None):
     with urllib.request.urlopen(req, timeout=8) as resp:
         data = json.loads(resp.read())
 
-    items = data.get('suggestions', [])
-    if not items:
-        return None
-    d = items[0].get('data', {})
-    lat = d.get('geo_lat')
-    lon = d.get('geo_lon')
-    if not lat or not lon:
-        return None
-    label = items[0].get('value') or query
-    found_region = d.get('region_with_type') or d.get('region') or ''
-    found_name = (d.get('settlement') or d.get('city')
-                  or d.get('city_district') or label)
-    print(f"geocode '{query}' (loc={locations}) -> {label} ({lat},{lon}) reg={found_region}")
-    return float(lat), float(lon), label, found_region, found_name
+    out = []
+    for item in data.get('suggestions', []):
+        d = item.get('data', {})
+        lat = d.get('geo_lat')
+        lon = d.get('geo_lon')
+        if not lat or not lon:
+            continue
+        label = item.get('value') or query
+        found_region = d.get('region_with_type') or d.get('region') or ''
+        found_name = (d.get('settlement') or d.get('city')
+                      or d.get('city_district') or label)
+        out.append((float(lat), float(lon), label, found_region, found_name))
+    print(f"geocode '{query}' -> {len(out)} cand: {[c[2] for c in out[:5]]}")
+    return out
+
+
+def geocode(query: str, api_key: str, locations=None):
+    """Первый кандидат (совместимость со старым кодом)."""
+    cands = geocode_candidates(query, api_key, count=1)
+    return cands[0] if cands else None
 
 
 def parse_region(query: str):
@@ -111,57 +117,50 @@ def geocode_safe(query: str, api_key: str):
     want = region_key(region) if region else ''
 
     def region_ok(res):
-        if not res:
-            return False
         if not want:
             return True
         return region_key(res[3]) == want
 
     def name_ok(res):
-        """Найденное название не должно сильно отличаться от запрошенного
+        """Название найденной точки должно совпадать с запрошенным
         (защита от подмены Какашкино -> Канашкино)."""
-        if not res:
-            return False
         found_name = res[4] if len(res) > 4 else res[2]
         return names_match(name, found_name)
 
-    def good(res):
-        return res and region_ok(res) and name_ok(res)
-
-    candidates = []
-
-    # ШАГ 1: жёсткий фильтр по региону
+    # Собираем кандидатов из нескольких запросов (с регионом в тексте и без).
+    queries = []
     if region:
-        for q in (f"{name}, {region}", name, query):
-            res = geocode(q, api_key, locations=[{'region': region}])
-            if good(res):
-                return res[:3]
-            if res:
-                candidates.append(res)
+        queries.append(f"{name}, {region}")
+        queries.append(query)
+    queries.append(name)
+    queries.append(query)
 
-    # ШАГ 2: поиск по всей России (регион + название должны совпасть)
-    res = geocode(query, api_key)
-    if good(res):
-        return res[:3]
-    if res:
-        candidates.append(res)
+    seen = set()
+    all_cands = []
+    for q in queries:
+        if q in seen:
+            continue
+        seen.add(q)
+        try:
+            all_cands.extend(geocode_candidates(q, api_key, count=10))
+        except Exception as e:
+            print(f"geocode_candidates error for '{q}': {e}")
 
-    res = geocode(name, api_key)
-    if good(res):
-        return res[:3]
-    if res:
-        candidates.append(res)
+    # 1) Идеально: совпал регион И название
+    for c in all_cands:
+        if region_ok(c) and name_ok(c):
+            return c[:3]
 
-    # ШАГ 3: точного совпадения нет — лучше ничего не вернуть,
-    # чем взять чужой или похожий по написанию нас. пункт
-    if want or candidates:
-        print(f"geocode WARN: '{query}' — нет точного совпадения "
-              f"(регион/название), кандидаты: {[c[2] for c in candidates]}")
-    # если региона не было И название первого кандидата совпадает — берём его
-    if not want:
-        for c in candidates:
-            if name_ok(c):
-                return c[:3]
+    # 2) Если регион известен, но точного нет — НЕ берём чужое
+    if want:
+        print(f"geocode WARN: '{query}' — нет точки с совпадающим регионом "
+              f"и названием. Кандидаты: {[(c[2], c[3]) for c in all_cands[:6]]}")
+        return None
+
+    # 3) Региона не было — берём первого с совпадающим названием
+    for c in all_cands:
+        if name_ok(c):
+            return c[:3]
     return None
 
 

@@ -85,18 +85,13 @@ export default function SeoTextSection() {
           </div>
         </div>
 
-        <div className="reveal mt-10">
-          <h3 className="font-display text-lg sm:text-xl font-bold mb-5 text-center">ПОПУЛЯРНЫЕ ЗАПРОСЫ</h3>
-          <div className="flex flex-wrap gap-2 justify-center">
+        <div className="sr-only" aria-hidden="true">
+          <h3>Популярные запросы</h3>
+          <ul>
             {SEO_QUERIES.map((q, i) => (
-              <span
-                key={i}
-                className="bg-surface border border-border rounded-full px-3 py-1.5 text-xs sm:text-sm text-muted-foreground hover:text-foreground hover:border-neon/40 transition-colors"
-              >
-                {q}
-              </span>
+              <li key={i}>{q}</li>
             ))}
-          </div>
+          </ul>
         </div>
 
       </div>

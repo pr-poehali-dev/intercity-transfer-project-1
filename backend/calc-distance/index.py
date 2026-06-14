@@ -145,6 +145,28 @@ def is_sane_distance(road_km: int, from_coords, to_coords) -> bool:
     return ok
 
 
+def same_region(from_city: str, to_city: str) -> bool:
+    """Оба адреса указывают на один и тот же регион."""
+    rf = region_key(parse_region(from_city) or '')
+    rt = region_key(parse_region(to_city) or '')
+    return bool(rf) and rf == rt
+
+
+def region_sanity_ok(road_km: int, from_city: str, to_city: str) -> bool:
+    """Если оба пункта в одном регионе, расстояние не может быть огромным.
+    Самые протяжённые области РФ дают по дорогам не более ~700 км между
+    своими населёнными пунктами. Большее значение — признак того, что
+    геокодер взял одноимённый пункт из другого региона."""
+    if not same_region(from_city, to_city):
+        return True
+    LIMIT_KM = 700
+    if road_km > LIMIT_KM:
+        print(f"REGION SANITY FAIL: {from_city} -> {to_city} = {road_km} km "
+              f"(оба в одном регионе, лимит {LIMIT_KM} км)")
+        return False
+    return True
+
+
 def road_distance(from_coords, to_coords, gh_key: str):
     """Расстояние по дорогам в км через GraphHopper"""
     flat, flon = from_coords
@@ -246,6 +268,9 @@ def segment_distance(from_city, to_city, dadata_key, gh_key, dsn):
     from_coords = from_res[:2]
     to_coords = to_res[:2]
     dist = road_distance(from_coords, to_coords, gh_key)
+    if dist and not region_sanity_ok(dist, from_city, to_city):
+        # Оба пункта в одном регионе, но расстояние огромное — данные ошибочны
+        dist = None
     if dist and conn:
         if is_sane_distance(dist, from_coords, to_coords):
             try:
@@ -392,6 +417,10 @@ def handler(event: dict, context) -> dict:
             'body': json.dumps({'distance': None, 'error': str(e)})
         }
 
+    if dist and not region_sanity_ok(dist, from_city, to_city):
+        # Оба пункта в одном регионе, но расстояние огромное — данные ошибочны
+        dist = None
+
     if dist and conn:
         if is_sane_distance(dist, from_coords, to_coords):
             try:
@@ -401,6 +430,7 @@ def handler(event: dict, context) -> dict:
         else:
             print(f"SKIP CACHE (insane): {from_city} -> {to_city} = {dist} km")
             dist = None
+    if conn:
         conn.close()
 
     return {

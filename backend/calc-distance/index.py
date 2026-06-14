@@ -214,6 +214,17 @@ def segment_distance(from_city, to_city, dadata_key, gh_key, dsn):
     return dist
 
 
+def geocode_label(query: str, api_key: str):
+    """Возвращает подпись найденной точки (название с областью) или исходную строку."""
+    try:
+        res = geocode_safe(query, api_key)
+        if res and len(res) > 2:
+            return res[2]
+    except Exception:
+        pass
+    return short_city(query)
+
+
 def calc_multi(cities, dadata_key, gh_key, dsn):
     """Сумма расстояний по цепочке городов. Все отрезки считаются параллельно."""
     if not dadata_key or not gh_key:
@@ -230,6 +241,8 @@ def calc_multi(cities, dadata_key, gh_key, dsn):
                 segments
             ))
         total = sum(r for r in results if r)
+        with ThreadPoolExecutor(max_workers=len(cities)) as ex:
+            labels = list(ex.map(lambda c: geocode_label(c, dadata_key), cities))
     except Exception as e:
         print(f"calc-distance multi error for {cities}: {type(e).__name__}: {e}")
         return {
@@ -240,7 +253,7 @@ def calc_multi(cities, dadata_key, gh_key, dsn):
     return {
         'statusCode': 200,
         'headers': {'Access-Control-Allow-Origin': '*'},
-        'body': json.dumps({'distance': total, 'segments': results})
+        'body': json.dumps({'distance': total, 'segments': results, 'labels': labels})
     }
 
 

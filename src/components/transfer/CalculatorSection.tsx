@@ -43,7 +43,7 @@ interface CalculatorSectionProps {
   setTime: (v: string) => void;
   price: number | null;
   distance: number | null;
-  routeLabels?: { from?: string; to?: string };
+  routeLabels?: { from?: string; to?: string; points?: string[] };
   calculated: boolean;
   calculating: boolean;
   distanceError: boolean;

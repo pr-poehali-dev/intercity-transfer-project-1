@@ -34,7 +34,7 @@ export default function Index() {
   const [calculated, setCalculated] = useState(false);
   const [calculating, setCalculating] = useState(false);
   const [distanceError, setDistanceError] = useState(false);
-  const [routeLabels, setRouteLabels] = useState<{ from?: string; to?: string }>({});
+  const [routeLabels, setRouteLabels] = useState<{ from?: string; to?: string; points?: string[] }>({});
 
   const bookRef = useRef<HTMLDivElement>(null);
 
@@ -115,6 +115,9 @@ export default function Index() {
       });
       if (!res.ok) return null;
       const data = await res.json();
+      if (Array.isArray(data.labels) && data.labels.length) {
+        setRouteLabels({ points: data.labels });
+      }
       if (typeof data.distance === "number" && data.distance > 0) return data.distance;
     } catch { /* no fallback */ }
     return null;

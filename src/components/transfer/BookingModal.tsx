@@ -20,7 +20,7 @@ interface BookingModalProps {
   minivanSub: number;
   price: number;
   distance: number | null;
-  routeLabels?: { from?: string; to?: string };
+  routeLabels?: { from?: string; to?: string; points?: string[] };
   name: string;
   setName: (v: string) => void;
   phone: string;
@@ -156,14 +156,25 @@ export default function BookingModal({
               </div>
             )}
 
-            {distance && (routeLabels?.from || routeLabels?.to) && (
+            {distance && (routeLabels?.from || routeLabels?.to || routeLabels?.points?.length) && (
               <div className="mb-6 -mt-3 flex items-start gap-2 text-xs text-muted-foreground">
                 <Icon name="MapPin" size={13} className="text-neon flex-shrink-0 mt-0.5" />
                 <span>
                   Маршрут построен между:{" "}
-                  {routeLabels.from && <span className="text-foreground">{routeLabels.from}</span>}
-                  {routeLabels.from && routeLabels.to && " → "}
-                  {routeLabels.to && <span className="text-foreground">{routeLabels.to}</span>}
+                  {routeLabels.points?.length
+                    ? routeLabels.points.map((p, i) => (
+                        <span key={i}>
+                          {i > 0 && " → "}
+                          <span className="text-foreground">{p}</span>
+                        </span>
+                      ))
+                    : (
+                      <>
+                        {routeLabels.from && <span className="text-foreground">{routeLabels.from}</span>}
+                        {routeLabels.from && routeLabels.to && " → "}
+                        {routeLabels.to && <span className="text-foreground">{routeLabels.to}</span>}
+                      </>
+                    )}
                 </span>
               </div>
             )}

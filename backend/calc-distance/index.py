@@ -31,22 +31,24 @@ def clean_name(s: str) -> str:
 
 
 def names_match(query_name: str, found_name: str) -> bool:
-    """Проверяет, что найденное название совпадает с запрошенным,
-    чтобы DaData не подменил 'Какашкино' на похожее 'Канашкино'."""
+    """Проверяет, что найденное название ТОЧНО совпадает с запрошенным,
+    чтобы DaData не подменил 'Какашкино' на похожее 'Канашкино'.
+    Опечатки/замены букв НЕ допускаются."""
     a = clean_name(query_name)
     b = clean_name(found_name)
     if not a or not b:
         return True
     if a == b:
         return True
-    # допускаем, если одно содержит другое целиком (Богородское / Богородское-2)
-    if a in b or b in a:
-        return True
-    # считаем посимвольные различия — больше 1 отличия = другой пункт
-    if abs(len(a) - len(b)) > 1:
-        return False
-    diff = sum(1 for x, y in zip(a, b) if x != y) + abs(len(a) - len(b))
-    return diff <= 1
+    # Разрешаем только дополнения через дефис/пробел/номер:
+    # 'богородское' ⊂ 'богородское-2', но 'канашкино' ⊄ 'какашкино'.
+    longer, shorter = (a, b) if len(a) >= len(b) else (b, a)
+    if longer.startswith(shorter):
+        tail = longer[len(shorter):].lstrip(' -')
+        # хвост должен быть номером/коротким уточнением, а не другим словом
+        if tail == '' or tail.isdigit() or len(tail) <= 2:
+            return True
+    return False
 
 
 def geocode(query: str, api_key: str, locations=None):

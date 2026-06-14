@@ -6,7 +6,7 @@ import CalculatorSection from "@/components/transfer/CalculatorSection";
 import PopularRoutesSection from "@/components/transfer/PopularRoutesSection";
 import ContactsSection from "@/components/transfer/ContactsSection";
 import { TARIFFS, DELIVERY_OPTIONS, MINIVAN_SUBTARIFFS, getDistanceSurcharge, CHILD_SEAT_PRICE, PET_OPTIONS } from "@/components/transfer/constants";
-import { resolveCity } from "@/components/transfer/regions";
+import { resolveCity, resolveGeocodeQuery } from "@/components/transfer/regions";
 import SeoTextSection from "@/components/transfer/SeoTextSection";
 import func2url from "../../backend/func2url.json";
 
@@ -125,8 +125,11 @@ export default function Index() {
   }
 
   function cityWithRegion(city: string, region: string): string {
-    const resolved = resolveCity(city);
-    return region ? `${resolved}, ${region}` : resolved;
+    const geo = resolveGeocodeQuery(city);
+    // Если это аэропорт (название изменилось и начинается с "Аэропорт"),
+    // регион не добавляем — название терминала самодостаточно для геокодера.
+    if (geo !== city && geo.startsWith("Аэропорт")) return geo;
+    return region ? `${geo}, ${region}` : geo;
   }
 
   async function calculate() {

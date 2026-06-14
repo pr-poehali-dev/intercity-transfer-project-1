@@ -201,6 +201,20 @@ export function resolveCity(value: string): string {
   return terminal ? terminal.city : value;
 }
 
+/** Возвращает поисковую строку для геокодера (расчёта расстояния).
+ *  Для аэропорта — точное название аэропорта, чтобы маршрут считался
+ *  до самого терминала, а не до центра города (это разные расстояния).
+ *  Для остального — название как есть. */
+export function resolveGeocodeQuery(value: string): string {
+  const terminal = TERMINALS.find((t) => t.name === value);
+  if (!terminal) return value;
+  if (terminal.type === "airport") {
+    // убираем код в скобках: "Аэропорт Оренбург Центральный (REN)" -> "Аэропорт Оренбург Центральный"
+    return terminal.name.replace(/\s*\([^)]*\)\s*$/, "").trim();
+  }
+  return terminal.city;
+}
+
 export interface Terminal {
   name: string;
   city: string;

@@ -107,10 +107,47 @@ def parse_region(query: str):
     return None
 
 
+def geocode_airport(query: str, api_key: str):
+    """Геокод аэропорта/вокзала: ищем сам объект (не населённый пункт),
+    поэтому расширяем границы поиска до уровня дома/объекта."""
+    payload = json.dumps({
+        'query': query,
+        'count': 5,
+        'locations': [{'country': 'Россия'}],
+    }).encode('utf-8')
+    req = urllib.request.Request(
+        'https://suggestions.dadata.ru/suggestions/api/4_1/rs/suggest/address',
+        data=payload, method='POST',
+        headers={'Content-Type': 'application/json', 'Accept': 'application/json',
+                 'Authorization': f'Token {api_key}'}
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=8) as resp:
+            data = json.loads(resp.read())
+    except Exception as e:
+        print(f"geocode_airport error '{query}': {e}")
+        return None
+    for item in data.get('suggestions', []):
+        d = item.get('data', {})
+        lat, lon = d.get('geo_lat'), d.get('geo_lon')
+        if lat and lon:
+            label = item.get('value') or query
+            print(f"geocode_airport '{query}' -> {label} ({lat},{lon})")
+            return float(lat), float(lon), label
+    return None
+
+
 def geocode_safe(query: str, api_key: str):
     """Геокод с жёсткой привязкой к региону, чтобы не попасть
     в одноимённый населённый пункт в другой области.
     Возвращает (lat, lon, label) либо None."""
+    # Аэропорты/вокзалы ищем как объект, а не как населённый пункт
+    low_q = query.lower()
+    if low_q.startswith('аэропорт') or low_q.startswith('вокзал') or low_q.startswith('жд '):
+        res = geocode_airport(query, api_key)
+        if res:
+            return res
+
     parts = [p.strip() for p in query.split(',') if p.strip()]
     name = parts[0] if parts else query
     region = parse_region(query)

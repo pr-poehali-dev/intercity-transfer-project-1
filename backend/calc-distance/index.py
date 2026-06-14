@@ -8,14 +8,15 @@ from concurrent.futures import ThreadPoolExecutor
 import psycopg2
 
 
-def geocode(query: str, api_key: str):
-    """Получить координаты населённого пункта через DaData"""
+def geocode(query: str, api_key: str, locations=None):
+    """Получить координаты населённого пункта через DaData.
+    locations — необязательный жёсткий фильтр (например по региону)."""
     payload = json.dumps({
         'query': query,
         'count': 1,
         'from_bound': {'value': 'region'},
         'to_bound': {'value': 'settlement'},
-        'locations': [{'country': 'Россия'}],
+        'locations': locations or [{'country': 'Россия'}],
     }).encode('utf-8')
 
     req = urllib.request.Request(
@@ -39,39 +40,44 @@ def geocode(query: str, api_key: str):
     lon = d.get('geo_lon')
     if not lat or not lon:
         return None
-    print(f"geocode '{query}' -> {items[0].get('value')} ({lat},{lon})")
+    print(f"geocode '{query}' (loc={locations}) -> {items[0].get('value')} ({lat},{lon})")
     return float(lat), float(lon)
 
 
+def parse_region(query: str):
+    """Достаёт название региона из строки адреса."""
+    parts = [p.strip() for p in query.split(',') if p.strip()]
+    for p in parts[1:]:
+        low = p.lower()
+        if any(k in low for k in ('обл', 'край', 'респ', 'область', 'ао', 'округ', 'г.')):
+            return p
+    return None
+
+
 def geocode_safe(query: str, api_key: str):
-    """Геокод с фоллбэками. ВАЖНО: сохраняем регион, чтобы не попасть
+    """Геокод с жёстким ограничением по региону, чтобы не попасть
     в одноимённый населённый пункт в другой области."""
+    parts = [p.strip() for p in query.split(',') if p.strip()]
+    name = parts[0] if parts else query
+    region = parse_region(query)
+
+    # ШАГ 1: если знаем регион — ищем СТРОГО внутри него (жёсткий фильтр).
+    # Это исключает попадание в одноимённое село в соседней области.
+    if region:
+        coords = geocode(name, api_key, locations=[{'region': region}])
+        if coords:
+            return coords
+        # повтор с полной строкой внутри региона
+        coords = geocode(query, api_key, locations=[{'region': region}])
+        if coords:
+            return coords
+
+    # ШАГ 2: обычный поиск по всей России (для крупных городов без региона)
     coords = geocode(query, api_key)
     if coords:
         return coords
 
-    parts = [p.strip() for p in query.split(',') if p.strip()]
-    if not parts:
-        return None
-    name = parts[0]
-    # Регион — часть со словами обл/край/респ/область/АО и т.п.
-    region = None
-    for p in parts[1:]:
-        low = p.lower()
-        if any(k in low for k in ('обл', 'край', 'респ', 'область', 'ао', 'округ')):
-            region = p
-            break
-
-    # 1) название + регion (без района и типа)
-    if region:
-        q2 = f"{name}, {region}"
-        if q2 != query:
-            print(f"geocode fallback: '{query}' -> '{q2}'")
-            coords = geocode(q2, api_key)
-            if coords:
-                return coords
-
-    # 2) только название (последний шанс)
+    # ШАГ 3: последний шанс — только название
     if name != query:
         print(f"geocode fallback: '{query}' -> '{name}'")
         return geocode(name, api_key)

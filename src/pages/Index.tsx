@@ -40,8 +40,12 @@ export default function Index() {
   const bookRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const today = new Date();
-    setDate(today.toISOString().split("T")[0]);
+    const now = new Date();
+    now.setMinutes(now.getMinutes() + 30);
+    setDate(now.toISOString().split("T")[0]);
+    const hh = String(now.getHours()).padStart(2, "0");
+    const mm = String(now.getMinutes()).padStart(2, "0");
+    setTime(`${hh}:${mm}`);
   }, []);
 
   useEffect(() => {

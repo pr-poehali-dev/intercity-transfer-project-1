@@ -3,7 +3,6 @@ import { TARIFFS, DELIVERY_OPTIONS, MINIVAN_SUBTARIFFS, getDistanceSurcharge, CH
 import { getDurationByDistance } from "./routesData";
 import CalculatorForm from "./CalculatorForm";
 import BookingModal from "./BookingModal";
-import HowItWorks from "./HowItWorks";
 import func2url from "../../../backend/func2url.json";
 
 interface CalculatorSectionProps {
@@ -221,8 +220,6 @@ export default function CalculatorSection({
         />
       )}
 
-      {/* HOW IT WORKS */}
-      <HowItWorks />
     </>
   );
 }

@@ -7,6 +7,7 @@ import PopularRoutesSection from "@/components/transfer/PopularRoutesSection";
 import ContactsSection from "@/components/transfer/ContactsSection";
 import { TARIFFS, DELIVERY_OPTIONS, MINIVAN_SUBTARIFFS, getDistanceSurcharge, CHILD_SEAT_PRICE, PET_OPTIONS } from "@/components/transfer/constants";
 import { resolveCity, resolveGeocodeQuery } from "@/components/transfer/regions";
+import HowItWorks from "@/components/transfer/HowItWorks";
 import SeoTextSection from "@/components/transfer/SeoTextSection";
 import func2url from "../../backend/func2url.json";
 
@@ -255,6 +256,7 @@ export default function Index() {
         sectionRef={bookRef}
       />
       <PopularRoutesSection />
+      <HowItWorks />
       <ContactsSection />
       <SeoTextSection />
       <footer className="border-t border-border py-10">

@@ -21,9 +21,37 @@ def region_key(region: str) -> str:
     return low[:6] if len(low) >= 6 else low
 
 
+def clean_name(s: str) -> str:
+    """Чистое имя нас. пункта без типа (деревня/село/г и т.п.) в нижнем регистре, ё→е."""
+    s = (s or '').lower().replace('ё', 'е')
+    for t in ('деревня', 'село', 'посёлок', 'поселок', 'пгт', 'станица',
+              'хутор', 'город', 'рабочий', 'г.', 'д.', 'с.', 'п.', 'г ', 'д ', 'с ', 'п '):
+        s = s.replace(t, ' ')
+    return ' '.join(s.split()).strip(' .,-')
+
+
+def names_match(query_name: str, found_name: str) -> bool:
+    """Проверяет, что найденное название совпадает с запрошенным,
+    чтобы DaData не подменил 'Какашкино' на похожее 'Канашкино'."""
+    a = clean_name(query_name)
+    b = clean_name(found_name)
+    if not a or not b:
+        return True
+    if a == b:
+        return True
+    # допускаем, если одно содержит другое целиком (Богородское / Богородское-2)
+    if a in b or b in a:
+        return True
+    # считаем посимвольные различия — больше 1 отличия = другой пункт
+    if abs(len(a) - len(b)) > 1:
+        return False
+    diff = sum(1 for x, y in zip(a, b) if x != y) + abs(len(a) - len(b))
+    return diff <= 1
+
+
 def geocode(query: str, api_key: str, locations=None):
     """Получить координаты населённого пункта через DaData.
-    Возвращает (lat, lon, label, region_value) либо None."""
+    Возвращает (lat, lon, label, region_value, settlement_name) либо None."""
     payload = json.dumps({
         'query': query,
         'count': 1,
@@ -55,8 +83,10 @@ def geocode(query: str, api_key: str, locations=None):
         return None
     label = items[0].get('value') or query
     found_region = d.get('region_with_type') or d.get('region') or ''
+    found_name = (d.get('settlement') or d.get('city')
+                  or d.get('city_district') or label)
     print(f"geocode '{query}' (loc={locations}) -> {label} ({lat},{lon}) reg={found_region}")
-    return float(lat), float(lon), label, found_region
+    return float(lat), float(lon), label, found_region, found_name
 
 
 def parse_region(query: str):
@@ -78,13 +108,23 @@ def geocode_safe(query: str, api_key: str):
     region = parse_region(query)
     want = region_key(region) if region else ''
 
-    def matches(res):
-        """Проверяет, что найденная точка в нужном регионе."""
+    def region_ok(res):
         if not res:
             return False
         if not want:
             return True
         return region_key(res[3]) == want
+
+    def name_ok(res):
+        """Найденное название не должно сильно отличаться от запрошенного
+        (защита от подмены Какашкино -> Канашкино)."""
+        if not res:
+            return False
+        found_name = res[4] if len(res) > 4 else res[2]
+        return names_match(name, found_name)
+
+    def good(res):
+        return res and region_ok(res) and name_ok(res)
 
     candidates = []
 
@@ -92,34 +132,34 @@ def geocode_safe(query: str, api_key: str):
     if region:
         for q in (f"{name}, {region}", name, query):
             res = geocode(q, api_key, locations=[{'region': region}])
-            if res and matches(res):
+            if good(res):
                 return res[:3]
             if res:
                 candidates.append(res)
 
-    # ШАГ 2: поиск по всей России, но ТОЛЬКО если совпадает регион
+    # ШАГ 2: поиск по всей России (регион + название должны совпасть)
     res = geocode(query, api_key)
-    if res and matches(res):
+    if good(res):
         return res[:3]
     if res:
         candidates.append(res)
 
     res = geocode(name, api_key)
-    if res and matches(res):
+    if good(res):
         return res[:3]
     if res:
         candidates.append(res)
 
-    # ШАГ 3: регион указан, но точного совпадения нет —
-    # лучше ничего не вернуть, чем взять чужой нас. пункт
-    if want:
-        print(f"geocode WARN: '{query}' — нет точки в регионе '{region}', "
-              f"кандидаты: {[c[2] for c in candidates]}")
-        return None
-
-    # региона не было (крупный город) — берём первый кандидат
-    if candidates:
-        return candidates[0][:3]
+    # ШАГ 3: точного совпадения нет — лучше ничего не вернуть,
+    # чем взять чужой или похожий по написанию нас. пункт
+    if want or candidates:
+        print(f"geocode WARN: '{query}' — нет точного совпадения "
+              f"(регион/название), кандидаты: {[c[2] for c in candidates]}")
+    # если региона не было И название первого кандидата совпадает — берём его
+    if not want:
+        for c in candidates:
+            if name_ok(c):
+                return c[:3]
     return None
 
 

@@ -42,6 +42,13 @@
       "expectedStatus": 200
     },
     {
+      "name": "Meshkovo Oryol region to Oryol short",
+      "method": "POST",
+      "path": "/",
+      "body": {"from": "деревня Мешково, Орловская обл, Урицкий р-н", "to": "Орёл, Орловская область"},
+      "expectedStatus": 200
+    },
+    {
       "name": "Multi points needs at least 2",
       "method": "POST",
       "path": "/",

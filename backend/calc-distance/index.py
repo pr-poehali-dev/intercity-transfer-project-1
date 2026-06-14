@@ -8,10 +8,22 @@ from concurrent.futures import ThreadPoolExecutor
 import psycopg2
 
 
+def region_key(region: str) -> str:
+    """Нормализует название региона до ядра без типа: 'Орловская обл' -> 'орловск'."""
+    if not region:
+        return ''
+    low = region.lower()
+    for t in ('область', 'обл.', 'обл', 'край', 'республика', 'респ.', 'респ',
+              'автономный округ', 'ао', 'округ', 'г.', 'г '):
+        low = low.replace(t, ' ')
+    low = low.strip(' .,-')
+    # отбрасываем окончание прилагательного, чтобы 'орловская' матчилось с 'орловск'
+    return low[:6] if len(low) >= 6 else low
+
+
 def geocode(query: str, api_key: str, locations=None):
     """Получить координаты населённого пункта через DaData.
-    Возвращает (lat, lon, label) либо None.
-    locations — необязательный жёсткий фильтр (например по региону)."""
+    Возвращает (lat, lon, label, region_value) либо None."""
     payload = json.dumps({
         'query': query,
         'count': 1,
@@ -42,8 +54,9 @@ def geocode(query: str, api_key: str, locations=None):
     if not lat or not lon:
         return None
     label = items[0].get('value') or query
-    print(f"geocode '{query}' (loc={locations}) -> {label} ({lat},{lon})")
-    return float(lat), float(lon), label
+    found_region = d.get('region_with_type') or d.get('region') or ''
+    print(f"geocode '{query}' (loc={locations}) -> {label} ({lat},{lon}) reg={found_region}")
+    return float(lat), float(lon), label, found_region
 
 
 def parse_region(query: str):
@@ -57,32 +70,56 @@ def parse_region(query: str):
 
 
 def geocode_safe(query: str, api_key: str):
-    """Геокод с жёстким ограничением по региону, чтобы не попасть
-    в одноимённый населённый пункт в другой области."""
+    """Геокод с жёсткой привязкой к региону, чтобы не попасть
+    в одноимённый населённый пункт в другой области.
+    Возвращает (lat, lon, label) либо None."""
     parts = [p.strip() for p in query.split(',') if p.strip()]
     name = parts[0] if parts else query
     region = parse_region(query)
+    want = region_key(region) if region else ''
 
-    # ШАГ 1: если знаем регион — ищем СТРОГО внутри него (жёсткий фильтр).
-    # Это исключает попадание в одноимённое село в соседней области.
+    def matches(res):
+        """Проверяет, что найденная точка в нужном регионе."""
+        if not res:
+            return False
+        if not want:
+            return True
+        return region_key(res[3]) == want
+
+    candidates = []
+
+    # ШАГ 1: жёсткий фильтр по региону
     if region:
-        coords = geocode(name, api_key, locations=[{'region': region}])
-        if coords:
-            return coords
-        # повтор с полной строкой внутри региона
-        coords = geocode(query, api_key, locations=[{'region': region}])
-        if coords:
-            return coords
+        for q in (f"{name}, {region}", name, query):
+            res = geocode(q, api_key, locations=[{'region': region}])
+            if res and matches(res):
+                return res[:3]
+            if res:
+                candidates.append(res)
 
-    # ШАГ 2: обычный поиск по всей России (для крупных городов без региона)
-    coords = geocode(query, api_key)
-    if coords:
-        return coords
+    # ШАГ 2: поиск по всей России, но ТОЛЬКО если совпадает регион
+    res = geocode(query, api_key)
+    if res and matches(res):
+        return res[:3]
+    if res:
+        candidates.append(res)
 
-    # ШАГ 3: последний шанс — только название
-    if name != query:
-        print(f"geocode fallback: '{query}' -> '{name}'")
-        return geocode(name, api_key)
+    res = geocode(name, api_key)
+    if res and matches(res):
+        return res[:3]
+    if res:
+        candidates.append(res)
+
+    # ШАГ 3: регион указан, но точного совпадения нет —
+    # лучше ничего не вернуть, чем взять чужой нас. пункт
+    if want:
+        print(f"geocode WARN: '{query}' — нет точки в регионе '{region}', "
+              f"кандидаты: {[c[2] for c in candidates]}")
+        return None
+
+    # региона не было (крупный город) — берём первый кандидат
+    if candidates:
+        return candidates[0][:3]
     return None
 
 

@@ -20,6 +20,7 @@ interface BookingModalProps {
   minivanSub: number;
   price: number;
   distance: number | null;
+  routeLabels?: { from?: string; to?: string };
   name: string;
   setName: (v: string) => void;
   phone: string;
@@ -40,7 +41,7 @@ export default function BookingModal({
   from, via, to, date, time, roundTrip, tariff, passengers,
   withChildren, childrenCount, withPet, petOption,
   deliveryMode, minivanSub,
-  price, distance,
+  price, distance, routeLabels,
   name, setName, phone, handlePhoneChange, isPhoneValid,
   comment, setComment,
   sending, sent, error, validationError,
@@ -152,6 +153,18 @@ export default function BookingModal({
                     {getDurationByDistance(distance)}
                   </span>
                 </div>
+              </div>
+            )}
+
+            {distance && (routeLabels?.from || routeLabels?.to) && (
+              <div className="mb-6 -mt-3 flex items-start gap-2 text-xs text-muted-foreground">
+                <Icon name="MapPin" size={13} className="text-neon flex-shrink-0 mt-0.5" />
+                <span>
+                  Маршрут построен между:{" "}
+                  {routeLabels.from && <span className="text-foreground">{routeLabels.from}</span>}
+                  {routeLabels.from && routeLabels.to && " → "}
+                  {routeLabels.to && <span className="text-foreground">{routeLabels.to}</span>}
+                </span>
               </div>
             )}
 

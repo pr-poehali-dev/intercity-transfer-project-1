@@ -10,6 +10,7 @@ import psycopg2
 
 def geocode(query: str, api_key: str, locations=None):
     """Получить координаты населённого пункта через DaData.
+    Возвращает (lat, lon, label) либо None.
     locations — необязательный жёсткий фильтр (например по региону)."""
     payload = json.dumps({
         'query': query,
@@ -40,8 +41,9 @@ def geocode(query: str, api_key: str, locations=None):
     lon = d.get('geo_lon')
     if not lat or not lon:
         return None
-    print(f"geocode '{query}' (loc={locations}) -> {items[0].get('value')} ({lat},{lon})")
-    return float(lat), float(lon)
+    label = items[0].get('value') or query
+    print(f"geocode '{query}' (loc={locations}) -> {label} ({lat},{lon})")
+    return float(lat), float(lon), label
 
 
 def parse_region(query: str):
@@ -189,12 +191,14 @@ def segment_distance(from_city, to_city, dadata_key, gh_key, dsn):
     with ThreadPoolExecutor(max_workers=2) as ex:
         f_from = ex.submit(geocode_safe, from_city, dadata_key)
         f_to = ex.submit(geocode_safe, to_city, dadata_key)
-        from_coords = f_from.result()
-        to_coords = f_to.result()
-    if not from_coords or not to_coords:
+        from_res = f_from.result()
+        to_res = f_to.result()
+    if not from_res or not to_res:
         if conn:
             conn.close()
         raise ValueError(f'Координаты не найдены: {from_city} / {to_city}')
+    from_coords = from_res[:2]
+    to_coords = to_res[:2]
     dist = road_distance(from_coords, to_coords, gh_key)
     if dist and conn:
         if is_sane_distance(dist, from_coords, to_coords):
@@ -304,9 +308,9 @@ def handler(event: dict, context) -> dict:
         with ThreadPoolExecutor(max_workers=2) as ex:
             f_from = ex.submit(geocode_safe, from_city, dadata_key)
             f_to = ex.submit(geocode_safe, to_city, dadata_key)
-            from_coords = f_from.result()
-            to_coords = f_to.result()
-        if not from_coords or not to_coords:
+            from_res = f_from.result()
+            to_res = f_to.result()
+        if not from_res or not to_res:
             if conn:
                 conn.close()
             return {
@@ -314,6 +318,10 @@ def handler(event: dict, context) -> dict:
                 'headers': {'Access-Control-Allow-Origin': '*'},
                 'body': json.dumps({'distance': None, 'error': 'Координаты не найдены'})
             }
+        from_coords = from_res[:2]
+        to_coords = to_res[:2]
+        from_label = from_res[2] if len(from_res) > 2 else from_city
+        to_label = to_res[2] if len(to_res) > 2 else to_city
         dist = road_distance(from_coords, to_coords, gh_key)
     except Exception as e:
         print(f"calc-distance error for {from_city} -> {to_city}: {type(e).__name__}: {e}")
@@ -339,5 +347,9 @@ def handler(event: dict, context) -> dict:
     return {
         'statusCode': 200,
         'headers': {'Access-Control-Allow-Origin': '*'},
-        'body': json.dumps({'distance': dist})
+        'body': json.dumps({
+            'distance': dist,
+            'from_label': from_label,
+            'to_label': to_label,
+        })
     }

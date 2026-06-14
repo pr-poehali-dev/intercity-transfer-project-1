@@ -34,6 +34,7 @@ export default function Index() {
   const [calculated, setCalculated] = useState(false);
   const [calculating, setCalculating] = useState(false);
   const [distanceError, setDistanceError] = useState(false);
+  const [routeLabels, setRouteLabels] = useState<{ from?: string; to?: string }>({});
 
   const bookRef = useRef<HTMLDivElement>(null);
 
@@ -97,6 +98,9 @@ export default function Index() {
       });
       if (!res.ok) return null;
       const data = await res.json();
+      if (data.from_label || data.to_label) {
+        setRouteLabels({ from: data.from_label, to: data.to_label });
+      }
       if (typeof data.distance === "number" && data.distance > 0) return data.distance;
     } catch { /* no fallback */ }
     return null;
@@ -126,6 +130,7 @@ export default function Index() {
     if (!from || !to || calculating) return;
     if (!roundTrip && norm(from) === norm(to)) return;
     setCalculating(true);
+    setRouteLabels({});
     const fromCity = resolveCity(from);
     const toCity = resolveCity(to);
     const viaCity = resolveCity(via);
@@ -227,6 +232,7 @@ export default function Index() {
         setTime={setTime}
         price={price}
         distance={distance}
+        routeLabels={routeLabels}
         calculated={calculated}
         calculating={calculating}
         distanceError={distanceError}

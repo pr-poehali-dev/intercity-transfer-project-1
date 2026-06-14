@@ -86,7 +86,11 @@ def handler(event: dict, context) -> dict:
             return
         region = d.get('region_with_type') or d.get('region', '')
         area = d.get('area_with_type') or ''
-        key = (name, region, area)
+        # Нормализуем ключ: ё→е и нижний регистр, чтобы 'Орёл' и 'Орел'
+        # считались одним населённым пунктом
+        def norm(s):
+            return (s or '').lower().replace('ё', 'е').strip()
+        key = (norm(name), norm(region), norm(area))
         if key in seen:
             return
         seen.add(key)

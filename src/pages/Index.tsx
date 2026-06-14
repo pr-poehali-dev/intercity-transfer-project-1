@@ -34,6 +34,7 @@ export default function Index() {
   const [calculated, setCalculated] = useState(false);
   const [calculating, setCalculating] = useState(false);
   const [distanceError, setDistanceError] = useState(false);
+  const [manualRequest, setManualRequest] = useState(false);
   const [routeLabels, setRouteLabels] = useState<{ from?: string; to?: string; points?: string[] }>({});
 
   const bookRef = useRef<HTMLDivElement>(null);
@@ -152,10 +153,12 @@ export default function Index() {
       setDistance(null);
       setCalculated(false);
       setDistanceError(true);
+      setManualRequest(true);
       setCalculating(false);
       return;
     }
     setDistanceError(false);
+    setManualRequest(false);
     if (roundTrip) totalDist *= 1.9;
     setPrice(priceFromDistance(totalDist) + (hasViaStop ? 1000 : 0));
     setDistance(totalDist);
@@ -174,9 +177,9 @@ export default function Index() {
     scrollToBook();
   }
 
-  function handleSetFrom(v: string, region?: string) { setFrom(v); setFromRegion(region || ""); setCalculated(false); setDistanceError(false); }
-  function handleSetTo(v: string, region?: string) { setTo(v); setToRegion(region || ""); setCalculated(false); setDistanceError(false); }
-  function handleSetVia(v: string, region?: string) { setVia(v); setViaRegion(region || ""); setCalculated(false); setDistanceError(false); }
+  function handleSetFrom(v: string, region?: string) { setFrom(v); setFromRegion(region || ""); setCalculated(false); setDistanceError(false); setManualRequest(false); }
+  function handleSetTo(v: string, region?: string) { setTo(v); setToRegion(region || ""); setCalculated(false); setDistanceError(false); setManualRequest(false); }
+  function handleSetVia(v: string, region?: string) { setVia(v); setViaRegion(region || ""); setCalculated(false); setDistanceError(false); setManualRequest(false); }
   function handleSetWithVia(v: boolean) { setWithVia(v); setCalculated(false); if (!v) { setVia(""); setViaRegion(""); } }
   function handleSetRoundTrip(v: boolean) { setRoundTrip(v); setCalculated(false); }
   function handleSetTariff(v: number) {
@@ -239,8 +242,9 @@ export default function Index() {
         calculated={calculated}
         calculating={calculating}
         distanceError={distanceError}
+        manualRequest={manualRequest}
         onCalculate={calculate}
-        onClose={() => setCalculated(false)}
+        onClose={() => { setCalculated(false); setManualRequest(false); }}
         onRouteSelect={handleRouteSelect}
         sectionRef={bookRef}
       />

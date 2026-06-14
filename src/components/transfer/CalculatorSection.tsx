@@ -47,6 +47,7 @@ interface CalculatorSectionProps {
   calculated: boolean;
   calculating: boolean;
   distanceError: boolean;
+  manualRequest?: boolean;
   onCalculate: () => void;
   onClose: () => void;
   onRouteSelect: (from: string, to: string) => void;
@@ -64,7 +65,7 @@ export default function CalculatorSection({
   minivanSub, setMinivanSub,
   date, setDate,
   time, setTime,
-  price, distance, routeLabels, calculated, calculating, distanceError,
+  price, distance, routeLabels, calculated, calculating, distanceError, manualRequest,
   onCalculate, onClose, onRouteSelect,
   sectionRef,
 }: CalculatorSectionProps) {
@@ -137,7 +138,7 @@ export default function CalculatorSection({
           date: time ? `${date} ${time}` : date,
           passengers: isDelivery ? "—" : passengers,
           tariff: tariffLabel,
-          price: finalPrice,
+          price: manualRequest ? "по запросу (ручной расчёт)" : finalPrice,
           distance,
           duration: distance ? getDurationByDistance(distance) : undefined,
           services: services.length ? services.join("; ") : "—",
@@ -195,8 +196,8 @@ export default function CalculatorSection({
         </div>
       </section>
 
-      {/* MODAL with price */}
-      {calculated && price && (
+      {/* MODAL with price OR manual request */}
+      {((calculated && price) || manualRequest) && (
         <BookingModal
           from={from} via={(withVia && via) ? via : undefined} to={to}
           date={date} time={time}
@@ -205,7 +206,8 @@ export default function CalculatorSection({
           withChildren={withChildren} childrenCount={childrenCount}
           withPet={withPet} petOption={petOption}
           deliveryMode={deliveryMode} minivanSub={minivanSub}
-          price={price} distance={distance}
+          price={price ?? 0} distance={distance}
+          manualRequest={manualRequest}
           routeLabels={routeLabels}
           name={name} setName={setName}
           phone={phone}

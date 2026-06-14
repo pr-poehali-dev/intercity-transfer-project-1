@@ -20,6 +20,7 @@ interface BookingModalProps {
   minivanSub: number;
   price: number;
   distance: number | null;
+  manualRequest?: boolean;
   routeLabels?: { from?: string; to?: string; points?: string[] };
   name: string;
   setName: (v: string) => void;
@@ -41,7 +42,7 @@ export default function BookingModal({
   from, via, to, date, time, roundTrip, tariff, passengers,
   withChildren, childrenCount, withPet, petOption,
   deliveryMode, minivanSub,
-  price, distance, routeLabels,
+  price, distance, manualRequest, routeLabels,
   name, setName, phone, handlePhoneChange, isPhoneValid,
   comment, setComment,
   sending, sent, error, validationError,
@@ -90,19 +91,34 @@ export default function BookingModal({
           </div>
         ) : (
           <>
-            <div className="text-xs font-display text-neon tracking-widest mb-4">СТОИМОСТЬ ПОЕЗДКИ</div>
-            <div className="flex items-baseline gap-2 mb-2 flex-wrap">
-              <span className="font-display text-lg sm:text-2xl text-muted-foreground">от</span>
-              <span className="font-display text-4xl sm:text-6xl font-bold text-neon glow-neon-text">
-                {(shownPrice ?? 0).toLocaleString("ru-RU")}
-              </span>
-              <span className="font-display text-lg sm:text-2xl text-muted-foreground">₽</span>
-            </div>
+            {manualRequest ? (
+              <>
+                <div className="text-xs font-display text-neon tracking-widest mb-4">ЗАЯВКА НА РАСЧЁТ</div>
+                <div className="font-display text-2xl sm:text-3xl font-bold mb-3">
+                  Рассчитаем стоимость вручную
+                </div>
+                <div className="inline-flex items-center gap-2 bg-neon/10 border border-neon/40 rounded-lg px-3 py-2 mb-3 text-xs text-foreground font-medium">
+                  <Icon name="Phone" size={13} className="flex-shrink-0 text-neon" />
+                  Оставьте контакты — посчитаем точную цену и ответим за 5 минут
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="text-xs font-display text-neon tracking-widest mb-4">СТОИМОСТЬ ПОЕЗДКИ</div>
+                <div className="flex items-baseline gap-2 mb-2 flex-wrap">
+                  <span className="font-display text-lg sm:text-2xl text-muted-foreground">от</span>
+                  <span className="font-display text-4xl sm:text-6xl font-bold text-neon glow-neon-text">
+                    {(shownPrice ?? 0).toLocaleString("ru-RU")}
+                  </span>
+                  <span className="font-display text-lg sm:text-2xl text-muted-foreground">₽</span>
+                </div>
 
-            <div className="inline-flex items-center gap-2 bg-yellow-500/10 border border-yellow-500/40 rounded-lg px-3 py-2 mb-3 text-xs text-yellow-200 font-medium">
-              <Icon name="TriangleAlert" size={13} className="flex-shrink-0 text-yellow-400" />
-              Без учёта платных дорог · точную стоимость подтвердит диспетчер
-            </div>
+                <div className="inline-flex items-center gap-2 bg-yellow-500/10 border border-yellow-500/40 rounded-lg px-3 py-2 mb-3 text-xs text-yellow-200 font-medium">
+                  <Icon name="TriangleAlert" size={13} className="flex-shrink-0 text-yellow-400" />
+                  Без учёта платных дорог · точную стоимость подтвердит диспетчер
+                </div>
+              </>
+            )}
 
             <div className="text-sm text-muted-foreground mb-3">
               {from}{via ? ` → ${via}` : ""} → {to}{roundTrip ? `${via ? ` → ${via}` : ""} → ${from}` : ""} · {cur.name}

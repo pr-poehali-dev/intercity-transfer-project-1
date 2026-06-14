@@ -211,12 +211,8 @@ export function resolveGeocodeQuery(value: string): string {
   // Для аэропорта отдаём полное название С КОДОМ (REN) — по нему backend
   // берёт точные координаты аэропорта из справочника.
   if (terminal.type === "airport") return terminal.name;
-  // Для ж/д вокзала и автовокзала отдаём "название, город" —
-  // backend геокодирует сам объект (вокзал), а не центр города.
-  if (terminal.type === "train" || terminal.type === "bus") {
-    const cleanName = terminal.name.replace(/\s*\([^)]*\)\s*$/, "").trim();
-    return `${cleanName}, ${terminal.city}`;
-  }
+  // Ж/д вокзалы и автовокзалы почти всегда в центре города,
+  // поэтому считаем маршрут до города — это точно и надёжно.
   return terminal.city;
 }
 

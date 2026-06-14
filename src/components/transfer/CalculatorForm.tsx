@@ -337,7 +337,10 @@ export default function CalculatorForm({
       {distanceError && (
         <div className="mt-3 flex items-start gap-2 text-sm text-red-400 bg-red-500/10 border border-red-500/30 rounded-lg px-3 py-2.5">
           <Icon name="TriangleAlert" size={16} className="flex-shrink-0 mt-0.5" />
-          <span>Не удалось рассчитать маршрут автоматически. Проверьте адреса или отправьте заявку — мы посчитаем вручную и ответим за 5 минут.</span>
+          <span>
+            Не удалось определить расстояние. Уточните населённый пункт — начните вводить название и выберите нужный вариант с областью из списка.
+            {" "}Если пункта нет в списке — просто отправьте заявку, мы рассчитаем вручную и ответим за 5 минут.
+          </span>
         </div>
       )}
     </div>

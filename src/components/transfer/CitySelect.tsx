@@ -95,7 +95,11 @@ export default function CitySelect({ value, onChange, iconName, exclude }: CityS
     <div ref={ref} className="relative">
       <button
         type="button"
-        onClick={() => setOpen(!open)}
+        onClick={() => {
+          const next = !open;
+          if (next && value) setSearch(value);
+          setOpen(next);
+        }}
         className="w-full bg-background border border-border rounded-lg pl-9 pr-9 py-3 text-base text-left text-foreground cursor-pointer hover:border-white/30 transition-colors flex items-center"
       >
         <Icon name={iconName} size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-neon pointer-events-none" />
@@ -112,6 +116,7 @@ export default function CitySelect({ value, onChange, iconName, exclude }: CityS
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
+                onFocus={(e) => e.target.select()}
                 placeholder="Можно даже и село"
                 autoFocus
                 className="w-full bg-background border border-border rounded-lg pl-9 pr-3 py-2.5 text-base text-foreground placeholder:text-muted-foreground/60"

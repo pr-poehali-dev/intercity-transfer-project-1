@@ -164,6 +164,19 @@ def geocode_safe(query: str, api_key: str):
         if res:
             return res
 
+    # Точный адрес (есть улица/дом) — геокодируем строку целиком,
+    # это самый детальный уровень и не требует проверки названия пункта.
+    street_markers = (' ул ', ' ул.', 'улица', ' пер ', ' пер.', 'переулок',
+                      ' пр-кт', ' проспект', ' пр-д', ' проезд', ' ш ', ' шоссе',
+                      ' б-р', ' бульвар', ' наб', ' тупик', ' аллея', ' кв-л')
+    house_markers = (' д ', ' д.', ' дом ', ' стр ', ' стр.', ' корп', ' влд ', ' владение')
+    qpad = f' {low_q} '
+    if any(m in qpad for m in street_markers) or any(m in qpad for m in house_markers):
+        cands = geocode_candidates(query, api_key, count=5)
+        if cands:
+            print(f"geocode address '{query}' -> {cands[0][2]}")
+            return cands[0][:3]
+
     parts = [p.strip() for p in query.split(',') if p.strip()]
     name = parts[0] if parts else query
     region = parse_region(query)

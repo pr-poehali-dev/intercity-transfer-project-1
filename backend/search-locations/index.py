@@ -50,14 +50,14 @@ def handler(event: dict, context) -> dict:
         with urllib.request.urlopen(req, timeout=6) as resp:
             return json.loads(resp.read())
 
-    # Ищем по всем уровням населённых пунктов:
-    # города, посёлки, сёла, деревни, хутора, станицы и т.п.
+    # Ищем по всем уровням адреса: города, посёлки, сёла, деревни, хутора,
+    # станицы, а также улицы и дома (to_bound = house).
     try:
         data = dadata_request({
             'query': query,
             'count': 20,
             'from_bound': {'value': 'city'},
-            'to_bound': {'value': 'settlement'},
+            'to_bound': {'value': 'house'},
             'restrict_value': True,
             'locations': [{'country': 'Россия'}],
         })
@@ -73,8 +73,8 @@ def handler(event: dict, context) -> dict:
 
     def add_item(item):
         d = item.get('data', {})
-        # Берём самый детальный населённый пункт
-        name = (
+        # Базовый населённый пункт
+        settlement = (
             d.get('settlement_with_type')
             or d.get('city_with_type')
             or d.get('settlement')
@@ -82,12 +82,20 @@ def handler(event: dict, context) -> dict:
             or d.get('city_district_with_type')
             or d.get('city_district')
         )
-        if not name:
+        if not settlement:
             return
         region = d.get('region_with_type') or d.get('region', '')
         area = d.get('area_with_type') or ''
-        # Нормализуем ключ: ё→е и нижний регистр, чтобы 'Орёл' и 'Орел'
-        # считались одним населённым пунктом
+        street = d.get('street_with_type') or d.get('street') or ''
+        house = d.get('house', '')
+        house_type = d.get('house_type') or 'д'
+        # Название в списке: нас. пункт + улица + дом, если они есть
+        name = settlement
+        if street:
+            name = f'{settlement}, {street}'
+            if house:
+                name = f'{name}, {house_type} {house}'
+        # Нормализуем ключ: ё→е и нижний регистр
         def norm(s):
             return (s or '').lower().replace('ё', 'е').strip()
         key = (norm(name), norm(region), norm(area))
@@ -113,7 +121,7 @@ def handler(event: dict, context) -> dict:
                 'query': query,
                 'count': 20,
                 'from_bound': {'value': 'settlement'},
-                'to_bound': {'value': 'settlement'},
+                'to_bound': {'value': 'house'},
                 'locations': [{'country': 'Россия'}],
             })
             for item in data2.get('suggestions', []):

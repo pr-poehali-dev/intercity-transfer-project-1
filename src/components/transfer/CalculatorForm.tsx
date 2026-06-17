@@ -64,6 +64,7 @@ export default function CalculatorForm({
       : viaSameAsTo
         ? "Промежуточный пункт совпадает с «Куда»"
         : "";
+  const addressesFilled = !!from.trim() && !!to.trim() && (!withVia || !!via.trim());
 
   return (
     <div className="reveal bg-surface border border-border rounded-2xl p-4 sm:p-8">
@@ -321,7 +322,7 @@ export default function CalculatorForm({
 
       <button
         onClick={onCalculate}
-        disabled={!!routeError || calculating}
+        disabled={!!routeError || calculating || !addressesFilled}
         className="w-full bg-neon text-background font-display font-bold text-base py-4 rounded-xl hover:opacity-90 transition-all glow-neon hover:scale-[1.02] active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
       >
         {calculating ? (

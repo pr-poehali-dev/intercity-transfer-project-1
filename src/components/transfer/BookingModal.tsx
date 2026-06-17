@@ -59,8 +59,15 @@ export default function BookingModal({
   const basePrice = distance
     ? Math.round((distance * ratePerKm * getDistanceSurcharge(distance)) / 50) * 50 + extras
     : price;
-  const discount = distance ? getLongRouteDiscount(distance) : 0;
+  const longRouteDiscount = distance ? getLongRouteDiscount(distance) : 0;
+  // Скидка за «туда-обратно»: обратный путь считается как 0.9 от прямого
+  // (distance уже = односторонняя × 1.9). Полная цена была бы при ×2.0.
+  const roundTripDiscount = (roundTrip && distance)
+    ? Math.round((distance / 1.9 * 0.1 * ratePerKm * getDistanceSurcharge(distance)) / 50) * 50
+    : 0;
+  const discount = longRouteDiscount + roundTripDiscount;
   const shownPrice = basePrice != null ? basePrice - discount : price;
+  const fullPrice = basePrice != null ? basePrice + roundTripDiscount : null;
 
   return (
     <div
@@ -107,10 +114,10 @@ export default function BookingModal({
             ) : (
               <>
                 <div className="text-xs font-display text-neon tracking-widest mb-4">СТОИМОСТЬ ПОЕЗДКИ</div>
-                {discount > 0 && basePrice != null && (
+                {discount > 0 && fullPrice != null && (
                   <div className="flex items-baseline gap-2 mb-1 flex-wrap">
                     <span className="font-display text-xl sm:text-2xl text-muted-foreground line-through decoration-2">
-                      {basePrice.toLocaleString("ru-RU")} ₽
+                      {fullPrice.toLocaleString("ru-RU")} ₽
                     </span>
                     <span className="inline-flex items-center gap-1 bg-neon/15 text-neon text-xs font-bold px-2 py-0.5 rounded-md">
                       <Icon name="TrendingDown" size={12} />
@@ -125,7 +132,13 @@ export default function BookingModal({
                   </span>
                   <span className="font-display text-lg sm:text-2xl text-muted-foreground">₽</span>
                 </div>
-                {discount > 0 && (
+                {roundTripDiscount > 0 && (
+                  <div className="inline-flex items-center gap-2 bg-neon/10 border border-neon/40 rounded-lg px-3 py-2 mb-3 text-xs text-foreground font-medium">
+                    <Icon name="RefreshCw" size={13} className="flex-shrink-0 text-neon" />
+                    Скидка 10% за поездку туда и обратно уже в цене
+                  </div>
+                )}
+                {longRouteDiscount > 0 && (
                   <div className="inline-flex items-center gap-2 bg-neon/10 border border-neon/40 rounded-lg px-3 py-2 mb-3 text-xs text-foreground font-medium">
                     <Icon name="Sparkles" size={13} className="flex-shrink-0 text-neon" />
                     Скидка за дальнюю поездку уже учтена в цене

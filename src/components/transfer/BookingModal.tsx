@@ -66,8 +66,10 @@ export default function BookingModal({
     ? Math.round((distance / 1.95 * 0.05 * ratePerKm * getDistanceSurcharge(distance)) / 50) * 50
     : 0;
   const discount = longRouteDiscount + roundTripDiscount;
-  const shownPrice = basePrice != null ? basePrice - discount : price;
+  // fullPrice — цена без всех скидок (как если бы платили за два конца полностью).
+  // shownPrice — итоговая цена: fullPrice минус все скидки. Так они всегда сходятся.
   const fullPrice = basePrice != null ? basePrice + roundTripDiscount : null;
+  const shownPrice = fullPrice != null ? fullPrice - discount : price;
 
   return (
     <div

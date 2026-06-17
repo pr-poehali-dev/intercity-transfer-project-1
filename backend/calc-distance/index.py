@@ -58,17 +58,15 @@ def names_match(query_name: str, found_name: str) -> bool:
     return False
 
 
-def geocode_candidates(query: str, api_key: str, count: int = 10):
-    """Возвращает список кандидатов от DaData:
-    [(lat, lon, label, region_value, settlement_name, area_value), ...]."""
+def _dadata_suggest(query: str, api_key: str, count: int, to_bound: str):
+    """Сырой запрос к DaData с заданной верхней границей (settlement/house)."""
     payload = json.dumps({
         'query': query,
         'count': count,
         'from_bound': {'value': 'region'},
-        'to_bound': {'value': 'settlement'},
+        'to_bound': {'value': to_bound},
         'locations': [{'country': 'Россия'}],
     }).encode('utf-8')
-
     req = urllib.request.Request(
         'https://suggestions.dadata.ru/suggestions/api/4_1/rs/suggest/address',
         data=payload,
@@ -80,10 +78,25 @@ def geocode_candidates(query: str, api_key: str, count: int = 10):
         }
     )
     with urllib.request.urlopen(req, timeout=8) as resp:
-        data = json.loads(resp.read())
+        return json.loads(resp.read())
+
+
+def geocode_candidates(query: str, api_key: str, count: int = 10):
+    """Возвращает список кандидатов от DaData:
+    [(lat, lon, label, region_value, settlement_name, area_value), ...]."""
+    data = _dadata_suggest(query, api_key, count, 'settlement')
+    items = data.get('suggestions', [])
+    # Если на уровне населённого пункта ничего нет (часто бывает с пгт,
+    # курортными посёлками), расширяем поиск до уровня дома — он
+    # вытягивает мелкие и нестандартные пункты.
+    if not items:
+        try:
+            items = _dadata_suggest(query, api_key, count, 'house').get('suggestions', [])
+        except Exception:
+            items = []
 
     out = []
-    for item in data.get('suggestions', []):
+    for item in items:
         d = item.get('data', {})
         lat = d.get('geo_lat')
         lon = d.get('geo_lon')
@@ -278,7 +291,14 @@ def geocode_safe(query: str, api_key: str):
     # 3) Региона не было — берём первого с совпадающим названием
     for c in all_cands:
         if name_ok(c):
+            print(f"geocode: '{query}' — без региона, берём по названию: {c[2]}")
             return c[:3]
+    # 3b) Название тоже не совпало (DaData вернул только похожие/territory),
+    # но кандидаты есть — берём самый первый (DaData ранжирует по релевантности).
+    if all_cands:
+        print(f"geocode: '{query}' — точного названия нет, берём первого: {all_cands[0][2]}")
+        return all_cands[0][:3]
+    print(f"geocode WARN: '{query}' — кандидатов нет вовсе")
     return None
 
 

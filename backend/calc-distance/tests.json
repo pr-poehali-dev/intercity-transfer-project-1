@@ -70,6 +70,13 @@
       "expectedStatus": 200
     },
     {
+      "name": "Pgt Azovskoe manual no region to Simferopol",
+      "method": "POST",
+      "path": "/",
+      "body": {"from": "пгт Азовское", "to": "г Симферополь"},
+      "expectedStatus": 200
+    },
+    {
       "name": "Multi points needs at least 2",
       "method": "POST",
       "path": "/",

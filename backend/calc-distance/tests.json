@@ -63,6 +63,13 @@
       "expectedStatus": 200
     },
     {
+      "name": "Kurortnoe Leninsky district to Simferopol",
+      "method": "POST",
+      "path": "/",
+      "body": {"from": "село Курортное, респ Крым, Ленинский р-н", "to": "г Симферополь, респ Крым"},
+      "expectedStatus": 200
+    },
+    {
       "name": "Multi points needs at least 2",
       "method": "POST",
       "path": "/",

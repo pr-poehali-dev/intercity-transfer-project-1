@@ -60,7 +60,7 @@ def names_match(query_name: str, found_name: str) -> bool:
 
 def geocode_candidates(query: str, api_key: str, count: int = 10):
     """Возвращает список кандидатов от DaData:
-    [(lat, lon, label, region_value, settlement_name), ...]."""
+    [(lat, lon, label, region_value, settlement_name, area_value), ...]."""
     payload = json.dumps({
         'query': query,
         'count': count,
@@ -93,7 +93,8 @@ def geocode_candidates(query: str, api_key: str, count: int = 10):
         found_region = d.get('region_with_type') or d.get('region') or ''
         found_name = (d.get('settlement') or d.get('city')
                       or d.get('city_district') or label)
-        out.append((float(lat), float(lon), label, found_region, found_name))
+        found_area = d.get('area_with_type') or d.get('area') or ''
+        out.append((float(lat), float(lon), label, found_region, found_name, found_area))
     print(f"geocode '{query}' -> {len(out)} cand: {[c[2] for c in out[:5]]}")
     return out
 
@@ -112,6 +113,28 @@ def parse_region(query: str):
         if any(k in low for k in ('обл', 'край', 'респ', 'область', 'ао', 'округ', 'г.')):
             return p
     return None
+
+
+def parse_area(query: str):
+    """Достаёт название района из строки адреса ('Ленинский р-н')."""
+    parts = [p.strip() for p in query.split(',') if p.strip()]
+    for p in parts[1:]:
+        low = p.lower()
+        if any(k in low for k in ('р-н', 'район', 'муницип')):
+            return p
+    return None
+
+
+def area_key(area: str) -> str:
+    """Нормализует район до ядра без типа: 'Ленинский р-н' -> 'ленинск'."""
+    if not area:
+        return ''
+    low = area.lower().replace('ё', 'е')
+    for t in ('муниципальный район', 'муниципальный округ', 'городской округ',
+              'муницип.', 'район', 'р-н', 'р-он', 'округ', 'г.о.'):
+        low = low.replace(t, ' ')
+    low = low.strip(' .,-')
+    return low[:6] if len(low) >= 6 else low
 
 
 def geocode_terminal(query: str, api_key: str):
@@ -181,11 +204,21 @@ def geocode_safe(query: str, api_key: str):
     name = parts[0] if parts else query
     region = parse_region(query)
     want = region_key(region) if region else ''
+    area = parse_area(query)
+    want_area = area_key(area) if area else ''
 
     def region_ok(res):
         if not want:
             return True
         return region_key(res[3]) == want
+
+    def area_ok(res):
+        """Район найденной точки совпадает с запрошенным.
+        Различает одноимённые сёла (Курортное в Ленинском и Белогорском р-нах)."""
+        if not want_area:
+            return True
+        found_area = res[5] if len(res) > 5 else ''
+        return area_key(found_area) == want_area
 
     def name_ok(res):
         """Название найденной точки должно совпадать с запрошенным
@@ -193,8 +226,10 @@ def geocode_safe(query: str, api_key: str):
         found_name = res[4] if len(res) > 4 else res[2]
         return names_match(name, found_name)
 
-    # Собираем кандидатов из нескольких запросов (с регионом в тексте и без).
+    # Собираем кандидатов из нескольких запросов (с регионом/районом в тексте и без).
     queries = []
+    if region and area:
+        queries.append(f"{name}, {region}, {area}")
     if region:
         queries.append(f"{name}, {region}")
         queries.append(query)
@@ -212,10 +247,21 @@ def geocode_safe(query: str, api_key: str):
         except Exception as e:
             print(f"geocode_candidates error for '{q}': {e}")
 
-    # 1) Идеально: совпал регион И название
+    # 1) Идеально: совпал регион, район И название
     for c in all_cands:
-        if region_ok(c) and name_ok(c):
+        if region_ok(c) and area_ok(c) and name_ok(c):
             return c[:3]
+
+    # 1b) Если указан район, но точного совпадения названия нет —
+    # берём кандидата с совпавшими регионом и районом (СНТ/территории).
+    if want_area:
+        ra_cands = [c for c in all_cands if region_ok(c) and area_ok(c)]
+        if ra_cands:
+            print(f"geocode: '{query}' — берём по совпадению района: {ra_cands[0][2]}")
+            return ra_cands[0][:3]
+        print(f"geocode WARN: '{query}' — нет точки с нужным районом '{area}'. "
+              f"Кандидаты: {[(c[2], c[3], c[5] if len(c) > 5 else '') for c in all_cands[:6]]}")
+        return None
 
     # 2) Если регион известен — проверим кандидатов только по региону
     if want:

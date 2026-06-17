@@ -166,7 +166,7 @@ export default function Index() {
     }
     setDistanceError(false);
     setManualRequest(false);
-    if (roundTrip) totalDist *= 1.9;
+    if (roundTrip) totalDist *= 1.95;
     setPrice(priceFromDistance(totalDist) + (hasViaStop ? 1000 : 0));
     setDistance(totalDist);
     setCalculated(true);

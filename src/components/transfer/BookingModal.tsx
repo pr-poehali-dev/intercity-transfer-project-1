@@ -60,10 +60,10 @@ export default function BookingModal({
     ? Math.round((distance * ratePerKm * getDistanceSurcharge(distance)) / 50) * 50 + extras
     : price;
   const longRouteDiscount = distance ? getLongRouteDiscount(distance) : 0;
-  // Скидка за «туда-обратно»: обратный путь считается как 0.9 от прямого
-  // (distance уже = односторонняя × 1.9). Полная цена была бы при ×2.0.
+  // Скидка за «туда-обратно»: обратный путь считается как 0.95 от прямого
+  // (distance уже = односторонняя × 1.95). Полная цена была бы при ×2.0.
   const roundTripDiscount = (roundTrip && distance)
-    ? Math.round((distance / 1.9 * 0.1 * ratePerKm * getDistanceSurcharge(distance)) / 50) * 50
+    ? Math.round((distance / 1.95 * 0.05 * ratePerKm * getDistanceSurcharge(distance)) / 50) * 50
     : 0;
   const discount = longRouteDiscount + roundTripDiscount;
   const shownPrice = basePrice != null ? basePrice - discount : price;
@@ -135,7 +135,7 @@ export default function BookingModal({
                 {roundTripDiscount > 0 && (
                   <div className="inline-flex items-center gap-2 bg-neon/10 border border-neon/40 rounded-lg px-3 py-2 mb-3 text-xs text-foreground font-medium">
                     <Icon name="RefreshCw" size={13} className="flex-shrink-0 text-neon" />
-                    Скидка 10% за поездку туда и обратно уже в цене
+                    Скидка 5% за поездку туда и обратно уже в цене
                   </div>
                 )}
                 {longRouteDiscount > 0 && (

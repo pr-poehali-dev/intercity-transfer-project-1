@@ -81,7 +81,7 @@ export default function Index() {
     return sum;
   }
 
-  function priceFromDistance(dist: number) {
+  function priceFromDistance(dist: number, isRoundTrip = false) {
     const t = TARIFFS[tariff];
     const isDelivery = t.isDelivery;
     const ratePerKm = isDelivery
@@ -91,7 +91,9 @@ export default function Index() {
         : t.pricePerKm;
     const surcharge = getDistanceSurcharge(dist);
     const extras = isDelivery ? 0 : extrasTotal();
-    return Math.round((dist * ratePerKm * surcharge) / 50) * 50 + extras - getLongRouteDiscount(dist);
+    let base = Math.round((dist * ratePerKm * surcharge) / 50) * 50;
+    if (isRoundTrip) base = Math.round((base * 0.95) / 50) * 50;
+    return base + extras - getLongRouteDiscount(dist);
   }
 
   async function fetchDist(a: string, b: string): Promise<number | null> {
@@ -166,8 +168,8 @@ export default function Index() {
     }
     setDistanceError(false);
     setManualRequest(false);
-    if (roundTrip) totalDist *= 1.95;
-    setPrice(priceFromDistance(totalDist) + (hasViaStop ? 1000 : 0));
+    if (roundTrip) totalDist *= 2;
+    setPrice(priceFromDistance(totalDist, roundTrip) + (hasViaStop ? 1000 : 0));
     setDistance(totalDist);
     setCalculated(true);
     setCalculating(false);

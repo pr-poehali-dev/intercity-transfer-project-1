@@ -56,19 +56,20 @@ export default function BookingModal({
     : isMinivan ? MINIVAN_SUBTARIFFS[minivanSub].pricePerKm
     : cur.pricePerKm;
   const extras = isDelivery ? 0 : ((withChildren ? childrenCount * CHILD_SEAT_PRICE : 0) + (withPet ? PET_OPTIONS[petOption].price : 0));
-  const basePrice = distance
-    ? Math.round((distance * ratePerKm * getDistanceSurcharge(distance)) / 50) * 50 + extras
-    : price;
+  // Базовая стоимость поездки без extras (distance уже = односторонняя × 2 при туда-обратно)
+  const baseRide = distance
+    ? Math.round((distance * ratePerKm * getDistanceSurcharge(distance)) / 50) * 50
+    : null;
+  const basePrice = baseRide != null ? baseRide + extras : price;
   const longRouteDiscount = distance ? getLongRouteDiscount(distance) : 0;
-  // Скидка за «туда-обратно»: обратный путь считается как 0.95 от прямого
-  // (distance уже = односторонняя × 1.95). Полная цена была бы при ×2.0.
-  const roundTripDiscount = (roundTrip && distance)
-    ? Math.round((distance / 1.95 * 0.05 * ratePerKm * getDistanceSurcharge(distance)) / 50) * 50
+  // Скидка 5% со всей стоимости поездки туда-обратно
+  const roundTripDiscount = (roundTrip && baseRide != null)
+    ? baseRide - Math.round((baseRide * 0.95) / 50) * 50
     : 0;
   const discount = longRouteDiscount + roundTripDiscount;
-  // fullPrice — цена без всех скидок (как если бы платили за два конца полностью).
-  // shownPrice — итоговая цена: fullPrice минус все скидки. Так они всегда сходятся.
-  const fullPrice = basePrice != null ? basePrice + roundTripDiscount : null;
+  // basePrice — полная стоимость двух концов без скидок (distance уже × 2).
+  // shownPrice — итоговая цена: полная минус все скидки. Так они всегда сходятся.
+  const fullPrice = basePrice != null ? basePrice : null;
   const shownPrice = fullPrice != null ? fullPrice - discount : price;
 
   return (

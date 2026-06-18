@@ -72,8 +72,7 @@ export default function ContactsSection() {
             <div className="reveal space-y-4">
               {[
                 { name: "Максим", value: "+7 996 160-65-67", tel: "+79961606567" },
-                { name: "Иван", value: "+7 936 525-00-50", tel: "+79365250050" },
-                { name: "Владимир", value: "+7 995 899-80-65", tel: "+79958998065" },
+                { name: "Максим", value: "+7 919 266-78-85", tel: "+79192667885" },
               ].map((c, i) => (
                 <div
                   key={i}

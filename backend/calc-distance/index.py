@@ -55,6 +55,14 @@ def names_match(query_name: str, found_name: str) -> bool:
         # хвост должен быть номером/коротким уточнением, а не другим словом
         if tail == '' or tail.isdigit() or len(tail) <= 2:
             return True
+    # Запрос — одно цельное слово (микрорайон/посёлок), а найденный пункт
+    # содержит его как отдельное слово: 'лоо' ⊂ 'горное лоо', 'вардане' ⊂
+    # 'вардане-верино'. Так находятся курортные посёлки Сочи, которых нет
+    # в DaData отдельной точкой. Требуем длину ≥3, чтобы избежать ложных.
+    q_words = a.replace('-', ' ').split()
+    f_words = b.replace('-', ' ').split()
+    if len(q_words) == 1 and len(q_words[0]) >= 3 and q_words[0] in f_words:
+        return True
     return False
 
 

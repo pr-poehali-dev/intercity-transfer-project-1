@@ -77,6 +77,13 @@
       "expectedStatus": 200
     },
     {
+      "name": "Loo to Vardane Sochi resorts",
+      "method": "POST",
+      "path": "/",
+      "body": {"from": "Лоо, Краснодарский край", "to": "Вардане, Краснодарский край"},
+      "expectedStatus": 200
+    },
+    {
       "name": "Multi points needs at least 2",
       "method": "POST",
       "path": "/",

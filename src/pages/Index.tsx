@@ -4,6 +4,7 @@ import Navbar from "@/components/transfer/Navbar";
 import HeroSection from "@/components/transfer/HeroSection";
 import CalculatorSection from "@/components/transfer/CalculatorSection";
 import PopularRoutesSection from "@/components/transfer/PopularRoutesSection";
+import FeaturedRoutesCarousel from "@/components/transfer/FeaturedRoutesCarousel";
 import ContactsSection from "@/components/transfer/ContactsSection";
 import { TARIFFS, DELIVERY_OPTIONS, MINIVAN_SUBTARIFFS, getDistanceSurcharge, getLongRouteDiscount, CHILD_SEAT_PRICE, PET_OPTIONS } from "@/components/transfer/constants";
 import { resolveCity, resolveGeocodeQuery } from "@/components/transfer/regions";
@@ -257,6 +258,7 @@ export default function Index() {
         onRouteSelect={handleRouteSelect}
         sectionRef={bookRef}
       />
+      <FeaturedRoutesCarousel />
       <PopularRoutesSection />
       <HowItWorks />
       <ContactsSection />

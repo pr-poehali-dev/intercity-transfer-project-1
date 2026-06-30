@@ -1,0 +1,23 @@
+{
+  "tests": [
+    {
+      "name": "OPTIONS preflight",
+      "method": "OPTIONS",
+      "path": "/",
+      "expectedStatus": 200
+    },
+    {
+      "name": "Poll empty session",
+      "method": "GET",
+      "path": "/?session_id=test12345678&after=999999",
+      "expectedStatus": 200
+    },
+    {
+      "name": "Send message",
+      "method": "POST",
+      "path": "/",
+      "body": {"action": "send", "session_id": "test12345678", "text": "Привет, тест", "name": "Тест"},
+      "expectedStatus": 200
+    }
+  ]
+}

@@ -10,6 +10,7 @@ import { TARIFFS, DELIVERY_OPTIONS, MINIVAN_SUBTARIFFS, getDistanceSurcharge, ge
 import { resolveCity, resolveGeocodeQuery } from "@/components/transfer/regions";
 import HowItWorks from "@/components/transfer/HowItWorks";
 import SeoTextSection from "@/components/transfer/SeoTextSection";
+import ChatWidget from "@/components/transfer/ChatWidget";
 import func2url from "../../backend/func2url.json";
 
 export default function Index() {
@@ -285,6 +286,8 @@ export default function Index() {
           </div>
         </div>
       </footer>
+
+      <ChatWidget />
 
       <style>{`
         .font-display { font-family: 'Oswald', sans-serif; }

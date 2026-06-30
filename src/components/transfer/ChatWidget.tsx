@@ -9,6 +9,7 @@ interface ChatMsg {
   sender: "client" | "operator";
   text: string;
   ts: number;
+  pending?: boolean;
 }
 
 function getSessionId(): string {
@@ -71,7 +72,7 @@ export default function ChatWidget() {
       const data = await res.json();
       if (Array.isArray(data.messages) && data.messages.length) {
         setMessages((prev) => {
-          const existing = new Set(prev.map((m) => m.id));
+          const existing = new Set(prev.filter((m) => !m.pending).map((m) => m.id));
           const fresh = data.messages.filter((m: ChatMsg) => !existing.has(m.id));
           if (!fresh.length) return prev;
           lastId.current = Math.max(lastId.current, ...data.messages.map((m: ChatMsg) => m.id));
@@ -80,7 +81,11 @@ export default function ChatWidget() {
             if (!open) setUnread((u) => u + opFresh);
             playBeep();
           }
-          return [...prev, ...fresh];
+          const freshClientTexts = new Set(
+            fresh.filter((m: ChatMsg) => m.sender === "client").map((m: ChatMsg) => m.text)
+          );
+          const kept = prev.filter((m) => !(m.pending && freshClientTexts.has(m.text)));
+          return [...kept, ...fresh];
         });
         scrollDown();
       }
@@ -108,7 +113,7 @@ export default function ChatWidget() {
     if (!text || sending) return;
     if (askName && !name.trim()) return;
     setSending(true);
-    const optimistic: ChatMsg = { id: Date.now(), sender: "client", text, ts: Math.floor(Date.now() / 1000) };
+    const optimistic: ChatMsg = { id: -Date.now(), sender: "client", text, ts: Math.floor(Date.now() / 1000), pending: true };
     setMessages((prev) => [...prev, optimistic]);
     setInput("");
     scrollDown();
@@ -122,6 +127,7 @@ export default function ChatWidget() {
         localStorage.setItem("chat_name", name.trim());
         setAskName(false);
       }
+      poll();
     } catch {
       /* ignore */
     } finally {

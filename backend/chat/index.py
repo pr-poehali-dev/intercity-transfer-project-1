@@ -12,7 +12,7 @@ CORS = {
 }
 
 BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN', '')
-CHAT_ID = os.environ.get('TELEGRAM_CHAT_ID', '') or '-1003992864128'
+CHAT_ID = '-1003992864128'
 
 
 def db():
@@ -26,16 +26,19 @@ def tg_send(text, reply_to=None):
     if reply_to:
         payload['reply_to_message_id'] = reply_to
         payload['allow_sending_without_reply'] = True
-    try:
-        resp = requests.post(
-            f'https://api.telegram.org/bot{BOT_TOKEN}/sendMessage',
-            json=payload, timeout=8,
-        )
-        data = resp.json()
-        if data.get('ok'):
-            return data['result']['message_id']
-    except Exception as e:
-        print(f"tg_send error: {e}")
+    for attempt in range(3):
+        try:
+            resp = requests.post(
+                f'https://api.telegram.org/bot{BOT_TOKEN}/sendMessage',
+                json=payload, timeout=8,
+            )
+            data = resp.json()
+            print(f"tg_send response: {data}")
+            if data.get('ok'):
+                return data['result']['message_id']
+            return None
+        except Exception as e:
+            print(f"tg_send attempt {attempt+1} failed: {e}")
     return None
 
 

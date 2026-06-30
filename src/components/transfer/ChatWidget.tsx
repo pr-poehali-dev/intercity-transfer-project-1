@@ -31,12 +31,38 @@ export default function ChatWidget() {
 
   const sessionId = useRef(getSessionId());
   const lastId = useRef(0);
+  const seeded = useRef(false);
   const bodyRef = useRef<HTMLDivElement>(null);
 
   const scrollDown = useCallback(() => {
     requestAnimationFrame(() => {
       if (bodyRef.current) bodyRef.current.scrollTop = bodyRef.current.scrollHeight;
     });
+  }, []);
+
+  const playBeep = useCallback(() => {
+    try {
+      const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+      const ctx = new AudioCtx();
+      const gain = ctx.createGain();
+      gain.connect(ctx.destination);
+      const tones = [880, 1175];
+      tones.forEach((freq, i) => {
+        const osc = ctx.createOscillator();
+        osc.type = "sine";
+        osc.frequency.value = freq;
+        osc.connect(gain);
+        const start = ctx.currentTime + i * 0.18;
+        gain.gain.setValueAtTime(0.0001, start);
+        gain.gain.exponentialRampToValueAtTime(0.2, start + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.16);
+        osc.start(start);
+        osc.stop(start + 0.18);
+      });
+      setTimeout(() => ctx.close(), 600);
+    } catch {
+      /* sound not available */
+    }
   }, []);
 
   const poll = useCallback(async () => {
@@ -50,15 +76,19 @@ export default function ChatWidget() {
           if (!fresh.length) return prev;
           lastId.current = Math.max(lastId.current, ...data.messages.map((m: ChatMsg) => m.id));
           const opFresh = fresh.filter((m: ChatMsg) => m.sender === "operator").length;
-          if (opFresh && !open) setUnread((u) => u + opFresh);
+          if (opFresh && seeded.current) {
+            if (!open) setUnread((u) => u + opFresh);
+            playBeep();
+          }
           return [...prev, ...fresh];
         });
         scrollDown();
       }
+      seeded.current = true;
     } catch {
       /* ignore */
     }
-  }, [open, scrollDown]);
+  }, [open, scrollDown, playBeep]);
 
   useEffect(() => {
     const interval = setInterval(poll, 3000);

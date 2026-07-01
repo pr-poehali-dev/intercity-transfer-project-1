@@ -49,9 +49,9 @@ export const STATS = [
 ];
 
 export function getDistanceSurcharge(distance: number): number {
-  if (distance <= 50) return 1.5;
-  if (distance <= 100) return 1.25;
-  if (distance <= 200) return 1.1;
+  if (distance <= 50) return 1.8;
+  if (distance <= 100) return 1.5;
+  if (distance <= 200) return 1.25;
   return 1;
 }
 

@@ -8,6 +8,7 @@ import FeaturedRoutesCarousel from "@/components/transfer/FeaturedRoutesCarousel
 import ContactsSection from "@/components/transfer/ContactsSection";
 import { TARIFFS, DELIVERY_OPTIONS, MINIVAN_SUBTARIFFS, getDistanceSurcharge, getLongRouteDiscount, CHILD_SEAT_PRICE, PET_OPTIONS } from "@/components/transfer/constants";
 import { resolveCity, resolveGeocodeQuery } from "@/components/transfer/regions";
+import { getYandexRoute } from "@/components/transfer/yandexMaps";
 import HowItWorks from "@/components/transfer/HowItWorks";
 import SeoTextSection from "@/components/transfer/SeoTextSection";
 import ChatWidget from "@/components/transfer/ChatWidget";
@@ -99,6 +100,12 @@ export default function Index() {
   }
 
   async function fetchDist(a: string, b: string): Promise<number | null> {
+    // Основной источник — роутинг Яндекса (по дорогам, с русскими адресами)
+    try {
+      const yr = await getYandexRoute([a, b]);
+      if (yr && yr.distanceKm > 0) return yr.distanceKm;
+    } catch { /* fallback to backend */ }
+    // Резерв — бэкенд GraphHopper с кэшем в БД
     try {
       const res = await fetch(func2url["calc-distance"], {
         method: "POST",
@@ -116,6 +123,12 @@ export default function Index() {
   }
 
   async function fetchDistMulti(points: string[]): Promise<number | null> {
+    // Основной источник — роутинг Яндекса
+    try {
+      const yr = await getYandexRoute(points);
+      if (yr && yr.distanceKm > 0) return yr.distanceKm;
+    } catch { /* fallback to backend */ }
+    // Резерв — бэкенд GraphHopper
     try {
       const res = await fetch(func2url["calc-distance"], {
         method: "POST",

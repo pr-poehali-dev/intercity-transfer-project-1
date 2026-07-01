@@ -48,3 +48,49 @@ export function loadYandexMaps(): Promise<any> {
 
   return loaderPromise;
 }
+
+export interface YandexRouteResult {
+  distanceKm: number;
+  durationText: string;
+}
+
+/**
+ * Строит автомобильный маршрут по дорогам через Яндекс multiRouter
+ * и возвращает суммарное расстояние (км) и время в пути.
+ */
+export async function getYandexRoute(points: string[]): Promise<YandexRouteResult | null> {
+  const stops = points.map((p) => p.trim()).filter(Boolean);
+  if (stops.length < 2) return null;
+
+  const ymaps = await loadYandexMaps();
+
+  return new Promise<YandexRouteResult | null>((resolve) => {
+    let done = false;
+    const finish = (v: YandexRouteResult | null) => {
+      if (!done) {
+        done = true;
+        resolve(v);
+      }
+    };
+
+    try {
+      const multiRoute = new ymaps.multiRouter.MultiRoute(
+        { referencePoints: stops, params: { routingMode: "auto", results: 1 } },
+        { boundsAutoApply: false }
+      );
+
+      multiRoute.model.events.add("requestsuccess", () => {
+        const active = multiRoute.getActiveRoute();
+        if (!active) return finish(null);
+        const meters: number = active.properties.get("distance").value;
+        const durationText: string = active.properties.get("duration").text;
+        finish({ distanceKm: Math.round(meters / 1000), durationText });
+      });
+      multiRoute.model.events.add("requestfail", () => finish(null));
+    } catch {
+      finish(null);
+    }
+
+    setTimeout(() => finish(null), 12000);
+  });
+}

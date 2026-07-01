@@ -7,6 +7,15 @@ const FEATURED_SLUGS = [
   "moskva-sankt-peterburg",
   "moskva-sochi",
   "moskva-kazan",
+  "moskva-kaliningrad",
+  "moskva-pyatigorsk",
+  "sochi-krasnodar",
+  "novosibirsk-krasnoyarsk",
+  "irkutsk-ulan-ude",
+  "habarovsk-vladivostok",
+  "moskva-murmansk",
+  "volgograd-astrahan",
+  "nizhniy-novgorod-vladimir",
 ];
 
 const FEATURED = FEATURED_SLUGS

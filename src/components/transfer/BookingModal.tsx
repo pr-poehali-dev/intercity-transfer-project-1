@@ -2,6 +2,7 @@ import Icon from "@/components/ui/icon";
 import { TARIFFS, DELIVERY_OPTIONS, MINIVAN_SUBTARIFFS, getDistanceSurcharge, getLongRouteDiscount, CHILD_SEAT_PRICE, PET_OPTIONS } from "./constants";
 import type { IconName } from "./constants";
 import { getDurationByDistance } from "./routesData";
+import RouteMap from "./RouteMap";
 
 interface BookingModalProps {
   from: string;
@@ -165,6 +166,13 @@ export default function BookingModal({
                   : ` · ${passengers} пасс.`
               }
             </div>
+
+            {!manualRequest && (
+              <RouteMap
+                points={[from, ...(via ? [via] : []), to].filter(Boolean)}
+                className="h-48 mb-3"
+              />
+            )}
 
             {(date || time) && (
               <div className="flex items-center gap-2 text-sm text-muted-foreground mb-3">

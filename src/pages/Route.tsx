@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import Icon from "@/components/ui/icon";
 import Navbar from "@/components/transfer/Navbar";
+import RouteMap from "@/components/transfer/RouteMap";
 import { ROUTES_WITH_DURATION as ROUTES } from "@/components/transfer/routesData";
 
 function getRouteBySlug(slug: string) {
@@ -73,6 +74,11 @@ export default function RoutePage() {
               <div className="text-xs text-muted-foreground mt-0.5">{s.label}</div>
             </div>
           ))}
+        </div>
+
+        <div className="mb-8">
+          <h2 className="font-display text-xl font-bold mb-4">Маршрут на карте</h2>
+          <RouteMap points={[route.from, route.to]} className="h-72 sm:h-80" />
         </div>
 
         <div className="bg-surface border border-border rounded-2xl p-4 sm:p-8 mb-8">

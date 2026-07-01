@@ -5,7 +5,6 @@ import urllib.error
 import time
 import math
 from concurrent.futures import ThreadPoolExecutor
-import psycopg2
 from airports import airport_coords
 
 
@@ -393,64 +392,14 @@ def short_city(name: str) -> str:
     return norm_yo(name.split(',')[0].strip())
 
 
-def get_cached(conn, from_city: str, to_city: str):
-    """Получить расстояние из кеша (проверяем оба направления и короткие названия)"""
-    schema = os.environ.get('MAIN_DB_SCHEMA', 'public')
-    from_city = norm_yo(from_city)
-    to_city = norm_yo(to_city)
-    f_short = short_city(from_city)
-    t_short = short_city(to_city)
-    variants = {
-        (from_city, to_city), (to_city, from_city),
-        (f_short, t_short), (t_short, f_short),
-    }
-    with conn.cursor() as cur:
-        for a, b in variants:
-            cur.execute(
-                f"SELECT distance_km FROM {schema}.distance_cache "
-                f"WHERE from_city = %s AND to_city = %s AND distance_km > 0 LIMIT 1",
-                (a, b)
-            )
-            row = cur.fetchone()
-            if row:
-                return row[0]
-    return None
-
-
-def save_cache(conn, from_city: str, to_city: str, dist: int):
-    """Сохранить расстояние в кеш"""
-    schema = os.environ.get('MAIN_DB_SCHEMA', 'public')
-    from_city = norm_yo(from_city)
-    to_city = norm_yo(to_city)
-    with conn.cursor() as cur:
-        cur.execute(
-            f"INSERT INTO {schema}.distance_cache (from_city, to_city, distance_km) "
-            f"VALUES (%s, %s, %s) ON CONFLICT (from_city, to_city) DO UPDATE "
-            f"SET distance_km = EXCLUDED.distance_km",
-            (from_city, to_city, dist)
-        )
-    conn.commit()
-
-
 def segment_distance(from_city, to_city, dadata_key, gh_key, dsn):
-    """Расстояние одного отрезка: кэш -> геокод -> GraphHopper -> сохранить кэш"""
-    try:
-        conn = psycopg2.connect(dsn)
-    except Exception:
-        conn = None
-    if conn:
-        cached = get_cached(conn, from_city, to_city)
-        if cached is not None:
-            conn.close()
-            return cached
+    """Расстояние одного отрезка: геокод -> GraphHopper (без кэша)."""
     with ThreadPoolExecutor(max_workers=2) as ex:
         f_from = ex.submit(geocode_safe, from_city, dadata_key)
         f_to = ex.submit(geocode_safe, to_city, dadata_key)
         from_res = f_from.result()
         to_res = f_to.result()
     if not from_res or not to_res:
-        if conn:
-            conn.close()
         raise ValueError(f'Координаты не найдены: {from_city} / {to_city}')
     from_coords = from_res[:2]
     to_coords = to_res[:2]
@@ -458,17 +407,9 @@ def segment_distance(from_city, to_city, dadata_key, gh_key, dsn):
     if dist and not region_sanity_ok(dist, from_city, to_city):
         # Оба пункта в одном регионе, но расстояние огромное — данные ошибочны
         dist = None
-    if dist and conn:
-        if is_sane_distance(dist, from_coords, to_coords):
-            try:
-                save_cache(conn, from_city, to_city, dist)
-            except Exception:
-                pass
-        else:
-            print(f"SKIP CACHE (insane): {from_city} -> {to_city} = {dist} km")
-            dist = None
-    if conn:
-        conn.close()
+    if dist and not is_sane_distance(dist, from_coords, to_coords):
+        print(f"INSANE distance: {from_city} -> {to_city} = {dist} km")
+        dist = None
     return dist
 
 
@@ -516,7 +457,7 @@ def calc_multi(cities, dadata_key, gh_key, dsn):
 
 
 def handler(event: dict, context) -> dict:
-    """Расчёт расстояния по дорогам через GraphHopper с кешированием в БД."""
+    """Расчёт расстояния по дорогам через GraphHopper (без кэша, всегда актуально)."""
     if event.get('httpMethod') == 'OPTIONS':
         return {
             'statusCode': 200,
@@ -555,19 +496,6 @@ def handler(event: dict, context) -> dict:
             'body': json.dumps({'error': 'from and to are required'})
         }
 
-    try:
-        conn = psycopg2.connect(dsn)
-        cached = get_cached(conn, from_city, to_city)
-        if cached is not None:
-            conn.close()
-            return {
-                'statusCode': 200,
-                'headers': {'Access-Control-Allow-Origin': '*'},
-                'body': json.dumps({'distance': cached, 'cached': True})
-            }
-    except Exception:
-        conn = None
-
     if not dadata_key or not gh_key:
         return {
             'statusCode': 200,
@@ -582,8 +510,6 @@ def handler(event: dict, context) -> dict:
             from_res = f_from.result()
             to_res = f_to.result()
         if not from_res or not to_res:
-            if conn:
-                conn.close()
             return {
                 'statusCode': 200,
                 'headers': {'Access-Control-Allow-Origin': '*'},
@@ -596,8 +522,6 @@ def handler(event: dict, context) -> dict:
         dist = road_distance(from_coords, to_coords, gh_key)
     except Exception as e:
         print(f"calc-distance error for {from_city} -> {to_city}: {type(e).__name__}: {e}")
-        if conn:
-            conn.close()
         return {
             'statusCode': 200,
             'headers': {'Access-Control-Allow-Origin': '*'},
@@ -608,17 +532,9 @@ def handler(event: dict, context) -> dict:
         # Оба пункта в одном регионе, но расстояние огромное — данные ошибочны
         dist = None
 
-    if dist and conn:
-        if is_sane_distance(dist, from_coords, to_coords):
-            try:
-                save_cache(conn, from_city, to_city, dist)
-            except Exception:
-                pass
-        else:
-            print(f"SKIP CACHE (insane): {from_city} -> {to_city} = {dist} km")
-            dist = None
-    if conn:
-        conn.close()
+    if dist and not is_sane_distance(dist, from_coords, to_coords):
+        print(f"INSANE distance: {from_city} -> {to_city} = {dist} km")
+        dist = None
 
     return {
         'statusCode': 200,

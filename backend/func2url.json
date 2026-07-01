@@ -1,7 +1,6 @@
 {
   "yandex-key": "https://functions.poehali.dev/819447d7-1aa7-4689-a613-eb1567e985c8",
   "chat": "https://functions.poehali.dev/76d006e7-087a-465c-afcb-bb541bad841a",
-  "fill-distance-cache": "https://functions.poehali.dev/a8e16fd6-55bc-4d32-bb3f-3b59763c0b90",
   "calc-distance": "https://functions.poehali.dev/c20cc00a-50bf-4491-9668-53aa4359b766",
   "search-locations": "https://functions.poehali.dev/d72f8faf-b072-4e36-9ad3-832f56dd0701",
   "send-booking": "https://functions.poehali.dev/d5c02ad8-8690-4c04-a14d-e52042970292"

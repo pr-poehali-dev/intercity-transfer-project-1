@@ -11,7 +11,7 @@ const GROUPS = [
   { label: "Из Петербурга", filter: (slug: string) => slug.startsWith("sankt-peterburg-") },
 ];
 
-const INITIAL_COUNT = 1;
+const INITIAL_COUNT = 3;
 
 export default function PopularRoutesSection() {
   const [activeGroup, setActiveGroup] = useState(0);

@@ -39,7 +39,7 @@ export default function Index() {
   const [calculating, setCalculating] = useState(false);
   const [distanceError, setDistanceError] = useState(false);
   const [manualRequest, setManualRequest] = useState(false);
-  const [routeLabels, setRouteLabels] = useState<{ from?: string; to?: string; points?: string[] }>({});
+  const [routeLabels, setRouteLabels] = useState<{ from?: string; to?: string; points?: string[]; geoPoints?: string[] }>({});
 
   const bookRef = useRef<HTMLDivElement>(null);
 
@@ -166,6 +166,7 @@ export default function Index() {
     const toFull = cityWithRegion(to, toRegion);
     const viaFull = cityWithRegion(via, viaRegion);
     const hasViaStop = withVia && via && norm(viaCity) !== norm(fromCity) && norm(viaCity) !== norm(toCity);
+    const geoPoints = hasViaStop ? [fromFull, viaFull, toFull] : [fromFull, toFull];
     let totalDist: number | null;
     if (hasViaStop) {
       totalDist = await fetchDistMulti([fromFull, viaFull, toFull]);
@@ -183,6 +184,7 @@ export default function Index() {
     }
     setDistanceError(false);
     setManualRequest(false);
+    setRouteLabels((prev) => ({ ...prev, geoPoints }));
     if (roundTrip) totalDist *= 2;
     setPrice(priceFromDistance(totalDist, roundTrip) + (hasViaStop ? 1000 : 0));
     setDistance(totalDist);

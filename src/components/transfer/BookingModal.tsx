@@ -22,7 +22,7 @@ interface BookingModalProps {
   price: number;
   distance: number | null;
   manualRequest?: boolean;
-  routeLabels?: { from?: string; to?: string; points?: string[] };
+  routeLabels?: { from?: string; to?: string; points?: string[]; geoPoints?: string[] };
   name: string;
   setName: (v: string) => void;
   phone: string;
@@ -169,7 +169,11 @@ export default function BookingModal({
 
             {!manualRequest && (
               <RouteMap
-                points={[from, ...(via ? [via] : []), to].filter(Boolean)}
+                points={
+                  routeLabels?.geoPoints && routeLabels.geoPoints.length >= 2
+                    ? routeLabels.geoPoints
+                    : [from, ...(via ? [via] : []), to].filter(Boolean)
+                }
                 className="h-48 mb-3"
               />
             )}

@@ -3,6 +3,7 @@ import { TARIFFS, DELIVERY_OPTIONS, MINIVAN_SUBTARIFFS, getDistanceSurcharge, ge
 import type { IconName } from "./constants";
 import { getDurationByDistance } from "./routesData";
 import RouteMap from "./RouteMap";
+import AddressInput from "./AddressInput";
 
 interface BookingModalProps {
   from: string;
@@ -28,6 +29,8 @@ interface BookingModalProps {
   phone: string;
   handlePhoneChange: (v: string) => void;
   isPhoneValid: (v: string) => boolean;
+  pickupAddress: string;
+  setPickupAddress: (v: string) => void;
   comment: string;
   setComment: (v: string) => void;
   sending: boolean;
@@ -45,6 +48,7 @@ export default function BookingModal({
   deliveryMode, minivanSub,
   price, distance, manualRequest, routeLabels,
   name, setName, phone, handlePhoneChange, isPhoneValid,
+  pickupAddress, setPickupAddress,
   comment, setComment,
   sending, sent, error, validationError,
   onBook, onClose, onSuccessClose,
@@ -275,10 +279,11 @@ export default function BookingModal({
               {phone.length > 1 && !isPhoneValid(phone) && (
                 <div className="text-xs text-red-400 -mt-1.5 px-1">Введите 11 цифр, например +7 (999) 123-45-67</div>
               )}
+              <AddressInput value={pickupAddress} onChange={setPickupAddress} />
               <textarea
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
-                placeholder="Комментарий (адрес подачи, пожелания к поездке...)"
+                placeholder="Комментарий (пожелания к поездке, номер рейса...)"
                 rows={2}
                 className="w-full bg-background border border-border rounded-lg px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/60 resize-none"
               />

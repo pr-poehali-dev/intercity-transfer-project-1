@@ -73,7 +73,6 @@ def handler(event: dict, context) -> dict:
     price = body.get('price', '—')
     distance = body.get('distance')
     services = body.get('services', '—')
-    pickup_address = body.get('pickup_address', '—')
     comment = body.get('comment', '—')
 
     def get_duration(dist):
@@ -106,7 +105,6 @@ def handler(event: dict, context) -> dict:
     services_line = f"➕ Доп. услуги: {services}\n\n" if services and services != '—' else ""
     distance_line = f"↕️ Расстояние: {distance} км\n\n" if distance else ""
     duration_line = f"⌛ В пути: {duration}\n\n" if duration else ""
-    pickup_line = f"🏠 Адрес подачи: {pickup_address}\n\n" if pickup_address and pickup_address != '—' else ""
     comment_line = f"🗒 Комментарий: {comment}\n\n" if comment and comment != '—' else ""
 
     # Сообщение 1 — полная информация о заявке
@@ -122,7 +120,6 @@ def handler(event: dict, context) -> dict:
         f"{distance_line}"
         f"{duration_line}"
         f"💰 Стоимость: {price} руб.\n\n"
-        f"{pickup_line}"
         f"{comment_line}"
         f"☎️ {phone} · {name}"
     )

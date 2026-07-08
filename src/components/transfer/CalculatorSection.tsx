@@ -70,7 +70,6 @@ export default function CalculatorSection({
 }: CalculatorSectionProps) {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("+");
-  const [pickupAddress, setPickupAddress] = useState("");
   const [comment, setComment] = useState("");
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
@@ -145,7 +144,6 @@ export default function CalculatorSection({
           distance,
           duration: distance ? getDurationByDistance(distance) : undefined,
           services: services.length ? services.join("; ") : "—",
-          pickup_address: pickupAddress.trim() || "—",
           comment: comment.trim() || "—",
         }),
       });
@@ -217,7 +215,6 @@ export default function CalculatorSection({
           phone={phone}
           handlePhoneChange={handlePhoneChange}
           isPhoneValid={isPhoneValid}
-          pickupAddress={pickupAddress} setPickupAddress={setPickupAddress}
           comment={comment} setComment={setComment}
           sending={sending} sent={sent} error={error} validationError={validationError}
           onBook={handleBook}

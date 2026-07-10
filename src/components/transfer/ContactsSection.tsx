@@ -81,9 +81,14 @@ export default function ContactsSection() {
                   <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 bg-neon/10">
                     <Icon name="User" size={20} className="text-neon" />
                   </div>
-                  <div>
-                    <div className="text-sm text-muted-foreground mb-1">Менеджер</div>
-                    <div className="font-display font-semibold text-xl text-foreground">{c.name}</div>
+                  <div className="min-w-0">
+                    <div className="text-sm text-muted-foreground mb-1">Менеджер {c.name}</div>
+                    <a
+                      href={`tel:${c.tel}`}
+                      className="font-display font-semibold text-lg sm:text-xl text-foreground hover:text-neon transition-colors block truncate"
+                    >
+                      {c.value}
+                    </a>
                   </div>
                   <div className="ml-auto flex items-center gap-2 flex-shrink-0">
                     <a

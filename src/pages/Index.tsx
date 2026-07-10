@@ -11,7 +11,6 @@ import { resolveCity, resolveGeocodeQuery } from "@/components/transfer/regions"
 import { getYandexRoute } from "@/components/transfer/yandexMaps";
 import HowItWorks from "@/components/transfer/HowItWorks";
 import SeoTextSection from "@/components/transfer/SeoTextSection";
-import ChatWidget from "@/components/transfer/ChatWidget";
 import func2url from "../../backend/func2url.json";
 
 export default function Index() {
@@ -301,8 +300,6 @@ export default function Index() {
           </div>
         </div>
       </footer>
-
-      <ChatWidget />
 
       <style>{`
         .font-display { font-family: 'Oswald', sans-serif; }

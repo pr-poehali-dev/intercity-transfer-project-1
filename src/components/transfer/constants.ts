@@ -7,23 +7,23 @@ export const CITIES = [
 ];
 
 export const TARIFFS = [
-  { name: "Эконом",    pricePerKm: 32, icon: "Car",       desc: "Комфортный седан",    maxPassengers: 4,  isDelivery: false, isMinivan: false },
-  { name: "Комфорт",  pricePerKm: 37, icon: "Star",      desc: "Повышенный комфорт",  maxPassengers: 4,  isDelivery: false, isMinivan: false },
-  { name: "Бизнес",   pricePerKm: 70, icon: "Gem",       desc: "Премиум класс",       maxPassengers: 4,  isDelivery: false, isMinivan: false },
-  { name: "Универсал",pricePerKm: 40, icon: "Truck",     desc: "Везите больше",       maxPassengers: 4,  isDelivery: false, isMinivan: false },
+  { name: "Эконом",    pricePerKm: 33, icon: "Car",       desc: "Комфортный седан",    maxPassengers: 4,  isDelivery: false, isMinivan: false },
+  { name: "Комфорт",  pricePerKm: 38, icon: "Star",      desc: "Повышенный комфорт",  maxPassengers: 4,  isDelivery: false, isMinivan: false },
+  { name: "Бизнес",   pricePerKm: 71, icon: "Gem",       desc: "Премиум класс",       maxPassengers: 4,  isDelivery: false, isMinivan: false },
+  { name: "Универсал",pricePerKm: 41, icon: "Truck",     desc: "Везите больше",       maxPassengers: 4,  isDelivery: false, isMinivan: false },
   { name: "Минивэн",  pricePerKm: 0,  icon: "Bus",       desc: "Выберите вместимость",maxPassengers: 10, isDelivery: false, isMinivan: true  },
-  { name: "Доставка", pricePerKm: 15, icon: "Package",   desc: "Грузы и посылки",     maxPassengers: 0,  isDelivery: true,  isMinivan: false },
+  { name: "Доставка", pricePerKm: 16, icon: "Package",   desc: "Грузы и посылки",     maxPassengers: 0,  isDelivery: true,  isMinivan: false },
 ];
 
 export const MINIVAN_SUBTARIFFS = [
-  { name: "Компакт вэн", seats: 5,  pricePerKm: 45, desc: "до 5 мест" },
-  { name: "Минивэн",     seats: 7,  pricePerKm: 55, desc: "до 7 мест" },
-  { name: "Минивэн XL",  seats: 10, pricePerKm: 65, desc: "до 10 мест" },
+  { name: "Компакт вэн", seats: 5,  pricePerKm: 46, desc: "до 5 мест" },
+  { name: "Минивэн",     seats: 7,  pricePerKm: 56, desc: "до 7 мест" },
+  { name: "Минивэн XL",  seats: 10, pricePerKm: 66, desc: "до 10 мест" },
 ];
 
 export const DELIVERY_OPTIONS = [
-  { name: "Попутная", pricePerKm: 15, desc: "Вместе с другим заказом", icon: "PackageSearch" },
-  { name: "Срочная", pricePerKm: 30, desc: "Отдельный рейс", icon: "Zap" },
+  { name: "Попутная", pricePerKm: 16, desc: "Вместе с другим заказом", icon: "PackageSearch" },
+  { name: "Срочная", pricePerKm: 31, desc: "Отдельный рейс", icon: "Zap" },
 ];
 
 export const CHILD_SEAT_PRICE = 500;

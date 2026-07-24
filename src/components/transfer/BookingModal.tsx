@@ -1,5 +1,5 @@
 import Icon from "@/components/ui/icon";
-import { TARIFFS, DELIVERY_OPTIONS, MINIVAN_SUBTARIFFS, getDistanceSurcharge, getLongRouteDiscount, CHILD_SEAT_PRICE, PET_OPTIONS } from "./constants";
+import { TARIFFS, DELIVERY_OPTIONS, MINIVAN_SUBTARIFFS, getDistanceSurcharge, CHILD_SEAT_PRICE, PET_OPTIONS } from "./constants";
 import type { IconName } from "./constants";
 import { getDurationByDistance } from "./routesData";
 import RouteMap from "./RouteMap";
@@ -62,12 +62,11 @@ export default function BookingModal({
     ? Math.round((distance * ratePerKm * getDistanceSurcharge(distance)) / 50) * 50
     : null;
   const basePrice = baseRide != null ? baseRide + extras : price;
-  const longRouteDiscount = distance ? getLongRouteDiscount(distance) : 0;
   // Скидка 5% со всей стоимости поездки туда-обратно
   const roundTripDiscount = (roundTrip && baseRide != null)
     ? baseRide - Math.round((baseRide * 0.95) / 50) * 50
     : 0;
-  const discount = longRouteDiscount + roundTripDiscount;
+  const discount = roundTripDiscount;
   // basePrice — полная стоимость двух концов без скидок (distance уже × 2).
   // shownPrice — итоговая цена: полная минус все скидки. Так они всегда сходятся.
   const fullPrice = basePrice != null ? basePrice : null;
@@ -140,12 +139,6 @@ export default function BookingModal({
                   <div className="inline-flex items-center gap-2 bg-neon/10 border border-neon/40 rounded-lg px-3 py-2 mb-3 text-xs text-foreground font-medium">
                     <Icon name="RefreshCw" size={13} className="flex-shrink-0 text-neon" />
                     Скидка 5% за поездку туда и обратно уже в цене
-                  </div>
-                )}
-                {longRouteDiscount > 0 && (
-                  <div className="inline-flex items-center gap-2 bg-neon/10 border border-neon/40 rounded-lg px-3 py-2 mb-3 text-xs text-foreground font-medium">
-                    <Icon name="Sparkles" size={13} className="flex-shrink-0 text-neon" />
-                    Скидка за дальнюю поездку уже учтена в цене
                   </div>
                 )}
 

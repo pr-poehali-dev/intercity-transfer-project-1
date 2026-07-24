@@ -6,7 +6,7 @@ import CalculatorSection from "@/components/transfer/CalculatorSection";
 import PopularRoutesSection from "@/components/transfer/PopularRoutesSection";
 import FeaturedRoutesCarousel from "@/components/transfer/FeaturedRoutesCarousel";
 import ContactsSection from "@/components/transfer/ContactsSection";
-import { TARIFFS, DELIVERY_OPTIONS, MINIVAN_SUBTARIFFS, getDistanceSurcharge, getLongRouteDiscount, CHILD_SEAT_PRICE, PET_OPTIONS } from "@/components/transfer/constants";
+import { TARIFFS, DELIVERY_OPTIONS, MINIVAN_SUBTARIFFS, getDistanceSurcharge, CHILD_SEAT_PRICE, PET_OPTIONS } from "@/components/transfer/constants";
 import { resolveCity, resolveGeocodeQuery } from "@/components/transfer/regions";
 import { getYandexRoute } from "@/components/transfer/yandexMaps";
 import HowItWorks from "@/components/transfer/HowItWorks";
@@ -95,7 +95,7 @@ export default function Index() {
     const extras = isDelivery ? 0 : extrasTotal();
     let base = Math.round((dist * ratePerKm * surcharge) / 50) * 50;
     if (isRoundTrip) base = Math.round((base * 0.95) / 50) * 50;
-    return base + extras - getLongRouteDiscount(dist);
+    return base + extras;
   }
 
   async function fetchDist(a: string, b: string): Promise<number | null> {

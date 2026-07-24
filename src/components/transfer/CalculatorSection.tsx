@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { TARIFFS, DELIVERY_OPTIONS, MINIVAN_SUBTARIFFS, getDistanceSurcharge, getLongRouteDiscount, CHILD_SEAT_PRICE, PET_OPTIONS } from "./constants";
+import { TARIFFS, DELIVERY_OPTIONS, MINIVAN_SUBTARIFFS, getDistanceSurcharge, CHILD_SEAT_PRICE, PET_OPTIONS } from "./constants";
 import { getDurationByDistance } from "./routesData";
 import CalculatorForm from "./CalculatorForm";
 import BookingModal from "./BookingModal";
@@ -111,7 +111,7 @@ export default function CalculatorSection({
       ? (roundTrip
           ? Math.round((Math.round((distance * ratePerKm * getDistanceSurcharge(distance)) / 50) * 50 * 0.95) / 50) * 50
           : Math.round((distance * ratePerKm * getDistanceSurcharge(distance)) / 50) * 50)
-        + extras - getLongRouteDiscount(distance)
+        + extras
       : price;
     const tariffLabel = isMinivan
       ? `${t.name} · ${MINIVAN_SUBTARIFFS[minivanSub].name}`

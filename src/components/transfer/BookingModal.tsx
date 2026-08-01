@@ -1,3 +1,5 @@
+import { useState } from "react";
+import { Link } from "react-router-dom";
 import Icon from "@/components/ui/icon";
 import { TARIFFS, DELIVERY_OPTIONS, MINIVAN_SUBTARIFFS, getDistanceSurcharge, CHILD_SEAT_PRICE, PET_OPTIONS } from "./constants";
 import { getDurationByDistance } from "./routesData";
@@ -48,6 +50,7 @@ export default function BookingModal({
   sending, sent, error, validationError,
   onBook, onClose, onSuccessClose,
 }: BookingModalProps) {
+  const [consent, setConsent] = useState(false);
   const cur = TARIFFS[tariff];
   const isDelivery = cur.isDelivery;
   const isMinivan = cur.isMinivan;
@@ -276,11 +279,30 @@ export default function BookingModal({
               />
             </div>
 
+            <label className="flex items-start gap-2.5 mb-4 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={consent}
+                onChange={(e) => setConsent(e.target.checked)}
+                className="mt-0.5 w-4 h-4 accent-neon flex-shrink-0"
+              />
+              <span className="text-xs text-muted-foreground leading-snug">
+                Соглашаюсь с{" "}
+                <Link to="/oferta" target="_blank" className="text-neon hover:underline">
+                  публичной офертой
+                </Link>{" "}
+                и{" "}
+                <Link to="/privacy" target="_blank" className="text-neon hover:underline">
+                  политикой конфиденциальности
+                </Link>
+              </span>
+            </label>
+
             {validationError && <div className="text-sm text-red-400 mb-3">{validationError}</div>}
             <button
               onClick={onBook}
-              disabled={sending}
-              className="w-full bg-neon text-background font-display font-bold py-4 rounded-xl hover:opacity-90 transition-all glow-neon disabled:opacity-50"
+              disabled={sending || !consent}
+              className="w-full bg-neon text-background font-display font-bold py-4 rounded-xl hover:opacity-90 transition-all glow-neon disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {sending ? "ОТПРАВЛЯЕМ..." : `ОФОРМИТЬ — ${price.toLocaleString("ru-RU")} ₽`}
             </button>

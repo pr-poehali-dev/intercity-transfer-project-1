@@ -1,6 +1,5 @@
 import Icon from "@/components/ui/icon";
 import { TARIFFS, DELIVERY_OPTIONS, MINIVAN_SUBTARIFFS, getDistanceSurcharge, CHILD_SEAT_PRICE, PET_OPTIONS } from "./constants";
-import type { IconName } from "./constants";
 import { getDurationByDistance } from "./routesData";
 import RouteMap from "./RouteMap";
 

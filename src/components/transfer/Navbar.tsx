@@ -1,14 +1,15 @@
 import Icon from "@/components/ui/icon";
+import { Link } from "react-router-dom";
 
 interface NavbarProps {
-  onBookClick: () => void;
+  onBookClick?: () => void;
 }
 
 export default function Navbar({ onBookClick }: NavbarProps) {
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 glass border-b border-white/5">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-        <div className="flex items-center gap-2 min-w-0">
+        <Link to="/" className="flex items-center gap-2 min-w-0">
           <div className="w-7 h-7 bg-neon rounded-sm flex items-center justify-center flex-shrink-0">
             <Icon name="MapPin" size={14} className="text-background" />
           </div>
@@ -17,33 +18,43 @@ export default function Navbar({ onBookClick }: NavbarProps) {
               НАШЕ<span className="text-neon"> for </span><span style={{ color: '#003087' }}>Russia</span> Transfer
             </span>
           </div>
-        </div>
+        </Link>
         <div className="hidden md:flex items-center gap-6 text-base text-muted-foreground">
-          <a href="#calc" className="hover:text-foreground transition-colors">Калькулятор</a>
-          <a href="#contacts" className="hover:text-foreground transition-colors">Контакты</a>
+          <Link to="/#calc" className="hover:text-foreground transition-colors">Калькулятор</Link>
+          <Link to="/#contacts" className="hover:text-foreground transition-colors">Контакты</Link>
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
-          <button
-            onClick={onBookClick}
-            className="bg-neon text-background font-display text-sm sm:text-base px-3 sm:px-5 py-2 rounded-md font-semibold hover:opacity-90 transition-opacity glow-neon"
-          >
-            <span className="hidden sm:inline">ОФОРМИТЬ ПОЕЗДКУ</span>
-            <span className="sm:hidden">ЦЕНА</span>
-          </button>
+          {onBookClick ? (
+            <button
+              onClick={onBookClick}
+              className="bg-neon text-background font-display text-sm sm:text-base px-3 sm:px-5 py-2 rounded-md font-semibold hover:opacity-90 transition-opacity glow-neon"
+            >
+              <span className="hidden sm:inline">ОФОРМИТЬ ПОЕЗДКУ</span>
+              <span className="sm:hidden">ЦЕНА</span>
+            </button>
+          ) : (
+            <Link
+              to="/#calc"
+              className="bg-neon text-background font-display text-sm sm:text-base px-3 sm:px-5 py-2 rounded-md font-semibold hover:opacity-90 transition-opacity glow-neon"
+            >
+              <span className="hidden sm:inline">ОФОРМИТЬ ПОЕЗДКУ</span>
+              <span className="sm:hidden">ЦЕНА</span>
+            </Link>
+          )}
           <div className="flex items-center gap-1">
             {/* Blinking pointer arrow */}
             <span
               className="text-neon text-base font-bold select-none leading-none"
               style={{ animation: "phonePointerBlink 1.2s ease-in-out infinite" }}
             >›</span>
-            <a
-              href="#contacts"
+            <Link
+              to="/#contacts"
               className="w-9 h-9 rounded-md border border-neon/60 bg-neon/10 flex items-center justify-center text-neon hover:bg-neon/20 transition-all"
               aria-label="Контакты"
               style={{ animation: "phoneGlowPulse 1.2s ease-in-out infinite" }}
             >
               <Icon name="Phone" size={16} />
-            </a>
+            </Link>
           </div>
         </div>
 

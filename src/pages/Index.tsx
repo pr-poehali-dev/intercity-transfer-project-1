@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { Link } from "react-router-dom";
 import Icon from "@/components/ui/icon";
 import Navbar from "@/components/transfer/Navbar";
 import HeroSection from "@/components/transfer/HeroSection";
@@ -291,9 +292,19 @@ export default function Index() {
               <span className="text-[10px] text-muted-foreground tracking-widest">TRANSFER</span>
             </div>
           </div>
-          <p className="text-sm text-muted-foreground text-center">
-            © 2024 НАШЕ for Russia Transfer. Поездки по России без агрегаторов.
-          </p>
+          <div className="flex flex-col items-center gap-2">
+            <p className="text-sm text-muted-foreground text-center">
+              © 2024 НАШЕ for Russia Transfer. Поездки по России без агрегаторов.
+            </p>
+            <div className="flex items-center gap-4 text-xs">
+              <Link to="/privacy" className="text-muted-foreground hover:text-neon transition-colors">
+                Политика конфиденциальности
+              </Link>
+              <Link to="/oferta" className="text-muted-foreground hover:text-neon transition-colors">
+                Публичная оферта
+              </Link>
+            </div>
+          </div>
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
             <Icon name="MapPin" size={12} className="text-neon" />
             Работаем по всей России

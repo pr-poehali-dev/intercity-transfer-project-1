@@ -3,23 +3,6 @@ import os
 import requests
 
 
-def send_telegram(message: str):
-    bot_token = os.environ.get('TELEGRAM_BOT_TOKEN', '')
-    chat_id = '-1003992864128'
-    if not (bot_token and chat_id):
-        print("Telegram secrets not configured, skipping Telegram")
-        return
-    resp = requests.post(
-        f'https://api.telegram.org/bot{bot_token}/sendMessage',
-        json={'chat_id': chat_id, 'text': message, 'parse_mode': 'HTML'},
-        timeout=3,
-    )
-    result = resp.json()
-    print(f"Telegram response: {result}")
-    if not result.get('ok'):
-        raise Exception(f"Telegram error: {result}")
-
-
 def send_vk(message: str):
     token = os.environ.get('VK_BOT_TOKEN', '')
     user_id = os.environ.get('VK_USER_ID', '')
@@ -44,7 +27,7 @@ def send_vk(message: str):
 
 
 def handler(event: dict, context) -> dict:
-    """Отправляет заявку на бронирование в Telegram и ВКонтакте."""
+    """Отправляет заявку на бронирование в ВКонтакте."""
     if event.get('httpMethod') == 'OPTIONS':
         return {
             'statusCode': 200,
@@ -139,11 +122,6 @@ def handler(event: dict, context) -> dict:
         f"{comment_line}"
         f"☎️ {phone} · {name}"
     )
-
-    try:
-        send_telegram(msg1)
-    except Exception as e:
-        print(f"Telegram error: {e}")
 
     try:
         send_vk(msg1)

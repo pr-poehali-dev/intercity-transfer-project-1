@@ -9,26 +9,42 @@ def send_telegram(message: str):
     if not (bot_token and chat_id):
         print("Telegram secrets not configured, skipping Telegram")
         return
-    for attempt in range(3):
-        try:
-            resp = requests.post(
-                f'https://api.telegram.org/bot{bot_token}/sendMessage',
-                json={'chat_id': chat_id, 'text': message, 'parse_mode': 'HTML'},
-                timeout=8,
-            )
-            break
-        except Exception as e:
-            print(f"Telegram attempt {attempt+1} failed: {e}")
-            if attempt == 2:
-                raise
+    resp = requests.post(
+        f'https://api.telegram.org/bot{bot_token}/sendMessage',
+        json={'chat_id': chat_id, 'text': message, 'parse_mode': 'HTML'},
+        timeout=3,
+    )
     result = resp.json()
     print(f"Telegram response: {result}")
     if not result.get('ok'):
         raise Exception(f"Telegram error: {result}")
 
 
+def send_vk(message: str):
+    token = os.environ.get('VK_BOT_TOKEN', '')
+    user_id = os.environ.get('VK_USER_ID', '')
+    if not (token and user_id):
+        print("VK secrets not configured, skipping VK")
+        return
+    resp = requests.post(
+        'https://api.vk.com/method/messages.send',
+        data={
+            'user_id': user_id,
+            'message': message,
+            'random_id': 0,
+            'access_token': token,
+            'v': '5.199',
+        },
+        timeout=3,
+    )
+    result = resp.json()
+    print(f"VK response: {result}")
+    if 'error' in result:
+        raise Exception(f"VK error: {result['error']}")
+
+
 def handler(event: dict, context) -> dict:
-    """Отправляет заявку на бронирование в Telegram."""
+    """Отправляет заявку на бронирование в Telegram и ВКонтакте."""
     if event.get('httpMethod') == 'OPTIONS':
         return {
             'statusCode': 200,
@@ -128,6 +144,11 @@ def handler(event: dict, context) -> dict:
         send_telegram(msg1)
     except Exception as e:
         print(f"Telegram error: {e}")
+
+    try:
+        send_vk(msg1)
+    except Exception as e:
+        print(f"VK error: {e}")
 
     return {
         'statusCode': 200,

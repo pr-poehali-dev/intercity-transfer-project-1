@@ -6,13 +6,20 @@ export const CITIES = [
   "Воронеж", "Уфа", "Пермь", "Тверь", "Ярославль", "Тула",
 ];
 
+export const TRUST_BADGES = [
+  { icon: "Clock", label: "Работаем 24/7" },
+  { icon: "CreditCard", label: "Фиксированная цена" },
+  { icon: "Shield", label: "Проверенные водители" },
+  { icon: "Star", label: "12 000+ поездок" },
+];
+
 export const TARIFFS = [
-  { name: "Эконом",    pricePerKm: 33, icon: "Car",       desc: "Комфортный седан",    maxPassengers: 4,  isDelivery: false, isMinivan: false },
-  { name: "Комфорт",  pricePerKm: 38, icon: "Star",      desc: "Повышенный комфорт",  maxPassengers: 4,  isDelivery: false, isMinivan: false },
-  { name: "Бизнес",   pricePerKm: 71, icon: "Gem",       desc: "Премиум класс",       maxPassengers: 4,  isDelivery: false, isMinivan: false },
-  { name: "Универсал",pricePerKm: 41, icon: "Truck",     desc: "Везите больше",       maxPassengers: 4,  isDelivery: false, isMinivan: false },
-  { name: "Минивэн",  pricePerKm: 0,  icon: "Bus",       desc: "Выберите вместимость",maxPassengers: 10, isDelivery: false, isMinivan: true  },
-  { name: "Доставка", pricePerKm: 16, icon: "Package",   desc: "Грузы и посылки",     maxPassengers: 0,  isDelivery: true,  isMinivan: false },
+  { name: "Эконом",    pricePerKm: 33, icon: "Car",       desc: "Комфортный седан",    maxPassengers: 4,  isDelivery: false, isMinivan: false, popular: false },
+  { name: "Комфорт",  pricePerKm: 38, icon: "Star",      desc: "Повышенный комфорт",  maxPassengers: 4,  isDelivery: false, isMinivan: false, popular: true },
+  { name: "Бизнес",   pricePerKm: 71, icon: "Gem",       desc: "Премиум класс",       maxPassengers: 4,  isDelivery: false, isMinivan: false, popular: false },
+  { name: "Универсал",pricePerKm: 41, icon: "Truck",     desc: "Везите больше",       maxPassengers: 4,  isDelivery: false, isMinivan: false, popular: false },
+  { name: "Минивэн",  pricePerKm: 0,  icon: "Bus",       desc: "Выберите вместимость",maxPassengers: 10, isDelivery: false, isMinivan: true,  popular: false },
+  { name: "Доставка", pricePerKm: 16, icon: "Package",   desc: "Грузы и посылки",     maxPassengers: 0,  isDelivery: true,  isMinivan: false, popular: false },
 ];
 
 export const MINIVAN_SUBTARIFFS = [
@@ -41,6 +48,63 @@ export const FEATURES = [
   { icon: "Headphones", title: "Поддержка 24/7", desc: "Всегда на связи для вас и водителя" },
 ];
 
+export const GALLERY = [
+  {
+    src: "https://cdn.poehali.dev/projects/62498eaa-31ad-4421-848c-bf54bb4f1b4a/files/081de678-436b-4fbb-bec6-2a1cb3f23367.jpg",
+    title: "Чистый салон",
+    desc: "Каждая машина проходит уборку перед подачей",
+  },
+  {
+    src: "https://cdn.poehali.dev/projects/62498eaa-31ad-4421-848c-bf54bb4f1b4a/files/ea4f1f5f-328a-42fc-bd98-3e045cd45783.jpg",
+    title: "Опытные водители",
+    desc: "Стаж от 5 лет, проверка документов и стажа",
+  },
+  {
+    src: "https://cdn.poehali.dev/projects/62498eaa-31ad-4421-848c-bf54bb4f1b4a/files/badf8aa8-397d-4ea1-98f7-65319245d710.jpg",
+    title: "Помощь с багажом",
+    desc: "Встретим, поможем загрузить и разгрузить вещи",
+  },
+];
+
+export const REVIEWS = [
+  {
+    name: "Андрей Соколов",
+    city: "Москва — Сочи",
+    rating: 5,
+    text: "Ехали семьёй с двумя детьми. Водитель подал машину минута в минуту, детские кресла были уже установлены. Цену назвали заранее и она не изменилась.",
+  },
+  {
+    name: "Марина Егорова",
+    city: "Санкт-Петербург — Тверь",
+    rating: 5,
+    text: "Заказывала трансфер после ночного рейса. Встретили с табличкой, помогли с багажом. Машина чистая, в дороге тихо и комфортно — выспалась.",
+  },
+  {
+    name: "Дмитрий Волков",
+    city: "Москва — Казань",
+    rating: 5,
+    text: "Пользуюсь регулярно для командировок. Дешевле агрегаторов, при этом уровень сервиса выше. Отдельный плюс — всегда можно дозвониться.",
+  },
+  {
+    name: "Ольга Никитина",
+    city: "Москва — Нижний Новгород",
+    rating: 5,
+    text: "Везли кота в переноске, заранее предупредила — никаких проблем. Водитель делал остановки, когда просила. Рекомендую.",
+  },
+  {
+    name: "Сергей Панин",
+    city: "Краснодар — Ростов-на-Дону",
+    rating: 5,
+    text: "Срочно нужна была доставка документов. Отправили в тот же день, забрали через два часа после звонка. Всё дошло в целости.",
+  },
+  {
+    name: "Екатерина Лебедева",
+    city: "Москва — Ярославль",
+    rating: 5,
+    text: "Заказывали минивэн на компанию из семи человек. Все поместились с багажом, ехали с комфортом. Цена вышла ниже, чем на двух такси.",
+  },
+];
+
 export const STATS = [
   { value: "12 000+", label: "Поездок выполнено" },
   { value: "98%", label: "Довольных клиентов" },
@@ -60,4 +124,4 @@ export type IconName =
   | "Package" | "PackageSearch" | "Zap" | "Gem" | "Bus" | "ArrowRight2"
   | "Shield" | "Clock" | "CreditCard" | "Headphones" | "Phone"
   | "Calculator" | "CheckCircle" | "Check" | "ArrowRight" | "MessageCircle" | "TriangleAlert"
-  | "Send" | "Mail" | "ChevronRight" | "RefreshCw";
+  | "Send" | "Mail" | "ChevronRight" | "RefreshCw" | "Quote" | "ArrowLeft" | "Flame";

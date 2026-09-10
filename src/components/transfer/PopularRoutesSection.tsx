@@ -65,6 +65,19 @@ export default function PopularRoutesSection() {
               </div>
               <Icon name="ChevronRight" size={18} className="text-muted-foreground group-hover:text-neon transition-colors flex-shrink-0" />
             </div>
+
+            <div className="flex items-center gap-2 mb-2">
+              <div className="w-2 h-2 rounded-full bg-neon flex-shrink-0" />
+              <div className="flex-1 h-px bg-gradient-to-r from-neon/60 to-neon/20 relative">
+                <Icon
+                  name="Car"
+                  size={13}
+                  className="absolute -top-[7px] left-1/2 -translate-x-1/2 text-neon/70 bg-surface px-[1px] transition-all duration-500 group-hover:left-[85%]"
+                />
+              </div>
+              <div className="w-2 h-2 rounded-full border-2 border-neon flex-shrink-0" />
+            </div>
+
             <h3 className="font-display text-lg sm:text-xl font-bold mb-1 truncate">{r.from} — {r.to}</h3>
             <div className="text-sm text-muted-foreground mb-3 truncate">{r.distance} км · {r.duration}</div>
             <div className="flex items-baseline gap-1">

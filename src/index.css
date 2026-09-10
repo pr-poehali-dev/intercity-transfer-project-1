@@ -127,6 +127,20 @@
   .opacity-0-init {
     opacity: 0;
   }
+
+  .animate-shine {
+    animation: shine 2.8s ease-in-out infinite;
+  }
+
+  @keyframes shine {
+    0% {
+      transform: translateX(-100%);
+    }
+    45%,
+    100% {
+      transform: translateX(200%);
+    }
+  }
 }
 
 /* Scrollbar */

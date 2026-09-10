@@ -139,15 +139,25 @@ export default function CalculatorForm({
             <button
               key={i}
               onClick={() => { setTariff(i); }}
-              className={`border rounded-xl p-2 sm:p-3 text-center transition-all overflow-hidden min-w-0 ${
+              className={`relative border rounded-xl p-2 sm:p-3 pt-3 text-center transition-all overflow-hidden min-w-0 ${
                 tariff === i
                   ? "border-neon bg-neon/10 text-foreground"
-                  : "border-border bg-background text-muted-foreground hover:border-white/30"
+                  : t.popular
+                    ? "border-neon/40 bg-background text-muted-foreground hover:border-neon/60"
+                    : "border-border bg-background text-muted-foreground hover:border-white/30"
               }`}
             >
-              <Icon name={t.icon as IconName} size={18} className={`mx-auto mb-1 ${tariff === i ? "text-neon" : ""}`} />
+              {t.popular && (
+                <div className="absolute top-0 right-0 bg-neon text-background text-[9px] sm:text-[10px] font-display font-bold tracking-wide px-1.5 py-0.5 rounded-bl-lg leading-none">
+                  ХИТ
+                </div>
+              )}
+              <Icon name={t.icon as IconName} size={18} className={`mx-auto mb-1 ${tariff === i ? "text-neon" : t.popular ? "text-neon/70" : ""}`} />
               <div className="font-display text-sm sm:text-base font-semibold leading-tight">{t.name}</div>
               <div className="text-[11px] sm:text-xs opacity-70 leading-tight mt-0.5">{t.desc}</div>
+              <div className={`text-[10px] sm:text-xs font-display font-semibold mt-1 ${tariff === i ? "text-neon" : "opacity-60"}`}>
+                {t.isMinivan ? "от 46 ₽/км" : `${t.pricePerKm} ₽/км`}
+              </div>
             </button>
           ))}
         </div>
@@ -323,15 +333,18 @@ export default function CalculatorForm({
       <button
         onClick={onCalculate}
         disabled={!!routeError || calculating || !addressesFilled}
-        className="w-full bg-neon text-background font-display font-bold text-base py-4 rounded-xl hover:opacity-90 transition-all glow-neon hover:scale-[1.02] active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+        className="relative overflow-hidden w-full bg-neon text-background font-display font-bold text-base py-4 rounded-xl hover:opacity-90 transition-all glow-neon hover:scale-[1.02] active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
       >
+        {!calculating && addressesFilled && !routeError && (
+          <span className="absolute inset-0 -translate-x-full animate-shine bg-gradient-to-r from-transparent via-white/40 to-transparent pointer-events-none" />
+        )}
         {calculating ? (
           <>
             <Icon name="Loader2" size={18} className="animate-spin" />
             РАССЧИТЫВАЕМ...
           </>
         ) : (
-          "РАССЧИТАТЬ СТОИМОСТЬ"
+          <span className="relative">РАССЧИТАТЬ СТОИМОСТЬ</span>
         )}
       </button>
 

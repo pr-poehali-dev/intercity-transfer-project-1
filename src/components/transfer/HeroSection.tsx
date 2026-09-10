@@ -1,10 +1,74 @@
-import { HERO_IMAGE, STATS } from "./constants";
+import { useEffect, useRef, useState } from "react";
+import Icon from "@/components/ui/icon";
+import { HERO_IMAGE, STATS, TRUST_BADGES } from "./constants";
+import type { IconName } from "./constants";
 
 interface HeroSectionProps {
   onBookClick: () => void;
 }
 
+function useCountUp(target: string, active: boolean) {
+  const [display, setDisplay] = useState(target);
+  const numMatch = target.match(/[\d.,]+/);
+
+  useEffect(() => {
+    if (!active || !numMatch) return;
+    const raw = numMatch[0].replace(",", ".");
+    const end = parseFloat(raw);
+    if (isNaN(end)) return;
+    const decimals = raw.includes(".") ? raw.split(".")[1].length : 0;
+    const duration = 1400;
+    const start = performance.now();
+    let frame = 0;
+
+    const tick = (now: number) => {
+      const progress = Math.min((now - start) / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      const value = (end * eased).toFixed(decimals);
+      const pretty = decimals === 0
+        ? Number(value).toLocaleString("ru-RU")
+        : value.replace(".", ",");
+      setDisplay(target.replace(numMatch[0], pretty));
+      if (progress < 1) frame = requestAnimationFrame(tick);
+    };
+
+    frame = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frame);
+  }, [active, target]);
+
+  return numMatch ? display : target;
+}
+
+function StatItem({ value, label, active }: { value: string; label: string; active: boolean }) {
+  const display = useCountUp(value, active);
+  return (
+    <div className="text-center py-1.5">
+      <div className="font-display text-xl sm:text-3xl font-bold text-neon tabular-nums">{display}</div>
+      <div className="text-xs sm:text-sm text-muted-foreground mt-0.5 leading-tight">{label}</div>
+    </div>
+  );
+}
+
 export default function HeroSection({ onBookClick: _ }: HeroSectionProps) {
+  const statsRef = useRef<HTMLDivElement>(null);
+  const [statsVisible, setStatsVisible] = useState(false);
+
+  useEffect(() => {
+    const el = statsRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          setStatsVisible(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.3 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <>
       {/* HERO */}
@@ -26,17 +90,26 @@ export default function HeroSection({ onBookClick: _ }: HeroSectionProps) {
             <p className="text-base sm:text-lg text-muted-foreground leading-relaxed animate-fade-up" style={{ animationDelay: "0.2s" }}>
               Поездки по России без агрегаторов — дёшево и с комфортом!
             </p>
+
+            <div className="flex flex-wrap gap-2 sm:gap-3 mt-6 animate-fade-up" style={{ animationDelay: "0.3s" }}>
+              {TRUST_BADGES.map((b, i) => (
+                <div
+                  key={i}
+                  className="flex items-center gap-2 glass rounded-xl px-3 py-2 border border-white/10 hover:border-neon/40 transition-colors"
+                >
+                  <Icon name={b.icon as IconName} size={16} className="text-neon flex-shrink-0" />
+                  <span className="text-xs sm:text-sm font-display font-semibold tracking-wide">{b.label}</span>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
 
         {/* Stats strip */}
-        <div className="absolute bottom-0 left-0 right-0 glass border-t border-white/5">
+        <div ref={statsRef} className="absolute bottom-0 left-0 right-0 glass border-t border-white/5">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 grid grid-cols-2 md:grid-cols-4 gap-2">
             {STATS.map((s, i) => (
-              <div key={i} className="text-center py-1.5">
-                <div className="font-display text-xl sm:text-3xl font-bold text-neon">{s.value}</div>
-                <div className="text-xs sm:text-sm text-muted-foreground mt-0.5 leading-tight">{s.label}</div>
-              </div>
+              <StatItem key={i} value={s.value} label={s.label} active={statsVisible} />
             ))}
           </div>
         </div>

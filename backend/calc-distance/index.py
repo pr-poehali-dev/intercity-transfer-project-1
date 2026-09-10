@@ -84,8 +84,15 @@ def _dadata_suggest(query: str, api_key: str, count: int, to_bound: str):
             'Authorization': f'Token {api_key}',
         }
     )
-    with urllib.request.urlopen(req, timeout=8) as resp:
-        return json.loads(resp.read())
+    last_err = None
+    for attempt in range(3):
+        try:
+            with urllib.request.urlopen(req, timeout=8) as resp:
+                return json.loads(resp.read())
+        except (urllib.error.URLError, TimeoutError, OSError) as e:
+            last_err = e
+            time.sleep(0.4 * (attempt + 1))
+    raise last_err
 
 
 def geocode_candidates(query: str, api_key: str, count: int = 10):
@@ -385,6 +392,55 @@ def road_distance(from_coords, to_coords, gh_key: str):
 GEO_SCHEMA = 't_p48987818_intercity_transfer_p'
 
 
+def distance_from_cache(from_city: str, to_city: str, dsn: str):
+    """Читает ранее рассчитанное расстояние между городами из БД."""
+    if not dsn:
+        return None
+    a = norm_yo(short_city(from_city).lower()).replace("'", "''")
+    b = norm_yo(short_city(to_city).lower()).replace("'", "''")
+    try:
+        import psycopg2
+        conn = psycopg2.connect(dsn)
+        try:
+            with conn.cursor() as cur:
+                cur.execute(
+                    f"SELECT distance_km FROM {GEO_SCHEMA}.distance_cache "
+                    f"WHERE (lower(from_city) = '{a}' AND lower(to_city) = '{b}') "
+                    f"   OR (lower(from_city) = '{b}' AND lower(to_city) = '{a}') LIMIT 1"
+                )
+                row = cur.fetchone()
+            if row:
+                print(f"distance cache HIT {a} -> {b} = {row[0]} km")
+                return int(row[0])
+        finally:
+            conn.close()
+    except Exception as e:
+        print(f"distance cache read failed: {type(e).__name__}: {e}")
+    return None
+
+
+def distance_to_cache(from_city: str, to_city: str, km: int, dsn: str) -> None:
+    """Сохраняет расстояние между городами в БД."""
+    if not dsn or not km:
+        return
+    a = norm_yo(short_city(from_city)).replace("'", "''")
+    b = norm_yo(short_city(to_city)).replace("'", "''")
+    try:
+        import psycopg2
+        conn = psycopg2.connect(dsn)
+        try:
+            with conn.cursor() as cur:
+                cur.execute(
+                    f"INSERT INTO {GEO_SCHEMA}.distance_cache (from_city, to_city, distance_km) "
+                    f"VALUES ('{a}', '{b}', {int(km)})"
+                )
+            conn.commit()
+        finally:
+            conn.close()
+    except Exception as e:
+        print(f"distance cache write failed: {type(e).__name__}: {e}")
+
+
 def geometry_from_cache(cache_key: str, dsn: str):
     """Читает готовую линию маршрута из кэша БД."""
     if not dsn:
@@ -486,7 +542,10 @@ def short_city(name: str) -> str:
 
 
 def segment_distance(from_city, to_city, dadata_key, gh_key, dsn):
-    """Расстояние одного отрезка: геокод -> GraphHopper (без кэша)."""
+    """Расстояние одного отрезка: кэш -> геокод -> GraphHopper."""
+    cached = distance_from_cache(from_city, to_city, dsn)
+    if cached:
+        return cached
     with ThreadPoolExecutor(max_workers=2) as ex:
         f_from = ex.submit(geocode_safe, from_city, dadata_key)
         f_to = ex.submit(geocode_safe, to_city, dadata_key)
@@ -496,13 +555,20 @@ def segment_distance(from_city, to_city, dadata_key, gh_key, dsn):
         raise ValueError(f'Координаты не найдены: {from_city} / {to_city}')
     from_coords = from_res[:2]
     to_coords = to_res[:2]
-    dist = road_distance(from_coords, to_coords, gh_key)
+    try:
+        dist = road_distance(from_coords, to_coords, gh_key)
+    except Exception as ge:
+        print(f"segment fallback {from_city} -> {to_city}: {type(ge).__name__}: {ge}")
+        straight = haversine_km(from_coords, to_coords)
+        dist = round(straight * 1.25) if straight >= 1 else None
     if dist and not region_sanity_ok(dist, from_city, to_city):
         # Оба пункта в одном регионе, но расстояние огромное — данные ошибочны
         dist = None
     if dist and not is_sane_distance(dist, from_coords, to_coords):
         print(f"INSANE distance: {from_city} -> {to_city} = {dist} km")
         dist = None
+    if dist:
+        distance_to_cache(from_city, to_city, dist, dsn)
     return dist
 
 
@@ -600,8 +666,18 @@ def handler(event: dict, context) -> dict:
                     'body': json.dumps({'line': None, 'error': 'Координаты не найдены'})
                 }
             coords = [r[:2] for r in results]
-            line, km = road_geometry(coords, gh_key)
-            geometry_to_cache(cache_key, line, km, coords, dsn)
+            approx = False
+            try:
+                line, km = road_geometry(coords, gh_key)
+            except Exception as ge:
+                print(f"geometry fallback {cities}: {type(ge).__name__}: {ge}")
+                approx = True
+                line = [list(c) for c in coords]
+                km = round(sum(
+                    haversine_km(coords[i], coords[i + 1]) for i in range(len(coords) - 1)
+                ) * 1.25)
+            if not approx:
+                geometry_to_cache(cache_key, line, km, coords, dsn)
             return {
                 'statusCode': 200,
                 'headers': {'Access-Control-Allow-Origin': '*', 'Content-Type': 'application/json'},
@@ -639,6 +715,14 @@ def handler(event: dict, context) -> dict:
             'body': json.dumps({'distance': None, 'error': 'API keys not configured'})
         }
 
+    cached_km = distance_from_cache(from_city, to_city, dsn)
+    if cached_km:
+        return {
+            'statusCode': 200,
+            'headers': {'Access-Control-Allow-Origin': '*', 'Content-Type': 'application/json'},
+            'body': json.dumps({'distance': cached_km, 'cached': True})
+        }
+
     try:
         with ThreadPoolExecutor(max_workers=2) as ex:
             f_from = ex.submit(geocode_safe, from_city, dadata_key)
@@ -655,7 +739,17 @@ def handler(event: dict, context) -> dict:
         to_coords = to_res[:2]
         from_label = from_res[2] if len(from_res) > 2 else from_city
         to_label = to_res[2] if len(to_res) > 2 else to_city
-        dist = road_distance(from_coords, to_coords, gh_key)
+        approx = False
+        try:
+            dist = road_distance(from_coords, to_coords, gh_key)
+        except Exception as ge:
+            # Внешний маршрутизатор недоступен/исчерпал лимит — оцениваем
+            # по прямой с типовым дорожным коэффициентом, чтобы клиент
+            # всё равно увидел стоимость.
+            print(f"road_distance fallback for {from_city} -> {to_city}: {type(ge).__name__}: {ge}")
+            approx = True
+            straight = haversine_km(from_coords, to_coords)
+            dist = round(straight * 1.25) if straight >= 1 else None
     except Exception as e:
         print(f"calc-distance error for {from_city} -> {to_city}: {type(e).__name__}: {e}")
         return {
@@ -671,6 +765,9 @@ def handler(event: dict, context) -> dict:
     if dist and not is_sane_distance(dist, from_coords, to_coords):
         print(f"INSANE distance: {from_city} -> {to_city} = {dist} km")
         dist = None
+
+    if dist and not approx:
+        distance_to_cache(from_city, to_city, dist, dsn)
 
     return {
         'statusCode': 200,

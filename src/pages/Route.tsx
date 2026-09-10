@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import Icon from "@/components/ui/icon";
 import Navbar from "@/components/transfer/Navbar";
@@ -14,6 +14,10 @@ export default function RoutePage() {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const route = slug ? getRouteBySlug(slug) : undefined;
+  const [tripDate, setTripDate] = useState("");
+  const [tripTime, setTripTime] = useState("");
+  const [pax, setPax] = useState(1);
+  const today = new Date().toISOString().split("T")[0];
 
   useEffect(() => {
     if (!route) return;
@@ -57,6 +61,9 @@ export default function RoutePage() {
       tariff: String(tariffIndex),
     });
     if (subIndex !== undefined) params.set("sub", String(subIndex));
+    if (tripDate) params.set("date", tripDate);
+    if (tripTime) params.set("time", tripTime);
+    if (pax > 1) params.set("pax", String(pax));
     navigate(`/?${params.toString()}#calc`);
   }
 
@@ -116,15 +123,61 @@ export default function RoutePage() {
 
         <div className="bg-surface border border-border rounded-2xl p-4 sm:p-8 mb-8">
           <h2 className="font-display text-xl font-bold mb-2 leading-snug">Тарифы: {route.from} — {route.to}</h2>
-          <p className="text-xs text-muted-foreground mb-4">Нажмите на тариф, чтобы перейти к оформлению</p>
+          <p className="text-xs text-muted-foreground mb-4">Укажите дату и нажмите на тариф — попадёте в форму с готовой заявкой</p>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5">
+            <div>
+              <label className="text-xs font-display text-muted-foreground tracking-wider mb-1.5 block">ДАТА ПОЕЗДКИ</label>
+              <input
+                type="date"
+                value={tripDate}
+                min={today}
+                onChange={(e) => setTripDate(e.target.value)}
+                className="w-full bg-background border border-border rounded-lg px-3 py-2.5 text-sm text-foreground focus:border-neon outline-none"
+              />
+            </div>
+            <div>
+              <label className="text-xs font-display text-muted-foreground tracking-wider mb-1.5 block">ВРЕМЯ</label>
+              <input
+                type="time"
+                value={tripTime}
+                onChange={(e) => setTripTime(e.target.value)}
+                className="w-full bg-background border border-border rounded-lg px-3 py-2.5 text-sm text-foreground focus:border-neon outline-none"
+              />
+            </div>
+            <div>
+              <label className="text-xs font-display text-muted-foreground tracking-wider mb-1.5 block">ПАССАЖИРЫ</label>
+              <div className="flex items-center justify-between gap-2 bg-background border border-border rounded-lg px-3 py-2">
+                <button
+                  onClick={() => setPax(Math.max(1, pax - 1))}
+                  className="w-6 h-6 rounded border border-border text-muted-foreground hover:border-neon hover:text-neon transition-colors"
+                >
+                  −
+                </button>
+                <span className="font-display text-base font-bold">{pax}</span>
+                <button
+                  onClick={() => setPax(Math.min(10, pax + 1))}
+                  className="w-6 h-6 rounded border border-border text-muted-foreground hover:border-neon hover:text-neon transition-colors"
+                >
+                  +
+                </button>
+              </div>
+            </div>
+          </div>
+
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            {TARIFFS.map((t, i) => (
+            {TARIFFS.map((t, i) => {
+              const tooSmall = !t.isDelivery && t.maxPassengers < pax;
+              return (
               <button
                 key={i}
+                disabled={tooSmall}
                 onClick={() => goToBooking(i)}
-                className="border border-border rounded-xl p-4 text-center overflow-hidden hover:border-neon hover:bg-neon/5 transition-all group cursor-pointer relative"
+                className={`border border-border rounded-xl p-4 text-center overflow-hidden transition-all group relative ${
+                  tooSmall ? "opacity-35 cursor-not-allowed" : "hover:border-neon hover:bg-neon/5 cursor-pointer"
+                }`}
               >
-                {t.popular && (
+                {t.popular && !tooSmall && (
                   <div className="absolute top-2 right-2 bg-neon text-background text-[10px] font-display font-bold px-2 py-0.5 rounded">
                     ХИТ
                   </div>
@@ -136,11 +189,12 @@ export default function RoutePage() {
                   от {tariffPrice(t).toLocaleString("ru-RU")} ₽
                 </div>
                 <div className="mt-2 text-xs text-muted-foreground group-hover:text-neon transition-colors inline-flex items-center gap-1">
-                  Заказать
-                  <Icon name="ChevronRight" size={12} />
+                  {tooSmall ? `до ${t.maxPassengers} чел.` : "Заказать"}
+                  {!tooSmall && <Icon name="ChevronRight" size={12} />}
                 </div>
               </button>
-            ))}
+              );
+            })}
           </div>
 
           {(() => {
@@ -153,8 +207,11 @@ export default function RoutePage() {
                   {MINIVAN_SUBTARIFFS.map((m, si) => (
                     <button
                       key={si}
+                      disabled={m.seats < pax}
                       onClick={() => goToBooking(mi, si)}
-                      className="border border-border rounded-lg px-3 py-2.5 text-left hover:border-neon hover:bg-neon/5 transition-all flex items-center justify-between gap-2 group"
+                      className={`border border-border rounded-lg px-3 py-2.5 text-left transition-all flex items-center justify-between gap-2 group ${
+                        m.seats < pax ? "opacity-35 cursor-not-allowed" : "hover:border-neon hover:bg-neon/5"
+                      }`}
                     >
                       <div className="min-w-0">
                         <div className="font-display text-sm font-semibold truncate">{m.name}</div>

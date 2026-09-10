@@ -19,11 +19,29 @@ export default function PopularRoutesSection() {
   const [activeGroup, setActiveGroup] = useState(0);
   const [showAll, setShowAll] = useState(false);
   const [openTariffs, setOpenTariffs] = useState<string | null>(null);
+  const [tripDate, setTripDate] = useState("");
+  const [tripTime, setTripTime] = useState("");
+  const [pax, setPax] = useState(1);
+
+  const today = new Date().toISOString().split("T")[0];
 
   function goToBooking(from: string, to: string, tariffIndex: number, subIndex?: number) {
     const params = new URLSearchParams({ from, to, tariff: String(tariffIndex) });
     if (subIndex !== undefined) params.set("sub", String(subIndex));
+    if (tripDate) params.set("date", tripDate);
+    if (tripTime) params.set("time", tripTime);
+    if (pax > 1) params.set("pax", String(pax));
     navigate(`/?${params.toString()}#calc`);
+  }
+
+  function toggleCard(slug: string) {
+    const next = openTariffs === slug ? null : slug;
+    setOpenTariffs(next);
+    if (next) {
+      setTripDate("");
+      setTripTime("");
+      setPax(1);
+    }
   }
 
   const grouped = ROUTES.filter(r => GROUPS[activeGroup].filter(r.slug));
@@ -99,41 +117,93 @@ export default function PopularRoutesSection() {
               </Link>
 
               <button
-                onClick={() => setOpenTariffs(isOpen ? null : r.slug)}
+                onClick={() => toggleCard(r.slug)}
                 className="mt-3 w-full flex items-center justify-center gap-1.5 py-2 rounded-lg border border-border text-xs font-display font-semibold text-muted-foreground hover:border-neon/50 hover:text-neon transition-all"
               >
-                {isOpen ? "Скрыть тарифы" : "Выбрать тариф"}
+                {isOpen ? "Свернуть" : "Выбрать дату и тариф"}
                 <Icon name={isOpen ? "ChevronUp" : "ChevronDown"} size={14} />
               </button>
 
               {isOpen && (
                 <div className="mt-3 space-y-1.5 animate-in">
-                  {TARIFFS.map((t, ti) => (
-                    <button
-                      key={ti}
-                      onClick={() => goToBooking(r.from, r.to, ti)}
-                      className="w-full flex items-center gap-2 px-3 py-2 rounded-lg border border-border hover:border-neon hover:bg-neon/5 transition-all text-left"
-                    >
-                      <Icon name={t.icon as IconName} size={15} className="text-neon flex-shrink-0" />
-                      <span className="font-display text-sm font-semibold truncate flex-1">{t.name}</span>
-                      {t.popular && (
-                        <span className="bg-neon text-background text-[9px] font-display font-bold px-1.5 py-0.5 rounded flex-shrink-0">ХИТ</span>
-                      )}
-                      <span className="font-display text-sm text-neon font-bold whitespace-nowrap">
-                        {getTariffPrice(r.distance, ti).toLocaleString("ru-RU")} ₽
-                      </span>
-                    </button>
-                  ))}
+                  <div className="grid grid-cols-2 gap-1.5 mb-2">
+                    <div>
+                      <label className="text-[10px] font-display text-muted-foreground tracking-wider mb-1 block">ДАТА</label>
+                      <input
+                        type="date"
+                        value={tripDate}
+                        min={today}
+                        onChange={(e) => setTripDate(e.target.value)}
+                        className="w-full bg-background border border-border rounded-lg px-2 py-1.5 text-xs text-foreground focus:border-neon outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-display text-muted-foreground tracking-wider mb-1 block">ВРЕМЯ</label>
+                      <input
+                        type="time"
+                        value={tripTime}
+                        onChange={(e) => setTripTime(e.target.value)}
+                        className="w-full bg-background border border-border rounded-lg px-2 py-1.5 text-xs text-foreground focus:border-neon outline-none"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between gap-2 bg-background border border-border rounded-lg px-2.5 py-1.5 mb-2">
+                    <span className="text-[11px] text-muted-foreground">Пассажиров</span>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => setPax(Math.max(1, pax - 1))}
+                        className="w-5 h-5 rounded border border-border text-muted-foreground hover:border-neon hover:text-neon transition-colors text-xs leading-none"
+                      >
+                        −
+                      </button>
+                      <span className="font-display text-sm font-bold w-4 text-center">{pax}</span>
+                      <button
+                        onClick={() => setPax(Math.min(10, pax + 1))}
+                        className="w-5 h-5 rounded border border-border text-muted-foreground hover:border-neon hover:text-neon transition-colors text-xs leading-none"
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
+                  {TARIFFS.map((t, ti) => {
+                    const tooSmall = !t.isDelivery && t.maxPassengers < pax;
+                    return (
+                      <button
+                        key={ti}
+                        disabled={tooSmall}
+                        onClick={() => goToBooking(r.from, r.to, ti)}
+                        className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg border transition-all text-left ${
+                          tooSmall
+                            ? "border-border opacity-35 cursor-not-allowed"
+                            : "border-border hover:border-neon hover:bg-neon/5"
+                        }`}
+                      >
+                        <Icon name={t.icon as IconName} size={15} className="text-neon flex-shrink-0" />
+                        <span className="font-display text-sm font-semibold truncate flex-1">{t.name}</span>
+                        {t.popular && !tooSmall && (
+                          <span className="bg-neon text-background text-[9px] font-display font-bold px-1.5 py-0.5 rounded flex-shrink-0">ХИТ</span>
+                        )}
+                        <span className="font-display text-sm text-neon font-bold whitespace-nowrap">
+                          {getTariffPrice(r.distance, ti).toLocaleString("ru-RU")} ₽
+                        </span>
+                      </button>
+                    );
+                  })}
 
                   <div className="pt-1.5 mt-1.5 border-t border-border">
                     <div className="text-[10px] text-muted-foreground mb-1.5 px-1">Минивэн по вместимости:</div>
                     {MINIVAN_SUBTARIFFS.map((m, si) => {
                       const mi = TARIFFS.findIndex((t) => t.isMinivan);
+                      const tooSmall = m.seats < pax;
                       return (
                         <button
                           key={si}
+                          disabled={tooSmall}
                           onClick={() => goToBooking(r.from, r.to, mi, si)}
-                          className="w-full flex items-center justify-between gap-2 px-3 py-1.5 rounded-lg hover:bg-neon/5 transition-all text-left"
+                          className={`w-full flex items-center justify-between gap-2 px-3 py-1.5 rounded-lg transition-all text-left ${
+                            tooSmall ? "opacity-35 cursor-not-allowed" : "hover:bg-neon/5"
+                          }`}
                         >
                           <span className="text-xs text-muted-foreground truncate">{m.name} · {m.desc}</span>
                           <span className="font-display text-xs text-neon font-bold whitespace-nowrap">

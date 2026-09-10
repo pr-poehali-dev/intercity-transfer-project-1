@@ -71,6 +71,15 @@ export default function Index() {
       const si = Number(qSub);
       if (Number.isInteger(si) && si >= 0 && si < MINIVAN_SUBTARIFFS.length) setMinivanSub(si);
     }
+    const qDate = params.get("date");
+    if (qDate && /^\d{4}-\d{2}-\d{2}$/.test(qDate)) setDate(qDate);
+    const qTime = params.get("time");
+    if (qTime && /^\d{2}:\d{2}$/.test(qTime)) setTime(qTime);
+    const qPax = params.get("pax");
+    if (qPax !== null) {
+      const p = Number(qPax);
+      if (Number.isInteger(p) && p >= 1 && p <= 10) setPassengers(p);
+    }
     if (qFrom || qTo) {
       setTimeout(() => bookRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
     }

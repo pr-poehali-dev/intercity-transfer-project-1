@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import Icon from "@/components/ui/icon";
 import { loadYandexMaps } from "./yandexMaps";
+import func2url from "../../../backend/func2url.json";
 
 interface RouteMapProps {
   points: string[];
@@ -28,8 +29,25 @@ export default function RouteMap({ points, className = "" }: RouteMapProps) {
 
     async function load() {
       try {
-        const ymaps = await loadYandexMaps();
+        const [ymaps, res] = await Promise.all([
+          loadYandexMaps(),
+          fetch(func2url["calc-distance"], {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ points: cities, geometry: true }),
+          }).then((r) => r.json()),
+        ]);
+
         if (cancelled || !containerRef.current) return;
+
+        const line: number[][] | null = res?.line || null;
+        const stops: number[][] | null = res?.stops || null;
+
+        if (!line || line.length < 2) {
+          setError(true);
+          setLoading(false);
+          return;
+        }
 
         if (mapRef.current) {
           mapRef.current.destroy();
@@ -38,35 +56,44 @@ export default function RouteMap({ points, className = "" }: RouteMapProps) {
 
         const map = new ymaps.Map(
           containerRef.current,
-          { center: [55.75, 37.61], zoom: 6, controls: ["zoomControl"] },
+          { center: line[Math.floor(line.length / 2)], zoom: 6, controls: ["zoomControl"] },
           { suppressMapOpenBlock: true }
         );
         map.behaviors.disable("scrollZoom");
         mapRef.current = map;
 
-        const multiRoute = new ymaps.multiRouter.MultiRoute(
-          { referencePoints: cities, params: { routingMode: "auto", results: 1 } },
+        const polyline = new ymaps.Polyline(
+          line,
+          {},
           {
-            boundsAutoApply: true,
-            routeActiveStrokeColor: "ff9d0a",
-            routeActiveStrokeWidth: 5,
-            wayPointStartIconColor: "#ffffff",
-            wayPointFinishIconColor: ACCENT,
-            pinIconFillColor: ACCENT,
+            strokeColor: ACCENT,
+            strokeWidth: 5,
+            strokeOpacity: 0.9,
           }
         );
+        map.geoObjects.add(polyline);
 
-        multiRoute.model.events.add("requestsuccess", () => {
-          if (!cancelled) setLoading(false);
-        });
-        multiRoute.model.events.add("requestfail", () => {
-          if (!cancelled) {
-            setError(true);
-            setLoading(false);
-          }
+        const marks = stops && stops.length >= 2 ? stops : [line[0], line[line.length - 1]];
+        marks.forEach((c, i) => {
+          const isStart = i === 0;
+          const isEnd = i === marks.length - 1;
+          const placemark = new ymaps.Placemark(
+            c,
+            { iconCaption: isStart ? cities[0] : isEnd ? cities[cities.length - 1] : cities[i] },
+            {
+              preset: isStart ? "islands#circleDotIcon" : "islands#circleIcon",
+              iconColor: ACCENT,
+            }
+          );
+          map.geoObjects.add(placemark);
         });
 
-        map.geoObjects.add(multiRoute);
+        map.setBounds(polyline.geometry.getBounds(), {
+          checkZoomRange: true,
+          zoomMargin: 30,
+        });
+
+        if (!cancelled) setLoading(false);
       } catch {
         if (!cancelled) {
           setError(true);

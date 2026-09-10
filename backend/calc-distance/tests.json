@@ -84,6 +84,13 @@
       "expectedStatus": 200
     },
     {
+      "name": "Route geometry Moscow to Kazan",
+      "method": "POST",
+      "path": "/",
+      "body": {"from": "Москва", "to": "Казань", "geometry": true},
+      "expectedStatus": 200
+    },
+    {
       "name": "Multi points needs at least 2",
       "method": "POST",
       "path": "/",

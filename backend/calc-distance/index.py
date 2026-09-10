@@ -382,6 +382,99 @@ def road_distance(from_coords, to_coords, gh_key: str):
     raise last_err
 
 
+GEO_SCHEMA = 't_p48987818_intercity_transfer_p'
+
+
+def geometry_from_cache(cache_key: str, dsn: str):
+    """Читает готовую линию маршрута из кэша БД."""
+    if not dsn:
+        return None
+    try:
+        import psycopg2
+        conn = psycopg2.connect(dsn)
+        try:
+            with conn.cursor() as cur:
+                safe = cache_key.replace("'", "''")
+                cur.execute(
+                    f"SELECT line, distance_km, stops FROM {GEO_SCHEMA}.route_geometry_cache "
+                    f"WHERE cache_key = '{safe}' LIMIT 1"
+                )
+                row = cur.fetchone()
+            if row:
+                return {'line': row[0], 'distance': row[1], 'stops': row[2]}
+        finally:
+            conn.close()
+    except Exception as e:
+        print(f"geometry cache read failed: {type(e).__name__}: {e}")
+    return None
+
+
+def geometry_to_cache(cache_key: str, line, km, stops, dsn: str) -> None:
+    """Сохраняет линию маршрута в кэш БД."""
+    if not dsn or not line:
+        return
+    try:
+        import psycopg2
+        conn = psycopg2.connect(dsn)
+        try:
+            with conn.cursor() as cur:
+                safe = cache_key.replace("'", "''")
+                line_j = json.dumps(line).replace("'", "''")
+                stops_j = json.dumps(stops).replace("'", "''")
+                cur.execute(
+                    f"INSERT INTO {GEO_SCHEMA}.route_geometry_cache (cache_key, line, distance_km, stops) "
+                    f"VALUES ('{safe}', '{line_j}'::jsonb, {int(km or 0)}, '{stops_j}'::jsonb) "
+                    f"ON CONFLICT (cache_key) DO NOTHING"
+                )
+            conn.commit()
+        finally:
+            conn.close()
+    except Exception as e:
+        print(f"geometry cache write failed: {type(e).__name__}: {e}")
+
+
+def road_geometry(coords_list, gh_key: str):
+    """Геометрия маршрута по дорогам: список [lat, lon] точек линии."""
+    pts = ''.join(f'&point={lat},{lon}' for lat, lon in coords_list)
+    url = (
+        f'https://graphhopper.com/api/1/route?{pts.lstrip("&")}'
+        f'&profile=car&locale=ru&points_encoded=false&instructions=false'
+        f'&key={gh_key}'
+    )
+    req = urllib.request.Request(url, headers={'User-Agent': 'transfer-app'})
+    data = None
+    last_err = None
+    for attempt in range(3):
+        try:
+            with urllib.request.urlopen(req, timeout=15) as resp:
+                data = json.loads(resp.read())
+            break
+        except urllib.error.HTTPError as e:
+            last_err = e
+            if e.code == 429:
+                time.sleep(1.2 * (attempt + 1))
+                continue
+            raise
+        except (urllib.error.URLError, TimeoutError, OSError) as e:
+            last_err = e
+            time.sleep(0.6 * (attempt + 1))
+    if data is None:
+        raise last_err
+    paths = data.get('paths', [])
+    if not paths:
+        return None, None
+    path = paths[0]
+    line = path.get('points', {}).get('coordinates', [])
+    # GraphHopper отдаёт [lon, lat] — переворачиваем под Яндекс [lat, lon]
+    latlon = [[p[1], p[0]] for p in line]
+    # прореживаем, чтобы не гнать десятки тысяч точек в браузер
+    if len(latlon) > 1200:
+        step = len(latlon) // 1200 + 1
+        latlon = latlon[::step] + [latlon[-1]]
+    km = round(path.get('distance', 0) / 1000)
+    return latlon, km
+
+
 def norm_yo(s: str) -> str:
     """Нормализует букву ё→е, чтобы 'Орёл' и 'Орел' использовали один ключ кеша."""
     return (s or '').replace('ё', 'е').replace('Ё', 'Е')
@@ -478,6 +571,49 @@ def handler(event: dict, context) -> dict:
     dadata_key = os.environ.get('DADATA_API_KEY', '')
     gh_key = os.environ.get('GRAPHHOPPER_API_KEY', '')
     dsn = os.environ.get('DATABASE_URL', '')
+
+    if body.get('geometry'):
+        stops = points if isinstance(points, list) else [from_city, to_city]
+        cities = [str(p).strip() for p in stops if str(p).strip()]
+        if len(cities) < 2 or not dadata_key or not gh_key:
+            return {
+                'statusCode': 200,
+                'headers': {'Access-Control-Allow-Origin': '*'},
+                'body': json.dumps({'line': None, 'error': 'not enough data'})
+            }
+        cache_key = '|'.join(norm_yo(c.lower().strip()) for c in cities)
+        cached = geometry_from_cache(cache_key, dsn)
+        if cached and cached.get('line'):
+            return {
+                'statusCode': 200,
+                'headers': {'Access-Control-Allow-Origin': '*', 'Content-Type': 'application/json'},
+                'body': json.dumps(cached)
+            }
+
+        try:
+            with ThreadPoolExecutor(max_workers=4) as ex:
+                results = list(ex.map(lambda c: geocode_safe(c, dadata_key), cities))
+            if any(r is None for r in results):
+                return {
+                    'statusCode': 200,
+                    'headers': {'Access-Control-Allow-Origin': '*'},
+                    'body': json.dumps({'line': None, 'error': 'Координаты не найдены'})
+                }
+            coords = [r[:2] for r in results]
+            line, km = road_geometry(coords, gh_key)
+            geometry_to_cache(cache_key, line, km, coords, dsn)
+            return {
+                'statusCode': 200,
+                'headers': {'Access-Control-Allow-Origin': '*', 'Content-Type': 'application/json'},
+                'body': json.dumps({'line': line, 'distance': km, 'stops': coords})
+            }
+        except Exception as e:
+            print(f"geometry error {cities}: {type(e).__name__}: {e}")
+            return {
+                'statusCode': 200,
+                'headers': {'Access-Control-Allow-Origin': '*'},
+                'body': json.dumps({'line': None, 'error': str(e)})
+            }
 
     if isinstance(points, list):
         cities = [str(p).strip() for p in points if str(p).strip()]

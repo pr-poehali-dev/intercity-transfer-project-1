@@ -1,3 +1,4 @@
+import { useState } from "react";
 import Icon from "@/components/ui/icon";
 import { Link } from "react-router-dom";
 
@@ -5,11 +6,19 @@ interface NavbarProps {
   onBookClick?: () => void;
 }
 
+const MENU = [
+  { to: "/#calc", label: "Калькулятор", icon: "Calculator" },
+  { to: "/otzyvy", label: "Отзывы", icon: "Star" },
+  { to: "/#contacts", label: "Контакты", icon: "Phone" },
+] as const;
+
 export default function Navbar({ onBookClick }: NavbarProps) {
+  const [open, setOpen] = useState(false);
+
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 glass border-b border-white/5">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-        <Link to="/" className="flex items-center gap-2 min-w-0">
+        <Link to="/" className="flex items-center gap-2 min-w-0" onClick={() => setOpen(false)}>
           <div className="w-7 h-7 bg-neon rounded-sm flex items-center justify-center flex-shrink-0">
             <Icon name="MapPin" size={14} className="text-background" />
           </div>
@@ -19,11 +28,15 @@ export default function Navbar({ onBookClick }: NavbarProps) {
             </span>
           </div>
         </Link>
+
         <div className="hidden md:flex items-center gap-6 text-base text-muted-foreground">
-          <Link to="/#calc" className="hover:text-foreground transition-colors">Калькулятор</Link>
-          <Link to="/otzyvy" className="hover:text-foreground transition-colors">Отзывы</Link>
-          <Link to="/#contacts" className="hover:text-foreground transition-colors">Контакты</Link>
+          {MENU.map((m) => (
+            <Link key={m.to} to={m.to} className="hover:text-foreground transition-colors">
+              {m.label}
+            </Link>
+          ))}
         </div>
+
         <div className="flex items-center gap-2 flex-shrink-0">
           {onBookClick ? (
             <button
@@ -42,6 +55,7 @@ export default function Navbar({ onBookClick }: NavbarProps) {
               <span className="sm:hidden">ЦЕНА</span>
             </Link>
           )}
+
           <div className="flex items-center gap-1">
             {/* Blinking pointer arrow */}
             <span
@@ -57,6 +71,16 @@ export default function Navbar({ onBookClick }: NavbarProps) {
               <Icon name="Phone" size={16} />
             </Link>
           </div>
+
+          <button
+            type="button"
+            onClick={() => setOpen(!open)}
+            aria-label="Меню"
+            aria-expanded={open}
+            className="md:hidden w-9 h-9 rounded-md border border-border bg-surface flex items-center justify-center text-foreground hover:border-neon/50 transition-colors"
+          >
+            <Icon name={open ? "X" : "Menu"} size={18} />
+          </button>
         </div>
 
         <style>{`
@@ -69,6 +93,27 @@ export default function Navbar({ onBookClick }: NavbarProps) {
             50% { box-shadow: 0 0 0 5px hsl(38 100% 55% / 0); }
           }
         `}</style>
+      </div>
+
+      {/* Mobile menu */}
+      <div
+        className={`md:hidden overflow-hidden border-t border-white/5 transition-all duration-300 ${
+          open ? "max-h-64 opacity-100" : "max-h-0 opacity-0"
+        }`}
+      >
+        <div className="px-4 py-2 flex flex-col">
+          {MENU.map((m) => (
+            <Link
+              key={m.to}
+              to={m.to}
+              onClick={() => setOpen(false)}
+              className="flex items-center gap-3 py-3 border-b border-white/5 last:border-0 text-foreground hover:text-neon transition-colors"
+            >
+              <Icon name={m.icon} size={16} className="text-neon flex-shrink-0" />
+              <span className="font-display font-semibold">{m.label}</span>
+            </Link>
+          ))}
+        </div>
       </div>
     </nav>
   );

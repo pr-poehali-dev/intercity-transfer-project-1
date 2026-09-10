@@ -13,7 +13,6 @@ import { getYandexRoute } from "@/components/transfer/yandexMaps";
 import HowItWorks from "@/components/transfer/HowItWorks";
 import GallerySection from "@/components/transfer/GallerySection";
 import ReviewsSection from "@/components/transfer/ReviewsSection";
-import FloatingCTA from "@/components/transfer/FloatingCTA";
 import SeoTextSection from "@/components/transfer/SeoTextSection";
 import func2url from "../../backend/func2url.json";
 
@@ -336,7 +335,6 @@ export default function Index() {
         </div>
       </footer>
 
-      <FloatingCTA onBookClick={scrollToBook} />
 
       <style>{`
         .font-display { font-family: 'Oswald', sans-serif; }

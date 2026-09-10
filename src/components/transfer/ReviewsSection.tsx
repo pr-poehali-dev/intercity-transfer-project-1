@@ -28,7 +28,7 @@ export default function ReviewsSection() {
               <Icon key={i} name="Star" size={16} className="text-neon fill-neon" />
             ))}
           </div>
-          <span className="text-sm">4.9 из 5 — на основе 12 000+ поездок</span>
+          <span className="text-sm">4.9 из 5 — на основе 1 000+ поездок</span>
         </div>
       </div>
 

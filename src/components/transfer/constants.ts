@@ -10,7 +10,7 @@ export const TRUST_BADGES = [
   { icon: "Clock", label: "Работаем 24/7" },
   { icon: "CreditCard", label: "Фиксированная цена" },
   { icon: "Shield", label: "Проверенные водители" },
-  { icon: "Star", label: "12 000+ поездок" },
+  { icon: "Star", label: "1 000+ поездок" },
 ];
 
 export const TARIFFS = [
@@ -106,7 +106,7 @@ export const REVIEWS = [
 ];
 
 export const STATS = [
-  { value: "12 000+", label: "Поездок выполнено" },
+  { value: "1 000+", label: "Поездок выполнено" },
   { value: "98%", label: "Довольных клиентов" },
   { value: "150+", label: "Городов и маршрутов" },
   { value: "4.9★", label: "Средняя оценка" },

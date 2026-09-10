@@ -8,9 +8,17 @@ interface NavbarProps {
 
 const MENU = [
   { to: "/#calc", label: "Калькулятор", icon: "Calculator" },
+  { to: "/#routes", label: "Маршруты", icon: "MapPin" },
+  { to: "/#how", label: "Как это работает", icon: "CheckCircle" },
+  { to: "/#about", label: "О нас", icon: "Shield" },
   { to: "/otzyvy", label: "Отзывы", icon: "Star" },
+  { to: "/#faq", label: "Вопросы", icon: "MessageCircle" },
   { to: "/#contacts", label: "Контакты", icon: "Phone" },
 ] as const;
+
+const DESKTOP_MENU = MENU.filter((m) =>
+  ["/#calc", "/#routes", "/otzyvy", "/#contacts"].includes(m.to)
+);
 
 export default function Navbar({ onBookClick }: NavbarProps) {
   const [open, setOpen] = useState(false);
@@ -29,9 +37,9 @@ export default function Navbar({ onBookClick }: NavbarProps) {
           </div>
         </Link>
 
-        <div className="hidden md:flex items-center gap-6 text-base text-muted-foreground">
-          {MENU.map((m) => (
-            <Link key={m.to} to={m.to} className="hover:text-foreground transition-colors">
+        <div className="hidden md:flex items-center gap-5 lg:gap-6 text-sm lg:text-base text-muted-foreground">
+          {DESKTOP_MENU.map((m) => (
+            <Link key={m.to} to={m.to} className="hover:text-foreground transition-colors whitespace-nowrap">
               {m.label}
             </Link>
           ))}
@@ -77,7 +85,7 @@ export default function Navbar({ onBookClick }: NavbarProps) {
             onClick={() => setOpen(!open)}
             aria-label="Меню"
             aria-expanded={open}
-            className="md:hidden w-9 h-9 rounded-md border border-border bg-surface flex items-center justify-center text-foreground hover:border-neon/50 transition-colors"
+            className="w-9 h-9 rounded-md border border-border bg-surface flex items-center justify-center text-foreground hover:border-neon/50 transition-colors"
           >
             <Icon name={open ? "X" : "Menu"} size={18} />
           </button>
@@ -95,13 +103,13 @@ export default function Navbar({ onBookClick }: NavbarProps) {
         `}</style>
       </div>
 
-      {/* Mobile menu */}
+      {/* Dropdown menu */}
       <div
-        className={`md:hidden overflow-hidden border-t border-white/5 transition-all duration-300 ${
-          open ? "max-h-64 opacity-100" : "max-h-0 opacity-0"
+        className={`overflow-hidden border-t border-white/5 transition-all duration-300 ${
+          open ? "max-h-[32rem] opacity-100" : "max-h-0 opacity-0"
         }`}
       >
-        <div className="px-4 py-2 flex flex-col">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-2 flex flex-col md:grid md:grid-cols-3 md:gap-x-6">
           {MENU.map((m) => (
             <Link
               key={m.to}

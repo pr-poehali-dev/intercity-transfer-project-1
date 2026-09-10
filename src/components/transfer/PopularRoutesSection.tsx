@@ -28,7 +28,7 @@ export default function PopularRoutesSection() {
   }
 
   return (
-    <section className="py-16 max-w-7xl mx-auto px-4 sm:px-6">
+    <section id="routes" style={{ scrollMarginTop: "80px" }} className="py-16 max-w-7xl mx-auto px-4 sm:px-6">
       <div className="reveal mb-8 text-center">
         <div className="inline-block font-display text-neon text-base tracking-widest mb-2">ПОПУЛЯРНЫЕ НАПРАВЛЕНИЯ</div>
         <h2 className="font-display text-3xl md:text-4xl font-bold">МАРШРУТЫ ПО РОССИИ</h2>

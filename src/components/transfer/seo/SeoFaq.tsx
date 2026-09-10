@@ -1,6 +1,6 @@
 export default function SeoFaq() {
   return (
-    <div className="reveal">
+    <div className="reveal" id="faq" style={{ scrollMarginTop: "80px" }}>
       <h3 className="font-display text-lg sm:text-xl font-bold mb-5 text-center">ЧАСТЫЕ ВОПРОСЫ</h3>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {[

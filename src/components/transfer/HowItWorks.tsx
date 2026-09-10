@@ -3,7 +3,7 @@ import type { IconName } from "./constants";
 
 export default function HowItWorks() {
   return (
-    <section className="py-12 sm:py-16 max-w-7xl mx-auto px-4 sm:px-6">
+    <section id="how" style={{ scrollMarginTop: "80px" }} className="py-12 sm:py-16 max-w-7xl mx-auto px-4 sm:px-6">
       <div className="reveal mb-8 text-center">
         <div className="inline-block font-display text-neon text-sm tracking-widest mb-2">КАК ЭТО РАБОТАЕТ</div>
         <h2 className="font-display text-2xl sm:text-3xl md:text-4xl font-bold">3 ШАГА ДО ПОЕЗДКИ</h2>

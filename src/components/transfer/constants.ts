@@ -60,7 +60,7 @@ export const GALLERY = [
     desc: "Стаж от 5 лет, проверка документов и стажа",
   },
   {
-    src: "https://cdn.poehali.dev/projects/62498eaa-31ad-4421-848c-bf54bb4f1b4a/files/badf8aa8-397d-4ea1-98f7-65319245d710.jpg",
+    src: "https://cdn.poehali.dev/projects/62498eaa-31ad-4421-848c-bf54bb4f1b4a/files/9504f622-dbbe-4b0d-9bb6-d082d56a9278.jpg",
     title: "Помощь с багажом",
     desc: "Встретим, поможем загрузить и разгрузить вещи",
   },

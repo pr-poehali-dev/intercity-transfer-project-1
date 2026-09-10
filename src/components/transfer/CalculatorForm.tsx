@@ -155,9 +155,6 @@ export default function CalculatorForm({
               <Icon name={t.icon as IconName} size={18} className={`mx-auto mb-1 ${tariff === i ? "text-neon" : t.popular ? "text-neon/70" : ""}`} />
               <div className="font-display text-sm sm:text-base font-semibold leading-tight">{t.name}</div>
               <div className="text-[11px] sm:text-xs opacity-70 leading-tight mt-0.5">{t.desc}</div>
-              <div className={`text-[10px] sm:text-xs font-display font-semibold mt-1 ${tariff === i ? "text-neon" : "opacity-60"}`}>
-                {t.isMinivan ? "от 46 ₽/км" : `${t.pricePerKm} ₽/км`}
-              </div>
             </button>
           ))}
         </div>

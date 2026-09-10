@@ -59,8 +59,18 @@ export default function Index() {
     const params = new URLSearchParams(window.location.search);
     const qFrom = params.get("from");
     const qTo = params.get("to");
+    const qTariff = params.get("tariff");
+    const qSub = params.get("sub");
     if (qFrom) setFrom(qFrom);
     if (qTo) setTo(qTo);
+    if (qTariff !== null) {
+      const ti = Number(qTariff);
+      if (Number.isInteger(ti) && ti >= 0 && ti < TARIFFS.length) setTariff(ti);
+    }
+    if (qSub !== null) {
+      const si = Number(qSub);
+      if (Number.isInteger(si) && si >= 0 && si < MINIVAN_SUBTARIFFS.length) setMinivanSub(si);
+    }
     if (qFrom || qTo) {
       setTimeout(() => bookRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
     }

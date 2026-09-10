@@ -8,7 +8,7 @@ import { ROUTES_WITH_DURATION as ROUTES } from "@/components/transfer/routesData
 function getRouteBySlug(slug: string) {
   return ROUTES.find((r) => r.slug === slug);
 }
-import { TARIFFS, MINIVAN_SUBTARIFFS } from "@/components/transfer/constants";
+import { TARIFFS, MINIVAN_SUBTARIFFS, getDistanceSurcharge } from "@/components/transfer/constants";
 
 export default function RoutePage() {
   const { slug } = useParams<{ slug: string }>();
@@ -38,6 +38,27 @@ export default function RoutePage() {
   }
 
   const otherRoutes = ROUTES.filter((r) => r.slug !== route.slug).slice(0, 4);
+
+  const surcharge = getDistanceSurcharge(route.distance);
+
+  function priceFor(pricePerKm: number) {
+    return Math.round((route!.distance * pricePerKm * surcharge) / 50) * 50;
+  }
+
+  function tariffPrice(t: (typeof TARIFFS)[number]) {
+    if (t.isMinivan) return priceFor(MINIVAN_SUBTARIFFS[0].pricePerKm);
+    return priceFor(t.pricePerKm);
+  }
+
+  function goToBooking(tariffIndex: number, subIndex?: number) {
+    const params = new URLSearchParams({
+      from: route!.from,
+      to: route!.to,
+      tariff: String(tariffIndex),
+    });
+    if (subIndex !== undefined) params.set("sub", String(subIndex));
+    navigate(`/?${params.toString()}#calc`);
+  }
 
   return (
     <div className="min-h-screen bg-background text-foreground font-golos">
@@ -94,19 +115,60 @@ export default function RoutePage() {
         </div>
 
         <div className="bg-surface border border-border rounded-2xl p-4 sm:p-8 mb-8">
-          <h2 className="font-display text-xl font-bold mb-4 leading-snug">Тарифы: {route.from} — {route.to}</h2>
+          <h2 className="font-display text-xl font-bold mb-2 leading-snug">Тарифы: {route.from} — {route.to}</h2>
+          <p className="text-xs text-muted-foreground mb-4">Нажмите на тариф, чтобы перейти к оформлению</p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             {TARIFFS.map((t, i) => (
-              <div key={i} className="border border-border rounded-xl p-4 text-center overflow-hidden">
+              <button
+                key={i}
+                onClick={() => goToBooking(i)}
+                className="border border-border rounded-xl p-4 text-center overflow-hidden hover:border-neon hover:bg-neon/5 transition-all group cursor-pointer relative"
+              >
+                {t.popular && (
+                  <div className="absolute top-2 right-2 bg-neon text-background text-[10px] font-display font-bold px-2 py-0.5 rounded">
+                    ХИТ
+                  </div>
+                )}
                 <Icon name={t.icon as "Car"} size={24} className="text-neon mx-auto mb-2" />
                 <div className="font-display text-base font-bold mb-1 truncate">{t.name}</div>
                 <div className="text-xs text-muted-foreground mb-2 truncate">{t.desc}</div>
                 <div className="font-display text-lg text-neon font-bold truncate">
-                  от {(route.distance * (t.isMinivan ? MINIVAN_SUBTARIFFS[0].pricePerKm : t.pricePerKm)).toLocaleString("ru-RU")} ₽
+                  от {tariffPrice(t).toLocaleString("ru-RU")} ₽
                 </div>
-              </div>
+                <div className="mt-2 text-xs text-muted-foreground group-hover:text-neon transition-colors inline-flex items-center gap-1">
+                  Заказать
+                  <Icon name="ChevronRight" size={12} />
+                </div>
+              </button>
             ))}
           </div>
+
+          {(() => {
+            const mi = TARIFFS.findIndex((t) => t.isMinivan);
+            if (mi < 0) return null;
+            return (
+              <div className="mt-4 pt-4 border-t border-border">
+                <div className="text-xs text-muted-foreground mb-2">Минивэн — выберите вместимость:</div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  {MINIVAN_SUBTARIFFS.map((m, si) => (
+                    <button
+                      key={si}
+                      onClick={() => goToBooking(mi, si)}
+                      className="border border-border rounded-lg px-3 py-2.5 text-left hover:border-neon hover:bg-neon/5 transition-all flex items-center justify-between gap-2 group"
+                    >
+                      <div className="min-w-0">
+                        <div className="font-display text-sm font-semibold truncate">{m.name}</div>
+                        <div className="text-[11px] text-muted-foreground truncate">{m.desc}</div>
+                      </div>
+                      <div className="font-display text-sm text-neon font-bold whitespace-nowrap">
+                        {priceFor(m.pricePerKm).toLocaleString("ru-RU")} ₽
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            );
+          })()}
         </div>
 
         <div className="text-center mb-10">

@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Icon from "@/components/ui/icon";
 import { ROUTES_WITH_DURATION as ROUTES } from "./routesData";
+import { TARIFFS, MINIVAN_SUBTARIFFS, getTariffPrice, type IconName } from "./constants";
 
 const GROUPS = [
   { label: "Из Москвы", filter: (slug: string) => slug.startsWith("moskva-") },
@@ -14,8 +15,16 @@ const GROUPS = [
 const INITIAL_COUNT = 3;
 
 export default function PopularRoutesSection() {
+  const navigate = useNavigate();
   const [activeGroup, setActiveGroup] = useState(0);
   const [showAll, setShowAll] = useState(false);
+  const [openTariffs, setOpenTariffs] = useState<string | null>(null);
+
+  function goToBooking(from: string, to: string, tariffIndex: number, subIndex?: number) {
+    const params = new URLSearchParams({ from, to, tariff: String(tariffIndex) });
+    if (subIndex !== undefined) params.set("sub", String(subIndex));
+    navigate(`/?${params.toString()}#calc`);
+  }
 
   const grouped = ROUTES.filter(r => GROUPS[activeGroup].filter(r.slug));
   const displayed = showAll ? grouped : grouped.slice(0, INITIAL_COUNT);
@@ -53,40 +62,92 @@ export default function PopularRoutesSection() {
 
       {/* Карточки маршрутов */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-        {displayed.map((r) => (
-          <Link
-            key={r.slug}
-            to={`/marshrut/${r.slug}`}
-            className="group bg-surface border border-border rounded-2xl p-4 sm:p-6 hover:border-neon/40 transition-all hover:-translate-y-1 overflow-hidden min-w-0"
-          >
-            <div className="flex items-start justify-between mb-3">
-              <div className="w-10 h-10 bg-neon/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                <Icon name="MapPin" size={18} className="text-neon" />
-              </div>
-              <Icon name="ChevronRight" size={18} className="text-muted-foreground group-hover:text-neon transition-colors flex-shrink-0" />
-            </div>
+        {displayed.map((r) => {
+          const isOpen = openTariffs === r.slug;
+          return (
+            <div
+              key={r.slug}
+              className="group bg-surface border border-border rounded-2xl p-4 sm:p-6 hover:border-neon/40 transition-all overflow-hidden min-w-0 flex flex-col"
+            >
+              <Link to={`/marshrut/${r.slug}`} className="block">
+                <div className="flex items-start justify-between mb-3">
+                  <div className="w-10 h-10 bg-neon/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <Icon name="MapPin" size={18} className="text-neon" />
+                  </div>
+                  <Icon name="ChevronRight" size={18} className="text-muted-foreground group-hover:text-neon transition-colors flex-shrink-0" />
+                </div>
 
-            <div className="flex items-center gap-2 mb-2">
-              <div className="w-2 h-2 rounded-full bg-neon flex-shrink-0" />
-              <div className="flex-1 h-px bg-gradient-to-r from-neon/60 to-neon/20 relative">
-                <Icon
-                  name="Car"
-                  size={13}
-                  className="absolute -top-[7px] left-1/2 -translate-x-1/2 text-neon/70 bg-surface px-[1px] transition-all duration-500 group-hover:left-[85%]"
-                />
-              </div>
-              <div className="w-2 h-2 rounded-full border-2 border-neon flex-shrink-0" />
-            </div>
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-2 h-2 rounded-full bg-neon flex-shrink-0" />
+                  <div className="flex-1 h-px bg-gradient-to-r from-neon/60 to-neon/20 relative">
+                    <Icon
+                      name="Car"
+                      size={13}
+                      className="absolute -top-[7px] left-1/2 -translate-x-1/2 text-neon/70 bg-surface px-[1px] transition-all duration-500 group-hover:left-[85%]"
+                    />
+                  </div>
+                  <div className="w-2 h-2 rounded-full border-2 border-neon flex-shrink-0" />
+                </div>
 
-            <h3 className="font-display text-lg sm:text-xl font-bold mb-1 truncate">{r.from} — {r.to}</h3>
-            <div className="text-sm text-muted-foreground mb-3 truncate">{r.distance} км · {r.duration}</div>
-            <div className="flex items-baseline gap-1">
-              <span className="text-sm text-muted-foreground">от</span>
-              <span className="font-display text-xl sm:text-2xl font-bold text-neon">{r.priceFrom.toLocaleString("ru-RU")}</span>
-              <span className="text-sm text-muted-foreground">₽</span>
+                <h3 className="font-display text-lg sm:text-xl font-bold mb-1 truncate">{r.from} — {r.to}</h3>
+                <div className="text-sm text-muted-foreground mb-3 truncate">{r.distance} км · {r.duration}</div>
+                <div className="flex items-baseline gap-1">
+                  <span className="text-sm text-muted-foreground">от</span>
+                  <span className="font-display text-xl sm:text-2xl font-bold text-neon">{r.priceFrom.toLocaleString("ru-RU")}</span>
+                  <span className="text-sm text-muted-foreground">₽</span>
+                </div>
+              </Link>
+
+              <button
+                onClick={() => setOpenTariffs(isOpen ? null : r.slug)}
+                className="mt-3 w-full flex items-center justify-center gap-1.5 py-2 rounded-lg border border-border text-xs font-display font-semibold text-muted-foreground hover:border-neon/50 hover:text-neon transition-all"
+              >
+                {isOpen ? "Скрыть тарифы" : "Выбрать тариф"}
+                <Icon name={isOpen ? "ChevronUp" : "ChevronDown"} size={14} />
+              </button>
+
+              {isOpen && (
+                <div className="mt-3 space-y-1.5 animate-in">
+                  {TARIFFS.map((t, ti) => (
+                    <button
+                      key={ti}
+                      onClick={() => goToBooking(r.from, r.to, ti)}
+                      className="w-full flex items-center gap-2 px-3 py-2 rounded-lg border border-border hover:border-neon hover:bg-neon/5 transition-all text-left"
+                    >
+                      <Icon name={t.icon as IconName} size={15} className="text-neon flex-shrink-0" />
+                      <span className="font-display text-sm font-semibold truncate flex-1">{t.name}</span>
+                      {t.popular && (
+                        <span className="bg-neon text-background text-[9px] font-display font-bold px-1.5 py-0.5 rounded flex-shrink-0">ХИТ</span>
+                      )}
+                      <span className="font-display text-sm text-neon font-bold whitespace-nowrap">
+                        {getTariffPrice(r.distance, ti).toLocaleString("ru-RU")} ₽
+                      </span>
+                    </button>
+                  ))}
+
+                  <div className="pt-1.5 mt-1.5 border-t border-border">
+                    <div className="text-[10px] text-muted-foreground mb-1.5 px-1">Минивэн по вместимости:</div>
+                    {MINIVAN_SUBTARIFFS.map((m, si) => {
+                      const mi = TARIFFS.findIndex((t) => t.isMinivan);
+                      return (
+                        <button
+                          key={si}
+                          onClick={() => goToBooking(r.from, r.to, mi, si)}
+                          className="w-full flex items-center justify-between gap-2 px-3 py-1.5 rounded-lg hover:bg-neon/5 transition-all text-left"
+                        >
+                          <span className="text-xs text-muted-foreground truncate">{m.name} · {m.desc}</span>
+                          <span className="font-display text-xs text-neon font-bold whitespace-nowrap">
+                            {getTariffPrice(r.distance, mi, si).toLocaleString("ru-RU")} ₽
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
             </div>
-          </Link>
-        ))}
+          );
+        })}
       </div>
 
       {/* Кнопка "Показать все" */}

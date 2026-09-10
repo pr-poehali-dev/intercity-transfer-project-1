@@ -119,10 +119,20 @@ export function getDistanceSurcharge(distance: number): number {
   return 1;
 }
 
+export function calcRoutePrice(distance: number, pricePerKm: number): number {
+  return Math.round((distance * pricePerKm * getDistanceSurcharge(distance)) / 50) * 50;
+}
+
+export function getTariffPrice(distance: number, tariffIndex: number, subIndex = 0): number {
+  const t = TARIFFS[tariffIndex];
+  const rate = t.isMinivan ? MINIVAN_SUBTARIFFS[subIndex].pricePerKm : t.pricePerKm;
+  return calcRoutePrice(distance, rate);
+}
+
 export type IconName =
   | "MapPin" | "Navigation" | "Car" | "Star" | "Users" | "Truck" | "Baby" | "Dog"
   | "Package" | "PackageSearch" | "Zap" | "Gem" | "Bus" | "ArrowRight2"
   | "Shield" | "Clock" | "CreditCard" | "Headphones" | "Phone"
   | "Calculator" | "CheckCircle" | "Check" | "ArrowRight" | "MessageCircle" | "TriangleAlert"
   | "Send" | "Mail" | "ChevronRight" | "RefreshCw" | "Quote" | "ArrowLeft" | "Flame"
-  | "Menu" | "X";
+  | "Menu" | "X" | "ChevronUp" | "ChevronDown";

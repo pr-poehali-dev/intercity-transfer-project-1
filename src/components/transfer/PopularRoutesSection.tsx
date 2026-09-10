@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Icon from "@/components/ui/icon";
 import { ROUTES_WITH_DURATION as ROUTES } from "./routesData";
-import { TARIFFS, MINIVAN_SUBTARIFFS, getTariffPrice, type IconName } from "./constants";
+import { TARIFFS, MINIVAN_SUBTARIFFS, getTariffPrice, localDateStr, QUICK_DATES, type IconName } from "./constants";
 
 const GROUPS = [
   { label: "Из Москвы", filter: (slug: string) => slug.startsWith("moskva-") },
@@ -23,7 +23,7 @@ export default function PopularRoutesSection() {
   const [tripTime, setTripTime] = useState("");
   const [pax, setPax] = useState(1);
 
-  const today = new Date().toISOString().split("T")[0];
+  const today = localDateStr();
 
   function goToBooking(from: string, to: string, tariffIndex: number, subIndex?: number) {
     const params = new URLSearchParams({ from, to, tariff: String(tariffIndex) });
@@ -126,6 +126,26 @@ export default function PopularRoutesSection() {
 
               {isOpen && (
                 <div className="mt-3 space-y-1.5 animate-in">
+                  <div className="flex gap-1 mb-2">
+                    {QUICK_DATES.slice(0, 2).map((q) => {
+                      const val = localDateStr(q.offset);
+                      const active = tripDate === val;
+                      return (
+                        <button
+                          key={q.offset}
+                          onClick={() => setTripDate(active ? "" : val)}
+                          className={`flex-1 py-1.5 rounded-lg text-[11px] font-display font-semibold border transition-all ${
+                            active
+                              ? "bg-neon text-background border-neon"
+                              : "bg-background border-border text-muted-foreground hover:border-neon/50 hover:text-neon"
+                          }`}
+                        >
+                          {q.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+
                   <div className="grid grid-cols-2 gap-1.5 mb-2">
                     <div>
                       <label className="text-[10px] font-display text-muted-foreground tracking-wider mb-1 block">ДАТА</label>

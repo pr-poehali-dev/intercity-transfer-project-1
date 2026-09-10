@@ -119,6 +119,20 @@ export function getDistanceSurcharge(distance: number): number {
   return 1;
 }
 
+export function localDateStr(offsetDays = 0): string {
+  const d = new Date();
+  d.setDate(d.getDate() + offsetDays);
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${d.getFullYear()}-${m}-${day}`;
+}
+
+export const QUICK_DATES = [
+  { label: "Сегодня", offset: 0 },
+  { label: "Завтра", offset: 1 },
+  { label: "Послезавтра", offset: 2 },
+];
+
 export function calcRoutePrice(distance: number, pricePerKm: number): number {
   return Math.round((distance * pricePerKm * getDistanceSurcharge(distance)) / 50) * 50;
 }

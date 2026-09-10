@@ -1,5 +1,5 @@
 import Icon from "@/components/ui/icon";
-import { TARIFFS, DELIVERY_OPTIONS, MINIVAN_SUBTARIFFS, CHILD_SEAT_PRICE, PET_OPTIONS } from "./constants";
+import { TARIFFS, DELIVERY_OPTIONS, MINIVAN_SUBTARIFFS, CHILD_SEAT_PRICE, PET_OPTIONS, QUICK_DATES, localDateStr } from "./constants";
 import type { IconName } from "./constants";
 import CitySelect from "./CitySelect";
 
@@ -211,13 +211,34 @@ export default function CalculatorForm({
         </div>
       )}
 
+      <div className="flex flex-wrap gap-2 mb-3">
+        {QUICK_DATES.map((q) => {
+          const val = localDateStr(q.offset);
+          const active = date === val;
+          return (
+            <button
+              key={q.offset}
+              type="button"
+              onClick={() => setDate(active ? "" : val)}
+              className={`px-4 py-2 rounded-lg text-xs font-display font-semibold border transition-all ${
+                active
+                  ? "bg-neon text-background border-neon"
+                  : "bg-background border-border text-muted-foreground hover:border-neon/50 hover:text-neon"
+              }`}
+            >
+              {q.label}
+            </button>
+          );
+        })}
+      </div>
+
       <div className={`grid gap-4 mb-6 ${TARIFFS[tariff].isDelivery ? "grid-cols-2" : "grid-cols-3"}`}>
         <div>
           <label className="text-sm font-display text-muted-foreground tracking-wider mb-2 block">ДАТА ПОЕЗДКИ</label>
           <input
             type="date"
             value={date}
-            min={new Date().toISOString().split("T")[0]}
+            min={localDateStr()}
             onChange={(e) => setDate(e.target.value)}
             className="w-full bg-background border border-border rounded-lg px-2 py-3 text-sm text-foreground"
           />

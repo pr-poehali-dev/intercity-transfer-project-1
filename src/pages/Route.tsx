@@ -8,7 +8,7 @@ import { ROUTES_WITH_DURATION as ROUTES } from "@/components/transfer/routesData
 function getRouteBySlug(slug: string) {
   return ROUTES.find((r) => r.slug === slug);
 }
-import { TARIFFS, MINIVAN_SUBTARIFFS, getDistanceSurcharge } from "@/components/transfer/constants";
+import { TARIFFS, MINIVAN_SUBTARIFFS, getDistanceSurcharge, localDateStr, QUICK_DATES } from "@/components/transfer/constants";
 
 export default function RoutePage() {
   const { slug } = useParams<{ slug: string }>();
@@ -17,7 +17,7 @@ export default function RoutePage() {
   const [tripDate, setTripDate] = useState("");
   const [tripTime, setTripTime] = useState("");
   const [pax, setPax] = useState(1);
-  const today = new Date().toISOString().split("T")[0];
+  const today = localDateStr();
 
   useEffect(() => {
     if (!route) return;
@@ -124,6 +124,26 @@ export default function RoutePage() {
         <div className="bg-surface border border-border rounded-2xl p-4 sm:p-8 mb-8">
           <h2 className="font-display text-xl font-bold mb-2 leading-snug">Тарифы: {route.from} — {route.to}</h2>
           <p className="text-xs text-muted-foreground mb-4">Укажите дату и нажмите на тариф — попадёте в форму с готовой заявкой</p>
+
+          <div className="flex flex-wrap gap-2 mb-3">
+            {QUICK_DATES.map((q) => {
+              const val = localDateStr(q.offset);
+              const active = tripDate === val;
+              return (
+                <button
+                  key={q.offset}
+                  onClick={() => setTripDate(active ? "" : val)}
+                  className={`px-4 py-2 rounded-lg text-xs font-display font-semibold border transition-all ${
+                    active
+                      ? "bg-neon text-background border-neon"
+                      : "bg-background border-border text-muted-foreground hover:border-neon/50 hover:text-neon"
+                  }`}
+                >
+                  {q.label}
+                </button>
+              );
+            })}
+          </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5">
             <div>

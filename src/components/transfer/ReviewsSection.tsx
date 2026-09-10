@@ -1,15 +1,22 @@
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import Icon from "@/components/ui/icon";
 import { REVIEWS } from "./constants";
-
-function initials(name: string) {
-  return name
-    .split(" ")
-    .map((p) => p[0])
-    .slice(0, 2)
-    .join("");
-}
+import ReviewCard, { type Review } from "./ReviewCard";
+import func2url from "../../../backend/func2url.json";
 
 export default function ReviewsSection() {
+  const [reviews, setReviews] = useState<Review[]>(REVIEWS);
+
+  useEffect(() => {
+    fetch(func2url["reviews"])
+      .then((r) => r.json())
+      .then((d) => {
+        if (Array.isArray(d.reviews) && d.reviews.length) setReviews(d.reviews);
+      })
+      .catch(() => { /* fallback to static reviews */ });
+  }, []);
+
   return (
     <section className="py-16 max-w-7xl mx-auto px-4 sm:px-6">
       <div className="reveal mb-8 text-center">
@@ -26,37 +33,20 @@ export default function ReviewsSection() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {REVIEWS.map((r, i) => (
-          <div
-            key={i}
-            className="reveal relative bg-surface border border-border rounded-2xl p-5 sm:p-6 hover:border-neon/40 transition-all hover:-translate-y-1 overflow-hidden"
-            style={{ transitionDelay: `${i * 60}ms` }}
-          >
-            <Icon
-              name="Quote"
-              size={56}
-              className="absolute -top-2 right-2 text-neon/5 pointer-events-none"
-            />
-
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-11 h-11 rounded-full bg-neon/15 border border-neon/30 flex items-center justify-center flex-shrink-0">
-                <span className="font-display font-bold text-neon text-sm">{initials(r.name)}</span>
-              </div>
-              <div className="min-w-0">
-                <div className="font-display font-semibold leading-tight truncate">{r.name}</div>
-                <div className="text-xs text-muted-foreground truncate">{r.city}</div>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-0.5 mb-3">
-              {[...Array(r.rating)].map((_, s) => (
-                <Icon key={s} name="Star" size={13} className="text-neon fill-neon" />
-              ))}
-            </div>
-
-            <p className="text-sm text-muted-foreground leading-relaxed relative z-10">{r.text}</p>
-          </div>
+        {reviews.slice(0, 6).map((r, i) => (
+          <ReviewCard key={i} review={r} delay={i * 60} />
         ))}
+      </div>
+
+      <div className="text-center mt-8">
+        <Link
+          to="/otzyvy"
+          className="inline-flex items-center gap-2 px-6 py-3 rounded-xl border border-neon/40 bg-neon/10 text-neon hover:bg-neon/20 font-display font-semibold transition-all"
+        >
+          <Icon name="MessageCircle" size={16} />
+          Все отзывы и оставить свой
+          <Icon name="ChevronRight" size={16} />
+        </Link>
       </div>
     </section>
   );

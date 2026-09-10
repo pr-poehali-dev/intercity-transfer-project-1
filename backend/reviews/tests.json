@@ -1,0 +1,23 @@
+{
+  "tests": [
+    {
+      "name": "OPTIONS preflight",
+      "method": "OPTIONS",
+      "path": "/",
+      "expectedStatus": 200
+    },
+    {
+      "name": "GET approved reviews",
+      "method": "GET",
+      "path": "/",
+      "expectedStatus": 200
+    },
+    {
+      "name": "POST invalid review",
+      "method": "POST",
+      "path": "/",
+      "body": { "name": "", "route": "", "text": "" },
+      "expectedStatus": 400
+    }
+  ]
+}

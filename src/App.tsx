@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { useEffect } from "react";
 import Index from "./pages/Index";
 import RoutePage from "./pages/Route";
+import Reviews from "./pages/Reviews";
 import Privacy from "./pages/Privacy";
 import Oferta from "./pages/Oferta";
 import NotFound from "./pages/NotFound";
@@ -46,6 +47,7 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/marshrut/:slug" element={<RoutePage />} />
+          <Route path="/otzyvy" element={<Reviews />} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/oferta" element={<Oferta />} />
           <Route path="/yml" element={<YmlRedirect />} />

@@ -50,7 +50,7 @@ export const FEATURES = [
 
 export const GALLERY = [
   {
-    src: "https://cdn.poehali.dev/projects/62498eaa-31ad-4421-848c-bf54bb4f1b4a/files/081de678-436b-4fbb-bec6-2a1cb3f23367.jpg",
+    src: "https://cdn.poehali.dev/projects/62498eaa-31ad-4421-848c-bf54bb4f1b4a/files/adebdac9-f631-4726-9799-39e9ca477876.jpg",
     title: "Чистый салон",
     desc: "Каждая машина проходит уборку перед подачей",
   },

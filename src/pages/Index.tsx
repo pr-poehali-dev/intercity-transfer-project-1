@@ -120,13 +120,26 @@ export default function Index() {
     return base + extras;
   }
 
+  async function saveYandexDistance(a: string, b: string, km: number) {
+    try {
+      await fetch(func2url["calc-distance"], {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ from: a, to: b, distance: km, save: "yandex" }),
+      });
+    } catch { /* кэш не критичен */ }
+  }
+
   async function fetchDist(a: string, b: string): Promise<number | null> {
     // Основной источник — роутинг Яндекса (по дорогам, с русскими адресами)
     try {
       const yr = await getYandexRoute([a, b]);
-      if (yr && yr.distanceKm > 0) return yr.distanceKm;
+      if (yr && yr.distanceKm > 0) {
+        saveYandexDistance(a, b, yr.distanceKm);
+        return yr.distanceKm;
+      }
     } catch { /* fallback to backend */ }
-    // Резерв — бэкенд GraphHopper с кэшем в БД
+    // Резерв — кэш Яндекса в БД, затем GraphHopper
     try {
       const res = await fetch(func2url["calc-distance"], {
         method: "POST",
@@ -147,7 +160,10 @@ export default function Index() {
     // Основной источник — роутинг Яндекса
     try {
       const yr = await getYandexRoute(points);
-      if (yr && yr.distanceKm > 0) return yr.distanceKm;
+      if (yr && yr.distanceKm > 0) {
+        if (points.length === 2) saveYandexDistance(points[0], points[1], yr.distanceKm);
+        return yr.distanceKm;
+      }
     } catch { /* fallback to backend */ }
     // Резерв — бэкенд GraphHopper
     try {

@@ -84,6 +84,13 @@
       "expectedStatus": 200
     },
     {
+      "name": "Save yandex distance to cache",
+      "method": "POST",
+      "path": "/",
+      "body": {"from": "Тестовгород", "to": "Тестовосело", "distance": 123, "save": "yandex"},
+      "expectedStatus": 200
+    },
+    {
       "name": "Route geometry Moscow to Kazan",
       "method": "POST",
       "path": "/",

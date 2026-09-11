@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { TARIFFS, DELIVERY_OPTIONS, MINIVAN_SUBTARIFFS, getDistanceSurcharge, CHILD_SEAT_PRICE, PET_OPTIONS } from "./constants";
+import { TARIFFS, DELIVERY_OPTIONS, MINIVAN_SUBTARIFFS, getDistanceSurcharge, CHILD_SEAT_PRICE, PET_OPTIONS, MIN_ORDER_PRICE } from "./constants";
 import { getDurationByDistance } from "./routesData";
 import CalculatorForm from "./CalculatorForm";
 import BookingModal from "./BookingModal";
@@ -108,10 +108,13 @@ export default function CalculatorSection({
       : t.pricePerKm;
     const extras = isDelivery ? 0 : ((withChildren ? childrenCount * CHILD_SEAT_PRICE : 0) + (withPet ? PET_OPTIONS[petOption].price : 0));
     const finalPrice = distance
-      ? (roundTrip
-          ? Math.round((Math.round((distance * ratePerKm * getDistanceSurcharge(distance)) / 50) * 50 * 0.95) / 50) * 50
-          : Math.round((distance * ratePerKm * getDistanceSurcharge(distance)) / 50) * 50)
-        + extras
+      ? Math.max(
+          (roundTrip
+            ? Math.round((Math.round((distance * ratePerKm * getDistanceSurcharge(distance)) / 50) * 50 * 0.95) / 50) * 50
+            : Math.round((distance * ratePerKm * getDistanceSurcharge(distance)) / 50) * 50)
+            + extras,
+          MIN_ORDER_PRICE
+        )
       : price;
     const tariffLabel = isMinivan
       ? `${t.name} · ${MINIVAN_SUBTARIFFS[minivanSub].name}`

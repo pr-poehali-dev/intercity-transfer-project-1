@@ -35,6 +35,8 @@ export const DELIVERY_OPTIONS = [
 
 export const CHILD_SEAT_PRICE = 500;
 
+export const MIN_ORDER_PRICE = 5000;
+
 export const PET_OPTIONS = [
   { label: "До 5 кг", price: 500 },
   { label: "До 10 кг", price: 1000 },

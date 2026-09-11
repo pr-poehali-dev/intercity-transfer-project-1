@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import Icon from "@/components/ui/icon";
-import { TARIFFS, DELIVERY_OPTIONS, MINIVAN_SUBTARIFFS, getDistanceSurcharge, CHILD_SEAT_PRICE, PET_OPTIONS } from "./constants";
+import { TARIFFS, DELIVERY_OPTIONS, MINIVAN_SUBTARIFFS, getDistanceSurcharge, CHILD_SEAT_PRICE, PET_OPTIONS, MIN_ORDER_PRICE } from "./constants";
 import { getDurationByDistance } from "./routesData";
 import RouteMap from "./RouteMap";
 
@@ -68,11 +68,13 @@ export default function BookingModal({
   const roundTripDiscount = (roundTrip && baseRide != null)
     ? baseRide - Math.round((baseRide * 0.95) / 50) * 50
     : 0;
-  const discount = roundTripDiscount;
   // basePrice — полная стоимость двух концов без скидок (distance уже × 2).
-  // shownPrice — итоговая цена: полная минус все скидки. Так они всегда сходятся.
+  // shownPrice — итоговая цена: полная минус все скидки, но не ниже минимума заказа.
   const fullPrice = basePrice != null ? basePrice : null;
-  const shownPrice = fullPrice != null ? fullPrice - discount : price;
+  const rawShownPrice = fullPrice != null ? fullPrice - roundTripDiscount : price;
+  const belowMinimum = rawShownPrice != null && rawShownPrice < MIN_ORDER_PRICE;
+  const discount = belowMinimum ? 0 : roundTripDiscount;
+  const shownPrice = belowMinimum ? MIN_ORDER_PRICE : rawShownPrice;
 
   return (
     <div

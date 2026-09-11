@@ -81,16 +81,26 @@ export async function getYandexRoute(points: string[]): Promise<YandexRouteResul
 
       multiRoute.model.events.add("requestsuccess", () => {
         const active = multiRoute.getActiveRoute();
-        if (!active) return finish(null);
+        if (!active) {
+          console.warn("[yandexRoute] no active route", stops);
+          return finish(null);
+        }
         const meters: number = active.properties.get("distance").value;
         const durationText: string = active.properties.get("duration").text;
         finish({ distanceKm: Math.round(meters / 1000), durationText });
       });
-      multiRoute.model.events.add("requestfail", () => finish(null));
-    } catch {
+      multiRoute.model.events.add("requestfail", (e: any) => {
+        console.error("[yandexRoute] requestfail", stops, e?.get?.("error"));
+        finish(null);
+      });
+    } catch (e) {
+      console.error("[yandexRoute] exception", stops, e);
       finish(null);
     }
 
-    setTimeout(() => finish(null), 12000);
+    setTimeout(() => {
+      if (!done) console.warn("[yandexRoute] timeout 12s", stops);
+      finish(null);
+    }, 12000);
   });
 }

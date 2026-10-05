@@ -144,16 +144,22 @@ export default function BookingModal({
 
                 {(zoneKm.newKm > 0 || zoneKm.crimeaKm > 0) && (
                   <div className="flex flex-col gap-1 bg-neon/10 border border-neon/40 rounded-lg px-3 py-2 mb-3 text-xs text-foreground font-medium">
+                    {distance != null && distance - zoneKm.newKm - zoneKm.crimeaKm > 0 && (
+                      <div className="flex items-center gap-2">
+                        <Icon name="MapPin" size={13} className="flex-shrink-0 text-muted-foreground" />
+                        {distance - zoneKm.newKm - zoneKm.crimeaKm} км по России — обычный тариф {rate} ₽/км
+                      </div>
+                    )}
                     {zoneKm.newKm > 0 && (
                       <div className="flex items-center gap-2">
                         <Icon name="MapPin" size={13} className="flex-shrink-0 text-neon" />
-                        {zoneKm.newKm} км по ДНР, ЛНР, Запорожской и Херсонской обл. — тариф ×{NEW_REGIONS_MULTIPLIER}
+                        {zoneKm.newKm} км по ДНР, ЛНР, Запорожской и Херсонской обл. — {rate * NEW_REGIONS_MULTIPLIER} ₽/км (×{NEW_REGIONS_MULTIPLIER})
                       </div>
                     )}
                     {zoneKm.crimeaKm > 0 && (
                       <div className="flex items-center gap-2">
                         <Icon name="MapPin" size={13} className="flex-shrink-0 text-neon" />
-                        {zoneKm.crimeaKm} км по Крыму и Севастополю — тариф ×{CRIMEA_MULTIPLIER}
+                        {zoneKm.crimeaKm} км по Крыму и Севастополю — {rate * CRIMEA_MULTIPLIER} ₽/км (×{CRIMEA_MULTIPLIER})
                       </div>
                     )}
                   </div>

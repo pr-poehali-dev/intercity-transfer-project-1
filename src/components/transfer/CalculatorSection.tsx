@@ -115,6 +115,10 @@ export default function CalculatorSection({
       ? `${t.name} · ${MINIVAN_SUBTARIFFS[minivanSub].name}`
       : t.name;
     const services: string[] = [];
+    if (distance && (zoneKm.newKm > 0 || zoneKm.crimeaKm > 0)) {
+      const normalKm = distance - zoneKm.newKm - zoneKm.crimeaKm;
+      if (normalKm > 0) services.push(`По России: ${normalKm} км × ${rate} ₽/км (обычный тариф)`);
+    }
     if (zoneKm.newKm > 0) services.push(`ДНР/ЛНР/Запорожская/Херсонская: ${zoneKm.newKm} км × ${rate * NEW_REGIONS_MULTIPLIER} ₽/км (×${NEW_REGIONS_MULTIPLIER})`);
     if (zoneKm.crimeaKm > 0) services.push(`Крым/Севастополь: ${zoneKm.crimeaKm} км × ${rate * CRIMEA_MULTIPLIER} ₽/км (×${CRIMEA_MULTIPLIER})`);
     if (isDelivery) {

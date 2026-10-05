@@ -14,23 +14,23 @@ export const TRUST_BADGES = [
 ];
 
 export const TARIFFS = [
-  { name: "Эконом",    pricePerKm: 33, icon: "Car",       desc: "Комфортный седан",    maxPassengers: 4,  isDelivery: false, isMinivan: false, popular: true },
-  { name: "Комфорт",  pricePerKm: 38, icon: "Star",      desc: "Повышенный комфорт",  maxPassengers: 4,  isDelivery: false, isMinivan: false, popular: false },
-  { name: "Бизнес",   pricePerKm: 71, icon: "Gem",       desc: "Премиум класс",       maxPassengers: 4,  isDelivery: false, isMinivan: false, popular: false },
-  { name: "Универсал",pricePerKm: 41, icon: "Truck",     desc: "Везите больше",       maxPassengers: 4,  isDelivery: false, isMinivan: false, popular: false },
-  { name: "Минивэн",  pricePerKm: 0,  icon: "Bus",       desc: "Выберите вместимость",maxPassengers: 10, isDelivery: false, isMinivan: true,  popular: false },
-  { name: "Доставка", pricePerKm: 16, icon: "Package",   desc: "Грузы и посылки",     maxPassengers: 0,  isDelivery: true,  isMinivan: false, popular: false },
+  { name: "Эконом",    pricePerKm: 33, specialPricePerKm: 33, icon: "Car",       desc: "Комфортный седан",    maxPassengers: 4,  isDelivery: false, isMinivan: false, popular: true },
+  { name: "Комфорт",  pricePerKm: 38, specialPricePerKm: 38, icon: "Star",      desc: "Повышенный комфорт",  maxPassengers: 4,  isDelivery: false, isMinivan: false, popular: false },
+  { name: "Бизнес",   pricePerKm: 71, specialPricePerKm: 71, icon: "Gem",       desc: "Премиум класс",       maxPassengers: 4,  isDelivery: false, isMinivan: false, popular: false },
+  { name: "Универсал",pricePerKm: 41, specialPricePerKm: 41, icon: "Truck",     desc: "Везите больше",       maxPassengers: 4,  isDelivery: false, isMinivan: false, popular: false },
+  { name: "Минивэн",  pricePerKm: 0, specialPricePerKm: 0,  icon: "Bus",       desc: "Выберите вместимость",maxPassengers: 10, isDelivery: false, isMinivan: true,  popular: false },
+  { name: "Доставка", pricePerKm: 16, specialPricePerKm: 16, icon: "Package",   desc: "Грузы и посылки",     maxPassengers: 0,  isDelivery: true,  isMinivan: false, popular: false },
 ];
 
 export const MINIVAN_SUBTARIFFS = [
-  { name: "Компакт вэн", seats: 5,  pricePerKm: 46, desc: "до 5 мест" },
-  { name: "Минивэн",     seats: 7,  pricePerKm: 56, desc: "до 7 мест" },
-  { name: "Минивэн XL",  seats: 10, pricePerKm: 66, desc: "до 10 мест" },
+  { name: "Компакт вэн", seats: 5,  pricePerKm: 46, specialPricePerKm: 46, desc: "до 5 мест" },
+  { name: "Минивэн",     seats: 7,  pricePerKm: 56, specialPricePerKm: 56, desc: "до 7 мест" },
+  { name: "Минивэн XL",  seats: 10, pricePerKm: 66, specialPricePerKm: 66, desc: "до 10 мест" },
 ];
 
 export const DELIVERY_OPTIONS = [
-  { name: "Попутная", pricePerKm: 16, desc: "Вместе с другим заказом", icon: "PackageSearch" },
-  { name: "Срочная", pricePerKm: 31, desc: "Отдельный рейс", icon: "Zap" },
+  { name: "Попутная", pricePerKm: 16, specialPricePerKm: 16, desc: "Вместе с другим заказом", icon: "PackageSearch" },
+  { name: "Срочная", pricePerKm: 31, specialPricePerKm: 31, desc: "Отдельный рейс", icon: "Zap" },
 ];
 
 export const CHILD_SEAT_PRICE = 500;
@@ -134,6 +134,20 @@ export const QUICK_DATES = [
   { label: "Завтра", offset: 1 },
   { label: "Послезавтра", offset: 2 },
 ];
+
+// Особый тариф: ДНР, ЛНР, Запорожская и Херсонская обл., Крым и Севастополь.
+// Цена specialPricePerKm у каждого класса применяется только к километрам внутри этих регионов.
+export function getRates(tariffIndex: number, minivanSub = 0, deliveryMode = 0) {
+  const t = TARIFFS[tariffIndex];
+  const src = t.isDelivery ? DELIVERY_OPTIONS[deliveryMode] : t.isMinivan ? MINIVAN_SUBTARIFFS[minivanSub] : t;
+  return { rate: src.pricePerKm, specialRate: src.specialPricePerKm };
+}
+
+export function calcRideBase(distance: number, specialKm: number, rate: number, specialRate: number): number {
+  const sk = Math.min(Math.max(specialKm || 0, 0), distance);
+  const sum = (distance - sk) * rate + sk * specialRate;
+  return Math.round((sum * getDistanceSurcharge(distance)) / 50) * 50;
+}
 
 export function calcRoutePrice(distance: number, pricePerKm: number): number {
   const price = Math.round((distance * pricePerKm * getDistanceSurcharge(distance)) / 50) * 50;

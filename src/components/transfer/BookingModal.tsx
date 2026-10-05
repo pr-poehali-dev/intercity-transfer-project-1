@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import Icon from "@/components/ui/icon";
-import { TARIFFS, DELIVERY_OPTIONS, MINIVAN_SUBTARIFFS, getDistanceSurcharge, CHILD_SEAT_PRICE, PET_OPTIONS, MIN_ORDER_PRICE } from "./constants";
+import { TARIFFS, DELIVERY_OPTIONS, MINIVAN_SUBTARIFFS, CHILD_SEAT_PRICE, PET_OPTIONS, MIN_ORDER_PRICE, getRates, calcRideBase } from "./constants";
 import { getDurationByDistance } from "./routesData";
 import RouteMap from "./RouteMap";
 
@@ -22,6 +22,7 @@ interface BookingModalProps {
   minivanSub: number;
   price: number;
   distance: number | null;
+  specialKm?: number;
   manualRequest?: boolean;
   routeLabels?: { from?: string; to?: string; points?: string[]; geoPoints?: string[] };
   name: string;
@@ -44,7 +45,7 @@ export default function BookingModal({
   from, via, to, date, time, roundTrip, tariff, passengers,
   withChildren, childrenCount, withPet, petOption,
   deliveryMode, minivanSub,
-  price, distance, manualRequest, routeLabels,
+  price, distance, specialKm = 0, manualRequest, routeLabels,
   name, setName, phone, handlePhoneChange, isPhoneValid,
   comment, setComment,
   sending, sent, error, validationError,
@@ -54,15 +55,10 @@ export default function BookingModal({
   const cur = TARIFFS[tariff];
   const isDelivery = cur.isDelivery;
   const isMinivan = cur.isMinivan;
-  const ratePerKm = isDelivery
-    ? DELIVERY_OPTIONS[deliveryMode].pricePerKm
-    : isMinivan ? MINIVAN_SUBTARIFFS[minivanSub].pricePerKm
-    : cur.pricePerKm;
+  const { rate, specialRate } = getRates(tariff, minivanSub, deliveryMode);
   const extras = isDelivery ? 0 : ((withChildren ? childrenCount * CHILD_SEAT_PRICE : 0) + (withPet ? PET_OPTIONS[petOption].price : 0));
   // Базовая стоимость поездки без extras (distance уже = односторонняя × 2 при туда-обратно)
-  const baseRide = distance
-    ? Math.round((distance * ratePerKm * getDistanceSurcharge(distance)) / 50) * 50
-    : null;
+  const baseRide = distance ? calcRideBase(distance, specialKm, rate, specialRate) : null;
   const basePrice = baseRide != null ? baseRide + extras : price;
   // Скидка 5% со всей стоимости поездки туда-обратно
   const roundTripDiscount = (roundTrip && baseRide != null)
@@ -143,6 +139,13 @@ export default function BookingModal({
                   <div className="inline-flex items-center gap-2 bg-neon/10 border border-neon/40 rounded-lg px-3 py-2 mb-3 text-xs text-foreground font-medium">
                     <Icon name="RefreshCw" size={13} className="flex-shrink-0 text-neon" />
                     Скидка 5% за поездку туда и обратно уже в цене
+                  </div>
+                )}
+
+                {specialKm > 0 && (
+                  <div className="inline-flex items-center gap-2 bg-neon/10 border border-neon/40 rounded-lg px-3 py-2 mb-3 text-xs text-foreground font-medium">
+                    <Icon name="MapPin" size={13} className="flex-shrink-0 text-neon" />
+                    {specialKm} км по новым регионам — по особому тарифу
                   </div>
                 )}
 

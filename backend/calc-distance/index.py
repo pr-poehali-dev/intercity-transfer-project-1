@@ -5,6 +5,7 @@ import urllib.error
 import time
 import math
 from concurrent.futures import ThreadPoolExecutor
+from special_zones import in_special_zone, special_share, straight_points
 from airports import airport_coords
 
 
@@ -360,15 +361,17 @@ def region_sanity_ok(road_km: int, from_city: str, to_city: str) -> bool:
     return True
 
 
-def road_distance(from_coords, to_coords, gh_key: str):
-    """Расстояние по дорогам в км через GraphHopper"""
+def road_distance_full(from_coords, to_coords, gh_key: str):
+    """Расстояние по дорогам и км внутри особых регионов через GraphHopper."""
     flat, flon = from_coords
     tlat, tlon = to_coords
+    need_points = any_special(from_coords, to_coords)
     url = (
         f'https://graphhopper.com/api/1/route'
         f'?point={flat},{flon}&point={tlat},{tlon}'
-        f'&profile=car&locale=ru&calc_points=false'
-        f'&key={gh_key}'
+        f'&profile=car&locale=ru&instructions=false'
+        + ('&points_encoded=false' if need_points else '&calc_points=false')
+        + f'&key={gh_key}'
     )
     req = urllib.request.Request(url, headers={'User-Agent': 'transfer-app'})
     last_err = None
@@ -378,21 +381,46 @@ def road_distance(from_coords, to_coords, gh_key: str):
                 data = json.loads(resp.read())
             paths = data.get('paths', [])
             if not paths:
-                return None
+                return None, 0
             meters = paths[0].get('distance', 0)
             km = round(meters / 1000)
-            print(f"GH route {flat},{flon} -> {tlat},{tlon} = {km} km")
-            return km
+            special_km = 0
+            if need_points:
+                line = paths[0].get('points', {}).get('coordinates', [])
+                pts = [[p[1], p[0]] for p in line]
+                special_km = round(km * special_share(pts)) if len(pts) > 1 else 0
+            print(f"GH route {flat},{flon} -> {tlat},{tlon} = {km} km (special {special_km})")
+            return km, special_km
         except (urllib.error.URLError, TimeoutError, OSError) as e:
             last_err = e
             time.sleep(0.5 * (attempt + 1))
     raise last_err
 
 
+def road_distance(from_coords, to_coords, gh_key: str):
+    return road_distance_full(from_coords, to_coords, gh_key)[0]
+
+
+def any_special(a, b) -> bool:
+    """Проходит ли путь рядом с особыми регионами: проверяем концы и прямую между ними."""
+    if in_special_zone(*a) or in_special_zone(*b):
+        return True
+    return special_share(straight_points(a, b)) > 0 or _near_south(a, b)
+
+
+def _near_south(a, b) -> bool:
+    """Грубая рамка юга: маршруты, оба конца которых южнее 52° и между 30°-41° в.д., проверяем по линии."""
+    return all(p[0] < 52.5 and 30 < p[1] < 41.5 for p in (a, b))
+
+
+def approx_special_km(from_coords, to_coords, km):
+    return round(km * special_share(straight_points(from_coords, to_coords))) if km else 0
+
+
 GEO_SCHEMA = 't_p48987818_intercity_transfer_p'
 
 
-CACHE_SOURCE = 'v2'
+CACHE_SOURCE = 'v3'
 ADDRESS_MARKERS = (' ул ', ' ул.', 'улица', ' пер ', ' пер.', 'переулок',
                    ' пр-кт', ' проспект', ' пр-д', ' проезд', ' ш ', ' шоссе',
                    ' б-р', ' бульвар', ' наб', ' тупик', ' аллея', ' кв-л',
@@ -427,15 +455,15 @@ def distance_from_cache(from_city: str, to_city: str, dsn: str):
         try:
             with conn.cursor() as cur:
                 cur.execute(
-                    f"SELECT distance_km FROM {GEO_SCHEMA}.distance_cache "
+                    f"SELECT distance_km, special_km FROM {GEO_SCHEMA}.distance_cache "
                     f"WHERE source = '{CACHE_SOURCE}' AND ("
                     f"     (lower(from_city) = '{a}' AND lower(to_city) = '{b}') "
                     f"  OR (lower(from_city) = '{b}' AND lower(to_city) = '{a}')) LIMIT 1"
                 )
                 row = cur.fetchone()
             if row:
-                print(f"distance cache HIT {a} -> {b} = {row[0]} km")
-                return int(row[0])
+                print(f"distance cache HIT {a} -> {b} = {row[0]} km (special {row[1]})")
+                return int(row[0]), int(row[1] or 0)
         finally:
             conn.close()
     except Exception as e:
@@ -444,7 +472,7 @@ def distance_from_cache(from_city: str, to_city: str, dsn: str):
 
 
 def distance_to_cache(from_city: str, to_city: str, km: int, dsn: str,
-                      source: str = CACHE_SOURCE) -> None:
+                      source: str = CACHE_SOURCE, special_km: int = 0) -> None:
     """Сохраняет расстояние между городами в новый кэш."""
     if not dsn or not km or not is_cacheable(from_city, to_city):
         return
@@ -457,8 +485,8 @@ def distance_to_cache(from_city: str, to_city: str, km: int, dsn: str,
             with conn.cursor() as cur:
                 cur.execute(
                     f"INSERT INTO {GEO_SCHEMA}.distance_cache "
-                    f"(from_city, to_city, distance_km, source) "
-                    f"SELECT '{a}', '{b}', {int(km)}, '{CACHE_SOURCE}' "
+                    f"(from_city, to_city, distance_km, source, special_km) "
+                    f"SELECT '{a}', '{b}', {int(km)}, '{CACHE_SOURCE}', {int(special_km or 0)} "
                     f"WHERE NOT EXISTS (SELECT 1 FROM {GEO_SCHEMA}.distance_cache "
                     f"WHERE source = '{CACHE_SOURCE}' AND lower(from_city) = '{a}' AND lower(to_city) = '{b}')"
                 )
@@ -572,7 +600,7 @@ def short_city(name: str) -> str:
 
 
 def segment_distance(from_city, to_city, dadata_key, gh_key, dsn):
-    """Расстояние одного отрезка: кэш -> геокод -> GraphHopper."""
+    """Отрезок: (км, км в особых регионах). Кэш -> геокод -> GraphHopper."""
     cached = distance_from_cache(from_city, to_city, dsn)
     if cached:
         return cached
@@ -585,21 +613,25 @@ def segment_distance(from_city, to_city, dadata_key, gh_key, dsn):
         raise ValueError(f'Координаты не найдены: {from_city} / {to_city}')
     from_coords = from_res[:2]
     to_coords = to_res[:2]
+    approx = False
     try:
-        dist = road_distance(from_coords, to_coords, gh_key)
+        dist, special = road_distance_full(from_coords, to_coords, gh_key)
     except Exception as ge:
         print(f"segment fallback {from_city} -> {to_city}: {type(ge).__name__}: {ge}")
+        approx = True
         straight = haversine_km(from_coords, to_coords)
         dist = round(straight * 1.25) if straight >= 1 else None
+        special = approx_special_km(from_coords, to_coords, dist)
     if dist and not region_sanity_ok(dist, from_city, to_city):
-        # Оба пункта в одном регионе, но расстояние огромное — данные ошибочны
         dist = None
     if dist and not is_sane_distance(dist, from_coords, to_coords):
         print(f"INSANE distance: {from_city} -> {to_city} = {dist} km")
         dist = None
-    if dist:
-        distance_to_cache(from_city, to_city, dist, dsn, source=CACHE_SOURCE)
-    return dist
+    if not dist:
+        return None, 0
+    if not approx:
+        distance_to_cache(from_city, to_city, dist, dsn, source=CACHE_SOURCE, special_km=special)
+    return dist, special
 
 
 def geocode_label(query: str, api_key: str):
@@ -628,7 +660,8 @@ def calc_multi(cities, dadata_key, gh_key, dsn):
                 lambda s: segment_distance(s[0], s[1], dadata_key, gh_key, dsn),
                 segments
             ))
-        total = sum(r for r in results if r)
+        total = sum(r[0] for r in results if r and r[0])
+        special_total = sum(r[1] for r in results if r and r[0])
         with ThreadPoolExecutor(max_workers=len(cities)) as ex:
             labels = list(ex.map(lambda c: geocode_label(c, dadata_key), cities))
     except Exception as e:
@@ -641,7 +674,7 @@ def calc_multi(cities, dadata_key, gh_key, dsn):
     return {
         'statusCode': 200,
         'headers': {'Access-Control-Allow-Origin': '*'},
-        'body': json.dumps({'distance': total, 'segments': results, 'labels': labels})
+        'body': json.dumps({'distance': total, 'special_km': special_total, 'segments': [r[0] for r in results], 'labels': labels})
     }
 
 
@@ -673,7 +706,7 @@ def warm_cache_batch(dadata_key, gh_key, dsn):
     done = 0
     for a, b in batch:
         try:
-            if segment_distance(a, b, dadata_key, gh_key, dsn):
+            if segment_distance(a, b, dadata_key, gh_key, dsn)[0]:
                 done += 1
         except Exception as e:
             print(f"warm fail {a} -> {b}: {type(e).__name__}: {e}")
@@ -792,7 +825,7 @@ def handler(event: dict, context) -> dict:
         return {
             'statusCode': 200,
             'headers': {'Access-Control-Allow-Origin': '*', 'Content-Type': 'application/json'},
-            'body': json.dumps({'distance': cached_km, 'cached': True})
+            'body': json.dumps({'distance': cached_km[0], 'special_km': cached_km[1], 'cached': True})
         }
 
     try:
@@ -812,8 +845,9 @@ def handler(event: dict, context) -> dict:
         from_label = from_res[2] if len(from_res) > 2 else from_city
         to_label = to_res[2] if len(to_res) > 2 else to_city
         approx = False
+        special = 0
         try:
-            dist = road_distance(from_coords, to_coords, gh_key)
+            dist, special = road_distance_full(from_coords, to_coords, gh_key)
         except Exception as ge:
             # Внешний маршрутизатор недоступен/исчерпал лимит — оцениваем
             # по прямой с типовым дорожным коэффициентом, чтобы клиент
@@ -822,6 +856,7 @@ def handler(event: dict, context) -> dict:
             approx = True
             straight = haversine_km(from_coords, to_coords)
             dist = round(straight * 1.25) if straight >= 1 else None
+            special = approx_special_km(from_coords, to_coords, dist)
     except Exception as e:
         print(f"calc-distance error for {from_city} -> {to_city}: {type(e).__name__}: {e}")
         return {
@@ -839,13 +874,14 @@ def handler(event: dict, context) -> dict:
         dist = None
 
     if dist and not approx:
-        distance_to_cache(from_city, to_city, dist, dsn, source=CACHE_SOURCE)
+        distance_to_cache(from_city, to_city, dist, dsn, source=CACHE_SOURCE, special_km=special)
 
     return {
         'statusCode': 200,
         'headers': {'Access-Control-Allow-Origin': '*'},
         'body': json.dumps({
             'distance': dist,
+            'special_km': min(special, dist) if dist else 0,
             'from_label': from_label,
             'to_label': to_label,
         })

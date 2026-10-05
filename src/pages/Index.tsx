@@ -7,7 +7,7 @@ import CalculatorSection from "@/components/transfer/CalculatorSection";
 import PopularRoutesSection from "@/components/transfer/PopularRoutesSection";
 import FeaturedRoutesCarousel from "@/components/transfer/FeaturedRoutesCarousel";
 import ContactsSection from "@/components/transfer/ContactsSection";
-import { TARIFFS, DELIVERY_OPTIONS, MINIVAN_SUBTARIFFS, getDistanceSurcharge, CHILD_SEAT_PRICE, PET_OPTIONS, MIN_ORDER_PRICE } from "@/components/transfer/constants";
+import { TARIFFS, MINIVAN_SUBTARIFFS, CHILD_SEAT_PRICE, PET_OPTIONS, MIN_ORDER_PRICE, getRates, calcRideBase } from "@/components/transfer/constants";
 import { resolveCity, resolveGeocodeQuery } from "@/components/transfer/regions";
 import HowItWorks from "@/components/transfer/HowItWorks";
 import GallerySection from "@/components/transfer/GallerySection";
@@ -36,6 +36,7 @@ export default function Index() {
   const [minivanSub, setMinivanSub] = useState(0);
   const [price, setPrice] = useState<number | null>(null);
   const [distance, setDistance] = useState<number | null>(null);
+  const [specialKm, setSpecialKm] = useState(0);
   const [calculated, setCalculated] = useState(false);
   const [calculating, setCalculating] = useState(false);
   const [distanceError, setDistanceError] = useState(false);
@@ -115,23 +116,19 @@ export default function Index() {
     return sum;
   }
 
-  function priceFromDistance(dist: number, isRoundTrip = false) {
-    const t = TARIFFS[tariff];
-    const isDelivery = t.isDelivery;
-    const ratePerKm = isDelivery
-      ? DELIVERY_OPTIONS[deliveryMode].pricePerKm
-      : t.isMinivan
-        ? MINIVAN_SUBTARIFFS[minivanSub].pricePerKm
-        : t.pricePerKm;
-    const surcharge = getDistanceSurcharge(dist);
+  function priceFromDistance(dist: number, isRoundTrip = false, special = 0) {
+    const isDelivery = TARIFFS[tariff].isDelivery;
+    const { rate, specialRate } = getRates(tariff, minivanSub, deliveryMode);
     const extras = isDelivery ? 0 : extrasTotal();
-    let base = Math.round((dist * ratePerKm * surcharge) / 50) * 50;
+    let base = calcRideBase(dist, special, rate, specialRate);
     if (isRoundTrip) base = Math.round((base * 0.95) / 50) * 50;
     const total = base + extras;
     return Math.max(total, MIN_ORDER_PRICE);
   }
 
-  async function fetchDist(a: string, b: string): Promise<number | null> {
+  type DistResult = { km: number; special: number };
+
+  async function fetchDist(a: string, b: string): Promise<DistResult | null> {
     try {
       const res = await fetch(func2url["calc-distance"], {
         method: "POST",
@@ -143,12 +140,14 @@ export default function Index() {
       if (data.from_label || data.to_label) {
         setRouteLabels({ from: data.from_label, to: data.to_label });
       }
-      if (typeof data.distance === "number" && data.distance > 0) return data.distance;
+      if (typeof data.distance === "number" && data.distance > 0) {
+        return { km: data.distance, special: Number(data.special_km) || 0 };
+      }
     } catch { /* no fallback */ }
     return null;
   }
 
-  async function fetchDistMulti(points: string[]): Promise<number | null> {
+  async function fetchDistMulti(points: string[]): Promise<DistResult | null> {
     try {
       const res = await fetch(func2url["calc-distance"], {
         method: "POST",
@@ -160,7 +159,9 @@ export default function Index() {
       if (Array.isArray(data.labels) && data.labels.length) {
         setRouteLabels({ points: data.labels });
       }
-      if (typeof data.distance === "number" && data.distance > 0) return data.distance;
+      if (typeof data.distance === "number" && data.distance > 0) {
+        return { km: data.distance, special: Number(data.special_km) || 0 };
+      }
     } catch { /* no fallback */ }
     return null;
   }
@@ -187,15 +188,13 @@ export default function Index() {
     const viaFull = cityWithRegion(via, viaRegion);
     const hasViaStop = withVia && via && norm(viaCity) !== norm(fromCity) && norm(viaCity) !== norm(toCity);
     const geoPoints = hasViaStop ? [fromFull, viaFull, toFull] : [fromFull, toFull];
-    let totalDist: number | null;
-    if (hasViaStop) {
-      totalDist = await fetchDistMulti([fromFull, viaFull, toFull]);
-    } else {
-      totalDist = await fetchDist(fromFull, toFull);
-    }
-    if (totalDist === null) {
+    const result = hasViaStop
+      ? await fetchDistMulti([fromFull, viaFull, toFull])
+      : await fetchDist(fromFull, toFull);
+    if (result === null) {
       setPrice(null);
       setDistance(null);
+      setSpecialKm(0);
       setCalculated(false);
       setDistanceError(true);
       setManualRequest(true);
@@ -205,9 +204,12 @@ export default function Index() {
     setDistanceError(false);
     setManualRequest(false);
     setRouteLabels((prev) => ({ ...prev, geoPoints }));
-    if (roundTrip) totalDist *= 2;
-    setPrice(priceFromDistance(totalDist, roundTrip) + (hasViaStop ? 1000 : 0));
+    let totalDist = result.km;
+    let totalSpecial = result.special;
+    if (roundTrip) { totalDist *= 2; totalSpecial *= 2; }
+    setPrice(priceFromDistance(totalDist, roundTrip, totalSpecial) + (hasViaStop ? 1000 : 0));
     setDistance(totalDist);
+    setSpecialKm(totalSpecial);
     setCalculated(true);
     setCalculating(false);
   }
@@ -277,6 +279,7 @@ export default function Index() {
         setTime={setTime}
         price={price}
         distance={distance}
+        specialKm={specialKm}
         routeLabels={routeLabels}
         calculated={calculated}
         calculating={calculating}

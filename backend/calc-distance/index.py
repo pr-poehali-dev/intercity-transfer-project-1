@@ -393,55 +393,14 @@ GEO_SCHEMA = 't_p48987818_intercity_transfer_p'
 
 
 def distance_from_cache(from_city: str, to_city: str, dsn: str):
-    """Читает расстояние из кэша. Доверяем только замерам Яндекс.Карт."""
-    if not dsn:
-        return None
-    a = norm_yo(short_city(from_city).lower()).replace("'", "''")
-    b = norm_yo(short_city(to_city).lower()).replace("'", "''")
-    try:
-        import psycopg2
-        conn = psycopg2.connect(dsn)
-        try:
-            with conn.cursor() as cur:
-                cur.execute(
-                    f"SELECT distance_km FROM {GEO_SCHEMA}.distance_cache "
-                    f"WHERE source = 'yandex' AND ("
-                    f"     (lower(from_city) = '{a}' AND lower(to_city) = '{b}') "
-                    f"  OR (lower(from_city) = '{b}' AND lower(to_city) = '{a}')) LIMIT 1"
-                )
-                row = cur.fetchone()
-            if row:
-                print(f"distance cache HIT (yandex) {a} -> {b} = {row[0]} km")
-                return int(row[0])
-        finally:
-            conn.close()
-    except Exception as e:
-        print(f"distance cache read failed: {type(e).__name__}: {e}")
+    """Кэш расстояний отключён: каждый расчёт считается заново."""
     return None
 
 
 def distance_to_cache(from_city: str, to_city: str, km: int, dsn: str,
-                      source: str = 'yandex') -> None:
-    """Сохраняет расстояние между городами. В кэш пишем только Яндекс."""
-    if not dsn or not km or source != 'yandex':
-        return
-    a = norm_yo(short_city(from_city)).replace("'", "''")
-    b = norm_yo(short_city(to_city)).replace("'", "''")
-    try:
-        import psycopg2
-        conn = psycopg2.connect(dsn)
-        try:
-            with conn.cursor() as cur:
-                cur.execute(
-                    f"INSERT INTO {GEO_SCHEMA}.distance_cache "
-                    f"(from_city, to_city, distance_km, source) "
-                    f"VALUES ('{a}', '{b}', {int(km)}, 'yandex')"
-                )
-            conn.commit()
-        finally:
-            conn.close()
-    except Exception as e:
-        print(f"distance cache write failed: {type(e).__name__}: {e}")
+                      source: str = 'graphhopper') -> None:
+    """Кэш расстояний отключён."""
+    return None
 
 
 def geometry_from_cache(cache_key: str, dsn: str):
@@ -456,7 +415,7 @@ def geometry_from_cache(cache_key: str, dsn: str):
                 safe = cache_key.replace("'", "''")
                 cur.execute(
                     f"SELECT line, distance_km, stops FROM {GEO_SCHEMA}.route_geometry_cache "
-                    f"WHERE cache_key = '{safe}' LIMIT 1"
+                    f"WHERE cache_key = '{safe}' AND source = 'v2' LIMIT 1"
                 )
                 row = cur.fetchone()
             if row:
@@ -481,9 +440,11 @@ def geometry_to_cache(cache_key: str, line, km, stops, dsn: str) -> None:
                 line_j = json.dumps(line).replace("'", "''")
                 stops_j = json.dumps(stops).replace("'", "''")
                 cur.execute(
-                    f"INSERT INTO {GEO_SCHEMA}.route_geometry_cache (cache_key, line, distance_km, stops) "
-                    f"VALUES ('{safe}', '{line_j}'::jsonb, {int(km or 0)}, '{stops_j}'::jsonb) "
-                    f"ON CONFLICT (cache_key) DO NOTHING"
+                    f"INSERT INTO {GEO_SCHEMA}.route_geometry_cache (cache_key, line, distance_km, stops, source) "
+                    f"VALUES ('{safe}', '{line_j}'::jsonb, {int(km or 0)}, '{stops_j}'::jsonb, 'v2') "
+                    f"ON CONFLICT (cache_key) DO UPDATE SET line = EXCLUDED.line, "
+                    f"distance_km = EXCLUDED.distance_km, stops = EXCLUDED.stops, source = 'v2' "
+                    f"WHERE {GEO_SCHEMA}.route_geometry_cache.source IS DISTINCT FROM 'v2'"
                 )
             conn.commit()
         finally:
@@ -619,7 +580,7 @@ def calc_multi(cities, dadata_key, gh_key, dsn):
 
 
 def handler(event: dict, context) -> dict:
-    """Расстояние по дорогам: кэш Яндекс.Карт, иначе резервный расчёт GraphHopper."""
+    """Расстояние по дорогам через GraphHopper."""
     if event.get('httpMethod') == 'OPTIONS':
         return {
             'statusCode': 200,
@@ -640,24 +601,6 @@ def handler(event: dict, context) -> dict:
     dadata_key = os.environ.get('DADATA_API_KEY', '')
     gh_key = os.environ.get('GRAPHHOPPER_API_KEY', '')
     dsn = os.environ.get('DATABASE_URL', '')
-
-    # Фронтенд посчитал маршрут через Яндекс.Карты и присылает результат,
-    # чтобы сохранить его в кэш — это единственный доверенный источник.
-    if body.get('save') == 'yandex':
-        km = body.get('distance')
-        if from_city and to_city and isinstance(km, (int, float)) and km > 0:
-            if not distance_from_cache(from_city, to_city, dsn):
-                distance_to_cache(from_city, to_city, int(km), dsn, source='yandex')
-            return {
-                'statusCode': 200,
-                'headers': {'Access-Control-Allow-Origin': '*', 'Content-Type': 'application/json'},
-                'body': json.dumps({'saved': True})
-            }
-        return {
-            'statusCode': 200,
-            'headers': {'Access-Control-Allow-Origin': '*'},
-            'body': json.dumps({'saved': False})
-        }
 
     if body.get('geometry'):
         stops = points if isinstance(points, list) else [from_city, to_city]

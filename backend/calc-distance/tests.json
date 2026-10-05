@@ -17,91 +17,122 @@
       "name": "Calc distance Moscow to SPb",
       "method": "POST",
       "path": "/",
-      "body": {"from": "Москва", "to": "Санкт-Петербург"},
+      "body": {
+        "from": "Москва",
+        "to": "Санкт-Петербург"
+      },
       "expectedStatus": 200
     },
     {
       "name": "Calc Moscow to Bryansk with regions",
       "method": "POST",
       "path": "/",
-      "body": {"from": "Москва, Москва", "to": "Брянск, Брянская область"},
+      "body": {
+        "from": "Москва, Москва",
+        "to": "Брянск, Брянская область"
+      },
       "expectedStatus": 200
     },
     {
       "name": "Calc Moscow to small town Hotkovo",
       "method": "POST",
       "path": "/",
-      "body": {"from": "Москва, Москва", "to": "г Хотьково, Московская область"},
+      "body": {
+        "from": "Москва, Москва",
+        "to": "г Хотьково, Московская область"
+      },
       "expectedStatus": 200
     },
     {
       "name": "Chernorechye Orenburg region to Orenburg",
       "method": "POST",
       "path": "/",
-      "body": {"from": "село Черноречье, Оренбургская обл, Оренбургский р-н", "to": "Оренбург, Оренбургская область"},
+      "body": {
+        "from": "село Черноречье, Оренбургская обл, Оренбургский р-н",
+        "to": "Оренбург, Оренбургская область"
+      },
       "expectedStatus": 200
     },
     {
       "name": "Meshkovo Oryol region to Oryol short",
       "method": "POST",
       "path": "/",
-      "body": {"from": "деревня Мешково, Орловская обл, Урицкий р-н", "to": "Орёл, Орловская область"},
+      "body": {
+        "from": "деревня Мешково, Орловская обл, Урицкий р-н",
+        "to": "Орёл, Орловская область"
+      },
       "expectedStatus": 200
     },
     {
       "name": "Chernorechye to Orenburg airport",
       "method": "POST",
       "path": "/",
-      "body": {"from": "село Черноречье, Оренбургская обл", "to": "Аэропорт Оренбург Центральный (REN)"},
+      "body": {
+        "from": "село Черноречье, Оренбургская обл",
+        "to": "Аэропорт Оренбург Центральный (REN)"
+      },
       "expectedStatus": 200
     },
     {
       "name": "City to airport Moscow",
       "method": "POST",
       "path": "/",
-      "body": {"from": "Москва, Москва", "to": "Аэропорт Домодедово (DME)"},
+      "body": {
+        "from": "Москва, Москва",
+        "to": "Аэропорт Домодедово (DME)"
+      },
       "expectedStatus": 200
     },
     {
       "name": "Kurortnoe Leninsky district to Simferopol",
       "method": "POST",
       "path": "/",
-      "body": {"from": "село Курортное, респ Крым, Ленинский р-н", "to": "г Симферополь, респ Крым"},
+      "body": {
+        "from": "село Курортное, респ Крым, Ленинский р-н",
+        "to": "г Симферополь, респ Крым"
+      },
       "expectedStatus": 200
     },
     {
       "name": "Pgt Azovskoe manual no region to Simferopol",
       "method": "POST",
       "path": "/",
-      "body": {"from": "пгт Азовское", "to": "г Симферополь"},
+      "body": {
+        "from": "пгт Азовское",
+        "to": "г Симферополь"
+      },
       "expectedStatus": 200
     },
     {
       "name": "Loo to Vardane Sochi resorts",
       "method": "POST",
       "path": "/",
-      "body": {"from": "Лоо, Краснодарский край", "to": "Вардане, Краснодарский край"},
-      "expectedStatus": 200
-    },
-    {
-      "name": "Save yandex distance to cache",
-      "method": "POST",
-      "path": "/",
-      "body": {"from": "Тестовгород", "to": "Тестовосело", "distance": 123, "save": "yandex"},
+      "body": {
+        "from": "Лоо, Краснодарский край",
+        "to": "Вардане, Краснодарский край"
+      },
       "expectedStatus": 200
     },
     {
       "name": "Route geometry Moscow to Kazan",
       "method": "POST",
       "path": "/",
-      "body": {"from": "Москва", "to": "Казань", "geometry": true},
+      "body": {
+        "from": "Москва",
+        "to": "Казань",
+        "geometry": true
+      },
       "expectedStatus": 200
     },
     {
       "name": "Multi points needs at least 2",
       "method": "POST",
       "path": "/",
-      "body": {"points": ["Москва"]},
+      "body": {
+        "points": [
+          "Москва"
+        ]
+      },
       "expectedStatus": 400
     }
   ]

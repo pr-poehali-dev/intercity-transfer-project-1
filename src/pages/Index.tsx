@@ -9,7 +9,6 @@ import FeaturedRoutesCarousel from "@/components/transfer/FeaturedRoutesCarousel
 import ContactsSection from "@/components/transfer/ContactsSection";
 import { TARIFFS, DELIVERY_OPTIONS, MINIVAN_SUBTARIFFS, getDistanceSurcharge, CHILD_SEAT_PRICE, PET_OPTIONS, MIN_ORDER_PRICE } from "@/components/transfer/constants";
 import { resolveCity, resolveGeocodeQuery } from "@/components/transfer/regions";
-import { getYandexRoute } from "@/components/transfer/yandexMaps";
 import HowItWorks from "@/components/transfer/HowItWorks";
 import GallerySection from "@/components/transfer/GallerySection";
 import ReviewsSection from "@/components/transfer/ReviewsSection";
@@ -121,26 +120,7 @@ export default function Index() {
     return Math.max(total, MIN_ORDER_PRICE);
   }
 
-  async function saveYandexDistance(a: string, b: string, km: number) {
-    try {
-      await fetch(func2url["calc-distance"], {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ from: a, to: b, distance: km, save: "yandex" }),
-      });
-    } catch { /* кэш не критичен */ }
-  }
-
   async function fetchDist(a: string, b: string): Promise<number | null> {
-    // Основной источник — роутинг Яндекса (по дорогам, с русскими адресами)
-    try {
-      const yr = await getYandexRoute([a, b]);
-      if (yr && yr.distanceKm > 0) {
-        saveYandexDistance(a, b, yr.distanceKm);
-        return yr.distanceKm;
-      }
-    } catch { /* fallback to backend */ }
-    // Резерв — кэш Яндекса в БД, затем GraphHopper
     try {
       const res = await fetch(func2url["calc-distance"], {
         method: "POST",
@@ -158,15 +138,6 @@ export default function Index() {
   }
 
   async function fetchDistMulti(points: string[]): Promise<number | null> {
-    // Основной источник — роутинг Яндекса
-    try {
-      const yr = await getYandexRoute(points);
-      if (yr && yr.distanceKm > 0) {
-        if (points.length === 2) saveYandexDistance(points[0], points[1], yr.distanceKm);
-        return yr.distanceKm;
-      }
-    } catch { /* fallback to backend */ }
-    // Резерв — бэкенд GraphHopper
     try {
       const res = await fetch(func2url["calc-distance"], {
         method: "POST",

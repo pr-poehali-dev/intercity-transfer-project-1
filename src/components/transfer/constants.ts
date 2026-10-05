@@ -136,7 +136,8 @@ export const QUICK_DATES = [
 ];
 
 export function calcRoutePrice(distance: number, pricePerKm: number): number {
-  return Math.round((distance * pricePerKm * getDistanceSurcharge(distance)) / 50) * 50;
+  const price = Math.round((distance * pricePerKm * getDistanceSurcharge(distance)) / 50) * 50;
+  return Math.max(price, MIN_ORDER_PRICE);
 }
 
 export function getTariffPrice(distance: number, tariffIndex: number, subIndex = 0): number {

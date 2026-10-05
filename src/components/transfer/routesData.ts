@@ -1,3 +1,5 @@
+import { TARIFFS, calcRoutePrice } from "./constants";
+
 export interface RouteInfo {
   slug: string;
   from: string;
@@ -3264,4 +3266,5 @@ export function getDurationByDistance(dist: number): string {
 export const ROUTES_WITH_DURATION = ROUTES.map((r) => ({
   ...r,
   duration: getDurationByDistance(r.distance),
+  priceFrom: calcRoutePrice(r.distance, TARIFFS[0].pricePerKm),
 }));

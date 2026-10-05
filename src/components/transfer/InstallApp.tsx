@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
+import { useLocation } from "react-router-dom";
 import Icon from "@/components/ui/icon";
 import { useInstallApp, markInstalled } from "@/hooks/use-install-app";
 
@@ -74,6 +75,8 @@ export function useInstallFlow() {
 export default function InstallAppBanner() {
   const flow = useInstallFlow();
   const [show, setShow] = useState(false);
+  const { pathname } = useLocation();
+  const onAppPage = pathname === "/app";
 
   useEffect(() => {
     if (!flow.available || !isMobile()) {
@@ -93,7 +96,7 @@ export default function InstallAppBanner() {
 
   return (
     <>
-      {show && flow.available && (
+      {show && flow.available && !onAppPage && (
         <div className="fixed left-3 right-3 bottom-3 z-[900] bg-surface/95 backdrop-blur border border-neon/40 rounded-2xl p-3 shadow-2xl flex items-center gap-3 animate-in slide-in-from-bottom-4">
           <img src="/icons/icon-192.png" alt="" className="w-11 h-11 rounded-xl flex-shrink-0" />
           <div className="flex-1 min-w-0">

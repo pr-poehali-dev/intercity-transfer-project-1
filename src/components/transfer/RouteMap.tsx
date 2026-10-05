@@ -10,12 +10,28 @@ interface RouteMapProps {
 }
 
 const ACCENT = "#ff9d0a";
+const ZONE_COLOR = "#e53935";
+
+function splitByZone(line: number[][], zones: string) {
+  const parts: { special: boolean; pts: number[][] }[] = [];
+  for (let i = 0; i < line.length - 1; i++) {
+    const special = zones[i] === "n" || zones[i] === "c";
+    const last = parts[parts.length - 1];
+    if (last && last.special === special) {
+      last.pts.push(line[i + 1]);
+    } else {
+      parts.push({ special, pts: [line[i], line[i + 1]] });
+    }
+  }
+  return parts;
+}
 
 export default function RouteMap({ points, className = "" }: RouteMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [hasZone, setHasZone] = useState(false);
 
   const key = points.filter(Boolean).join("|");
 
@@ -26,6 +42,7 @@ export default function RouteMap({ points, className = "" }: RouteMapProps) {
     let cancelled = false;
     setLoading(true);
     setError(false);
+    setHasZone(false);
 
     async function load() {
       try {
@@ -62,16 +79,23 @@ export default function RouteMap({ points, className = "" }: RouteMapProps) {
         map.behaviors.disable("scrollZoom");
         mapRef.current = map;
 
-        const polyline = new ymaps.Polyline(
-          line,
-          {},
-          {
-            strokeColor: ACCENT,
-            strokeWidth: 5,
-            strokeOpacity: 0.9,
-          }
-        );
+        const polyline = new ymaps.Polyline(line, {}, { strokeOpacity: 0 });
         map.geoObjects.add(polyline);
+
+        const zones: string = typeof res?.zones === "string" ? res.zones : "";
+        const parts = zones.length === line.length - 1
+          ? splitByZone(line, zones)
+          : [{ special: false, pts: line }];
+        parts.forEach((p) => {
+          map.geoObjects.add(
+            new ymaps.Polyline(p.pts, {}, {
+              strokeColor: p.special ? ZONE_COLOR : ACCENT,
+              strokeWidth: p.special ? 6 : 5,
+              strokeOpacity: 0.95,
+            })
+          );
+        });
+        if (!cancelled) setHasZone(parts.some((p) => p.special));
 
         const marks = stops && stops.length >= 2 ? stops : [line[0], line[line.length - 1]];
         marks.forEach((c, i) => {
@@ -123,6 +147,12 @@ export default function RouteMap({ points, className = "" }: RouteMapProps) {
   return (
     <div className={`relative rounded-2xl overflow-hidden border border-border ${className}`}>
       <div ref={containerRef} className="w-full h-full min-h-[220px] bg-surface" />
+      {hasZone && !loading && !error && (
+        <div className="absolute left-2 bottom-2 z-[400] flex items-center gap-2 rounded-md bg-background/85 backdrop-blur-sm px-2 py-1 text-[11px] text-foreground border border-border">
+          <span className="inline-block w-4 h-1 rounded-full" style={{ background: ZONE_COLOR }} />
+          Участок по особому тарифу
+        </div>
+      )}
       {loading && (
         <div className="absolute inset-0 flex items-center justify-center bg-surface/80 backdrop-blur-sm z-[500]">
           <div className="flex items-center gap-2 text-sm text-muted-foreground">

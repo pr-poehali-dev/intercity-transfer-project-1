@@ -5,7 +5,7 @@ import urllib.error
 import time
 import math
 from concurrent.futures import ThreadPoolExecutor
-from special_zones import in_special_zone, special_share, zone_shares, straight_points
+from special_zones import in_special_zone, special_share, zone_shares, straight_points, zone_group
 from airports import airport_coords
 
 
@@ -508,6 +508,18 @@ def distance_to_cache(from_city: str, to_city: str, km: int, dsn: str,
         print(f"distance cache write failed: {type(e).__name__}: {e}")
 
 
+def line_zones(line) -> str:
+    """Для каждого отрезка линии маршрута: 'n' — новые регионы, 'c' — Крым, '.' — остальное."""
+    if not line or len(line) < 2:
+        return ''
+    out = []
+    for i in range(len(line) - 1):
+        a, b = line[i], line[i + 1]
+        g = zone_group((a[0] + b[0]) / 2, (a[1] + b[1]) / 2)
+        out.append('n' if g == 'new' else 'c' if g == 'crimea' else '.')
+    return ''.join(out)
+
+
 def geometry_from_cache(cache_key: str, dsn: str):
     """Читает готовую линию маршрута из кэша БД."""
     if not dsn:
@@ -770,7 +782,7 @@ def handler(event: dict, context) -> dict:
             return {
                 'statusCode': 200,
                 'headers': {'Access-Control-Allow-Origin': '*', 'Content-Type': 'application/json'},
-                'body': json.dumps(cached)
+                'body': json.dumps({**cached, 'zones': line_zones(cached['line'])})
             }
 
         try:
@@ -798,7 +810,7 @@ def handler(event: dict, context) -> dict:
             return {
                 'statusCode': 200,
                 'headers': {'Access-Control-Allow-Origin': '*', 'Content-Type': 'application/json'},
-                'body': json.dumps({'line': line, 'distance': km, 'stops': coords})
+                'body': json.dumps({'line': line, 'distance': km, 'stops': coords, 'zones': line_zones(line)})
             }
         except Exception as e:
             print(f"geometry error {cities}: {type(e).__name__}: {e}")

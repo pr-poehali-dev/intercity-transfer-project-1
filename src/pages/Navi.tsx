@@ -1,5 +1,6 @@
 import { useEffect, useMemo } from "react";
 import Icon from "@/components/ui/icon";
+import RouteMap from "@/components/transfer/RouteMap";
 
 type Pt = { lat: number; lon: number };
 
@@ -38,7 +39,7 @@ function webLink(pts: Pt[]): string {
 }
 
 export default function Navi() {
-  const params = new URLSearchParams(window.location.search);
+  const params = useMemo(() => new URLSearchParams(window.location.search), []);
   const pts = useMemo(() => parsePoints(params.get("p")), [params]);
   const names = (params.get("n") || "").split("~").filter(Boolean);
   const ok = pts.length >= 2;
@@ -62,12 +63,17 @@ export default function Navi() {
   const btn = "flex items-center justify-center gap-2 w-full rounded-xl px-4 py-4 font-semibold text-base";
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6 bg-background">
-      <div className="w-full max-w-sm flex flex-col gap-3">
+    <div className="min-h-screen flex justify-center p-4 sm:p-6 bg-background">
+      <div className="w-full max-w-2xl flex flex-col gap-3">
         <div className="text-xs font-display text-neon tracking-widest">МАРШРУТ ПОЕЗДКИ</div>
         <div className="font-display text-xl font-bold mb-2">
           {names.length ? names.join(" → ") : `${pts.length} точки`}
         </div>
+        <RouteMap
+          points={pts.map((p) => `${p.lat},${p.lon}`)}
+          labels={names.length === pts.length ? names : undefined}
+          className="h-[55vh] min-h-[300px] mb-2"
+        />
         <a href={naviLink(pts)} className={`${btn} bg-neon text-background`}>
           <Icon name="Navigation" size={18} />
           Открыть в Навигаторе

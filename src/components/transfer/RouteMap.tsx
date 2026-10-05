@@ -6,6 +6,7 @@ import func2url from "../../../backend/func2url.json";
 
 interface RouteMapProps {
   points: string[];
+  labels?: string[];
   className?: string;
 }
 
@@ -29,7 +30,7 @@ function splitByZone(line: number[][], zones: string) {
   return parts;
 }
 
-export default function RouteMap({ points, className = "" }: RouteMapProps) {
+export default function RouteMap({ points, labels, className = "" }: RouteMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<any>(null);
   const [loading, setLoading] = useState(true);
@@ -98,12 +99,13 @@ export default function RouteMap({ points, className = "" }: RouteMapProps) {
         });
 
         const marks = stops && stops.length >= 2 ? stops : [line[0], line[line.length - 1]];
+        const names = labels && labels.length === cities.length ? labels : cities;
         marks.forEach((c, i) => {
           const isStart = i === 0;
           const isEnd = i === marks.length - 1;
           const placemark = new ymaps.Placemark(
             c,
-            { iconCaption: isStart ? cities[0] : isEnd ? cities[cities.length - 1] : cities[i] },
+            { iconCaption: isStart ? names[0] : isEnd ? names[names.length - 1] : names[i] },
             {
               preset: isStart ? "islands#circleDotIcon" : "islands#circleIcon",
               iconColor: ACCENT,

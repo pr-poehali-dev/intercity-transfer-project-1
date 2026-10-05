@@ -1,3 +1,4 @@
+import re
 import json
 import os
 import urllib.request
@@ -199,6 +200,12 @@ def geocode_safe(query: str, api_key: str):
     """Геокод с жёсткой привязкой к региону, чтобы не попасть
     в одноимённый населённый пункт в другой области.
     Возвращает (lat, lon, label) либо None."""
+    m = re.fullmatch(r'\s*(-?\d{1,2}(?:\.\d+)?)\s*,\s*(-?\d{1,3}(?:\.\d+)?)\s*', query or '')
+    if m:
+        lat, lon = float(m.group(1)), float(m.group(2))
+        if -90 <= lat <= 90 and -180 <= lon <= 180:
+            return (lat, lon, query.strip())
+
     # Аэропорт по IATA-коду из справочника — самый точный путь
     ap = airport_coords(query)
     if ap:

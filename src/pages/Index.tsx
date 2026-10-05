@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import Icon from "@/components/ui/icon";
 import Navbar from "@/components/transfer/Navbar";
 import HeroSection from "@/components/transfer/HeroSection";
@@ -46,6 +46,8 @@ export default function Index() {
   const [routeLabels, setRouteLabels] = useState<{ from?: string; to?: string; points?: string[]; geoPoints?: string[] }>({});
 
   const bookRef = useRef<HTMLDivElement>(null);
+  const location = useLocation();
+  const [pendingCalc, setPendingCalc] = useState(0);
 
   useEffect(() => {
     const now = new Date();
@@ -68,9 +70,16 @@ export default function Index() {
   }, []);
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
+    const params = new URLSearchParams(location.search);
     const qFrom = params.get("from");
     const qTo = params.get("to");
+    if (qFrom || qTo) {
+      setFromRegion("");
+      setToRegion("");
+      setCalculated(false);
+      setDistanceError(false);
+      setManualRequest(false);
+    }
     const qTariff = params.get("tariff");
     const qSub = params.get("sub");
     if (qFrom) setFrom(qFrom);
@@ -95,7 +104,8 @@ export default function Index() {
     if (qFrom || qTo) {
       setTimeout(() => bookRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
     }
-  }, []);
+    if (qFrom && qTo) setPendingCalc((n) => n + 1);
+  }, [location.key, location.search]);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -218,6 +228,12 @@ export default function Index() {
     setCalculated(true);
     setCalculating(false);
   }
+
+  useEffect(() => {
+    if (!pendingCalc) return;
+    calculate();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pendingCalc]);
 
   function scrollToBook() {
     bookRef.current?.scrollIntoView({ behavior: "smooth" });

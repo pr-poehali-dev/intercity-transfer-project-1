@@ -46,10 +46,6 @@ export default function Navi() {
 
   useEffect(() => {
     document.title = "Маршрут поездки";
-    if (ok && /Android|iPhone|iPad/i.test(navigator.userAgent)) {
-      window.location.href = naviLink(pts);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   if (!ok) {

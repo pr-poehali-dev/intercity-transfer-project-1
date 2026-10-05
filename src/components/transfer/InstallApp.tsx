@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import Icon from "@/components/ui/icon";
-import { useInstallApp } from "@/hooks/use-install-app";
+import { useInstallApp, markInstalled } from "@/hooks/use-install-app";
 
 const DISMISS_KEY = "install-banner-dismissed";
 
@@ -74,12 +74,15 @@ export default function InstallAppBanner() {
   const [show, setShow] = useState(false);
 
   useEffect(() => {
-    if (flow.installed || !isMobile()) return;
+    if (!flow.available || !isMobile()) {
+      setShow(false);
+      return;
+    }
     const until = Number(localStorage.getItem(DISMISS_KEY) || 0);
     if (until > Date.now()) return;
     const t = setTimeout(() => setShow(true), 6000);
     return () => clearTimeout(t);
-  }, [flow.installed]);
+  }, [flow.available]);
 
   function dismiss() {
     localStorage.setItem(DISMISS_KEY, String(Date.now() + 7 * 24 * 3600 * 1000));
@@ -88,7 +91,7 @@ export default function InstallAppBanner() {
 
   return (
     <>
-      {show && !flow.installed && (
+      {show && flow.available && (
         <div className="fixed left-3 right-3 bottom-3 z-[900] bg-surface/95 backdrop-blur border border-neon/40 rounded-2xl p-3 shadow-2xl flex items-center gap-3 animate-in slide-in-from-bottom-4">
           <img src="/icons/icon-192.png" alt="" className="w-11 h-11 rounded-xl flex-shrink-0" />
           <div className="flex-1 min-w-0">
@@ -96,7 +99,11 @@ export default function InstallAppBanner() {
             <div className="text-xs text-muted-foreground leading-tight mt-0.5">Заказ поездки в два касания</div>
           </div>
           <button
-            onClick={async () => { await flow.start(); setShow(false); }}
+            onClick={async () => {
+              if (flow.ios) markInstalled();
+              await flow.start();
+              setShow(false);
+            }}
             className="bg-neon text-background font-display font-semibold text-sm rounded-lg px-3 py-2 flex-shrink-0"
           >
             Установить

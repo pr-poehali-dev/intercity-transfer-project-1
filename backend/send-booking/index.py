@@ -1,6 +1,7 @@
 import json
 import os
 import requests
+from urllib.parse import quote
 
 
 def send_vk(message: str):
@@ -56,6 +57,22 @@ def handler(event: dict, context) -> dict:
             return f"{city} ({region})"
         return city
 
+    def map_point(city, region):
+        city = (city or '').strip()
+        region = (region or '').strip()
+        return f"{city}, {region}" if region and region not in city else city
+
+    stops = [map_point(body.get('from_city'), from_region)]
+    if via_city:
+        stops.append(map_point(via_city, via_region))
+    stops.append(map_point(body.get('to_city'), to_region))
+    if round_trip:
+        stops += stops[-2::-1]
+    stops = [x for x in stops if x]
+    route_names = [x.split(',')[0].strip() for x in stops]
+    route_text = ' → '.join(route_names)
+    route_url = 'https://yandex.ru/maps/?rtt=auto&rtext=' + '~'.join(quote(x) for x in stops)
+
     from_city = with_region(from_city, from_region)
     to_city = with_region(to_city, to_region)
     if via_city:
@@ -110,6 +127,8 @@ def handler(event: dict, context) -> dict:
     msg1 = (
         f"🕛 {date}\n\n"
         f"🚘 Тариф: {tariff}\n\n"
+        f"🗺 Маршрут: {route_text}\n"
+        f"{route_url}\n\n"
         f"🔵 Откуда: {from_city}\n\n"
         f"{via_line}"
         f"🟢 Куда: {to_city}\n\n"

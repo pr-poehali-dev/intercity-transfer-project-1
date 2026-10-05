@@ -1,6 +1,7 @@
 import { useState } from "react";
 import Icon from "@/components/ui/icon";
 import { Link } from "react-router-dom";
+import { useInstallFlow } from "./InstallApp";
 
 interface NavbarProps {
   onBookClick?: () => void;
@@ -22,6 +23,7 @@ const DESKTOP_MENU = MENU.filter((m) =>
 
 export default function Navbar({ onBookClick }: NavbarProps) {
   const [open, setOpen] = useState(false);
+  const installFlow = useInstallFlow();
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 glass border-b border-white/5">
@@ -121,8 +123,19 @@ export default function Navbar({ onBookClick }: NavbarProps) {
               <span className="font-display font-semibold">{m.label}</span>
             </Link>
           ))}
+          {!installFlow.installed && (
+            <button
+              type="button"
+              onClick={() => { setOpen(false); installFlow.start(); }}
+              className="flex items-center gap-3 py-3 text-left text-foreground hover:text-neon transition-colors"
+            >
+              <Icon name="Smartphone" size={16} className="text-neon flex-shrink-0" />
+              <span className="font-display font-semibold">Установить приложение</span>
+            </button>
+          )}
         </div>
       </div>
+      {installFlow.helpNode}
     </nav>
   );
 }

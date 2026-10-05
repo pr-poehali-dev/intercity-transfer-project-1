@@ -12,6 +12,7 @@ import Privacy from "./pages/Privacy";
 import Oferta from "./pages/Oferta";
 import NotFound from "./pages/NotFound";
 import Navi from "./pages/Navi";
+import InstallAppBanner from "./components/transfer/InstallApp";
 import func2url from "../backend/func2url.json";
 
 function YmlRedirect() {
@@ -45,6 +46,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <ScrollToTop />
+        <InstallAppBanner />
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/marshrut/:slug" element={<RoutePage />} />

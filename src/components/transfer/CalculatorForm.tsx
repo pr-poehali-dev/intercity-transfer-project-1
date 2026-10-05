@@ -1,5 +1,5 @@
 import Icon from "@/components/ui/icon";
-import { TARIFFS, DELIVERY_OPTIONS, MINIVAN_SUBTARIFFS, CHILD_SEAT_PRICE, PET_OPTIONS, QUICK_DATES, localDateStr } from "./constants";
+import { TARIFFS, DELIVERY_OPTIONS, MINIVAN_SUBTARIFFS, PET_OPTIONS, QUICK_DATES, localDateStr } from "./constants";
 import type { IconName } from "./constants";
 import CitySelect from "./CitySelect";
 

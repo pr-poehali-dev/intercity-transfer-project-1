@@ -216,13 +216,6 @@ export default function Index() {
     bookRef.current?.scrollIntoView({ behavior: "smooth" });
   }
 
-  function handleRouteSelect(newFrom: string, newTo: string) {
-    setFrom(newFrom);
-    setTo(newTo);
-    setCalculated(false);
-    scrollToBook();
-  }
-
   function handleSetFrom(v: string, region?: string) { setFrom(v); setFromRegion(region || ""); setCalculated(false); setDistanceError(false); setManualRequest(false); }
   function handleSetTo(v: string, region?: string) { setTo(v); setToRegion(region || ""); setCalculated(false); setDistanceError(false); setManualRequest(false); }
   function handleSetVia(v: string, region?: string) { setVia(v); setViaRegion(region || ""); setCalculated(false); setDistanceError(false); setManualRequest(false); }
@@ -291,7 +284,6 @@ export default function Index() {
         manualRequest={manualRequest}
         onCalculate={calculate}
         onClose={() => { setCalculated(false); setManualRequest(false); }}
-        onRouteSelect={handleRouteSelect}
         sectionRef={bookRef}
       />
       <FeaturedRoutesCarousel />

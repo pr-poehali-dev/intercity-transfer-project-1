@@ -49,7 +49,6 @@ interface CalculatorSectionProps {
   manualRequest?: boolean;
   onCalculate: () => void;
   onClose: () => void;
-  onRouteSelect: (from: string, to: string) => void;
   sectionRef: React.RefObject<HTMLDivElement>;
 }
 
@@ -65,7 +64,7 @@ export default function CalculatorSection({
   date, setDate,
   time, setTime,
   price, distance, routeLabels, calculated, calculating, distanceError, manualRequest,
-  onCalculate, onClose, onRouteSelect,
+  onCalculate, onClose,
   sectionRef,
 }: CalculatorSectionProps) {
   const [name, setName] = useState("");

@@ -19,7 +19,7 @@ interface RemoteCity {
 export default function CitySelect({ value, onChange, iconName, exclude }: CitySelectProps) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
-  const [activeDistrict, setActiveDistrict] = useState<string>(FEDERAL_DISTRICTS[0].name);
+  const activeDistrict = FEDERAL_DISTRICTS[0].name;
   const [remoteResults, setRemoteResults] = useState<RemoteCity[]>([]);
   const [searching, setSearching] = useState(false);
   const ref = useRef<HTMLDivElement>(null);

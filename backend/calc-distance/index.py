@@ -815,6 +815,18 @@ def handler(event: dict, context) -> dict:
     gh_key = os.environ.get('GRAPHHOPPER_API_KEY', '')
     dsn = os.environ.get('DATABASE_URL', '')
 
+    if body.get('coords_only') and dadata_key:
+        stops = points if isinstance(points, list) else [from_city, to_city]
+        names = [str(p).strip() for p in stops if str(p).strip()]
+        with ThreadPoolExecutor(max_workers=max(1, min(4, len(names)))) as ex:
+            res = list(ex.map(lambda c: geocode_safe(c, dadata_key), names))
+        coords = [[r[0], r[1]] if r else None for r in res]
+        return {
+            'statusCode': 200,
+            'headers': {'Access-Control-Allow-Origin': '*', 'Content-Type': 'application/json'},
+            'body': json.dumps({'coords': coords})
+        }
+
     if body.get('warm') and dsn and dadata_key and gh_key:
         return {
             'statusCode': 200,

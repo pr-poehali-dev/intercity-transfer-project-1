@@ -71,7 +71,18 @@ def handler(event: dict, context) -> dict:
     stops = [x for x in stops if x]
     route_names = [x.split(',')[0].strip() for x in stops]
     route_text = ' → '.join(route_names)
-    route_url = 'https://yandex.ru/maps/?rtt=auto&rtext=' + '~'.join(quote(x) for x in stops)
+    coords = body.get('route_coords') or []
+    ok_coords = (
+        isinstance(coords, list) and len(coords) >= 2
+        and all(isinstance(c, list) and len(c) == 2 for c in coords)
+    )
+    if ok_coords:
+        pts = [f"{float(c[0]):.6f},{float(c[1]):.6f}" for c in coords]
+        if round_trip:
+            pts += pts[-2::-1]
+        route_url = 'https://yandex.ru/maps/?mode=routes&rtt=auto&rtext=' + '~'.join(pts)
+    else:
+        route_url = 'https://yandex.ru/maps/?mode=routes&rtt=auto&rtext=' + '~'.join(quote(x) for x in stops)
 
     from_city = with_region(from_city, from_region)
     to_city = with_region(to_city, to_region)

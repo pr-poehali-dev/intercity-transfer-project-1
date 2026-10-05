@@ -130,6 +130,19 @@ export default function CalculatorSection({
       if (withChildren) services.push(`С детьми до 6 лет: ${childrenCount} (+${childrenCount * CHILD_SEAT_PRICE} ₽)`);
       if (withPet) services.push(`Перевозка животного ${PET_OPTIONS[petOption].label} (+${PET_OPTIONS[petOption].price} ₽)`);
     }
+    const routePoints = routeLabels?.geoPoints && routeLabels.geoPoints.length >= 2
+      ? routeLabels.geoPoints
+      : [from, ...((withVia && via) ? [via] : []), to].filter(Boolean);
+    let routeCoords: (number[] | null)[] = [];
+    try {
+      const cr = await fetch(func2url["calc-distance"], {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ points: routePoints, coords_only: true }),
+      });
+      const cd = await cr.json();
+      if (Array.isArray(cd.coords)) routeCoords = cd.coords;
+    } catch { /* без координат ссылка строится по названиям */ }
     try {
       const res = await fetch(func2url["send-booking"], {
         method: "POST",
@@ -144,6 +157,7 @@ export default function CalculatorSection({
           to_city: to,
           to_region: toRegion || undefined,
           round_trip: roundTrip,
+          route_coords: routeCoords,
           date: time ? `${date} ${time}` : date,
           passengers: isDelivery ? "—" : passengers,
           tariff: tariffLabel,

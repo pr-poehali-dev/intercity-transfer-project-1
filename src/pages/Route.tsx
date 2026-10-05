@@ -8,7 +8,7 @@ import { ROUTES_WITH_DURATION as ROUTES } from "@/components/transfer/routesData
 function getRouteBySlug(slug: string) {
   return ROUTES.find((r) => r.slug === slug);
 }
-import { TARIFFS, MINIVAN_SUBTARIFFS, getDistanceSurcharge, localDateStr, QUICK_DATES } from "@/components/transfer/constants";
+import { TARIFFS, MINIVAN_SUBTARIFFS, getDistanceSurcharge, localDateStr, QUICK_DATES, MIN_ORDER_PRICE } from "@/components/transfer/constants";
 
 export default function RoutePage() {
   const { slug } = useParams<{ slug: string }>();
@@ -46,7 +46,7 @@ export default function RoutePage() {
   const surcharge = getDistanceSurcharge(route.distance);
 
   function priceFor(pricePerKm: number) {
-    return Math.round((route!.distance * pricePerKm * surcharge) / 50) * 50;
+    return Math.max(Math.round((route!.distance * pricePerKm * surcharge) / 50) * 50, MIN_ORDER_PRICE);
   }
 
   function tariffPrice(t: (typeof TARIFFS)[number]) {

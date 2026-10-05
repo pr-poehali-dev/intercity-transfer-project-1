@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { TARIFFS, DELIVERY_OPTIONS, MINIVAN_SUBTARIFFS, CHILD_SEAT_PRICE, PET_OPTIONS, MIN_ORDER_PRICE, getRates, calcRideBase } from "./constants";
+import { TARIFFS, DELIVERY_OPTIONS, MINIVAN_SUBTARIFFS, CHILD_SEAT_PRICE, PET_OPTIONS, MIN_ORDER_PRICE, getRate, calcRideBase, NEW_REGIONS_MULTIPLIER, CRIMEA_MULTIPLIER, type ZoneKm } from "./constants";
 import { getDurationByDistance } from "./routesData";
 import CalculatorForm from "./CalculatorForm";
 import BookingModal from "./BookingModal";
@@ -42,7 +42,7 @@ interface CalculatorSectionProps {
   setTime: (v: string) => void;
   price: number | null;
   distance: number | null;
-  specialKm?: number;
+  zoneKm?: ZoneKm;
   routeLabels?: { from?: string; to?: string; points?: string[]; geoPoints?: string[] };
   calculated: boolean;
   calculating: boolean;
@@ -64,7 +64,7 @@ export default function CalculatorSection({
   minivanSub, setMinivanSub,
   date, setDate,
   time, setTime,
-  price, distance, specialKm = 0, routeLabels, calculated, calculating, distanceError, manualRequest,
+  price, distance, zoneKm = { newKm: 0, crimeaKm: 0 }, routeLabels, calculated, calculating, distanceError, manualRequest,
   onCalculate, onClose,
   sectionRef,
 }: CalculatorSectionProps) {
@@ -102,9 +102,9 @@ export default function CalculatorSection({
     const t = TARIFFS[tariff];
     const isDelivery = t.isDelivery;
     const isMinivan = t.isMinivan;
-    const { rate, specialRate } = getRates(tariff, minivanSub, deliveryMode);
+    const rate = getRate(tariff, minivanSub, deliveryMode);
     const extras = isDelivery ? 0 : ((withChildren ? childrenCount * CHILD_SEAT_PRICE : 0) + (withPet ? PET_OPTIONS[petOption].price : 0));
-    const rideBase = distance ? calcRideBase(distance, specialKm, rate, specialRate) : 0;
+    const rideBase = distance ? calcRideBase(distance, zoneKm, rate) : 0;
     const finalPrice = distance
       ? Math.max(
           (roundTrip ? Math.round((rideBase * 0.95) / 50) * 50 : rideBase) + extras,
@@ -115,7 +115,8 @@ export default function CalculatorSection({
       ? `${t.name} · ${MINIVAN_SUBTARIFFS[minivanSub].name}`
       : t.name;
     const services: string[] = [];
-    if (specialKm > 0) services.push(`По особому тарифу (новые регионы): ${specialKm} км × ${specialRate} ₽/км`);
+    if (zoneKm.newKm > 0) services.push(`ДНР/ЛНР/Запорожская/Херсонская: ${zoneKm.newKm} км × ${rate * NEW_REGIONS_MULTIPLIER} ₽/км (×${NEW_REGIONS_MULTIPLIER})`);
+    if (zoneKm.crimeaKm > 0) services.push(`Крым/Севастополь: ${zoneKm.crimeaKm} км × ${rate * CRIMEA_MULTIPLIER} ₽/км (×${CRIMEA_MULTIPLIER})`);
     if (isDelivery) {
       services.push(`Доставка: ${DELIVERY_OPTIONS[deliveryMode].name} (${DELIVERY_OPTIONS[deliveryMode].pricePerKm} ₽/км)`);
     } else {
@@ -207,7 +208,7 @@ export default function CalculatorSection({
           withChildren={withChildren} childrenCount={childrenCount}
           withPet={withPet} petOption={petOption}
           deliveryMode={deliveryMode} minivanSub={minivanSub}
-          price={price ?? 0} distance={distance} specialKm={specialKm}
+          price={price ?? 0} distance={distance} zoneKm={zoneKm}
           manualRequest={manualRequest}
           routeLabels={routeLabels}
           name={name} setName={setName}

@@ -7,7 +7,7 @@ import CalculatorSection from "@/components/transfer/CalculatorSection";
 import PopularRoutesSection from "@/components/transfer/PopularRoutesSection";
 import FeaturedRoutesCarousel from "@/components/transfer/FeaturedRoutesCarousel";
 import ContactsSection from "@/components/transfer/ContactsSection";
-import { TARIFFS, MINIVAN_SUBTARIFFS, CHILD_SEAT_PRICE, PET_OPTIONS, MIN_ORDER_PRICE, getRates, calcRideBase } from "@/components/transfer/constants";
+import { TARIFFS, MINIVAN_SUBTARIFFS, CHILD_SEAT_PRICE, PET_OPTIONS, MIN_ORDER_PRICE, getRate, calcRideBase, type ZoneKm } from "@/components/transfer/constants";
 import { resolveCity, resolveGeocodeQuery } from "@/components/transfer/regions";
 import HowItWorks from "@/components/transfer/HowItWorks";
 import GallerySection from "@/components/transfer/GallerySection";
@@ -36,7 +36,7 @@ export default function Index() {
   const [minivanSub, setMinivanSub] = useState(0);
   const [price, setPrice] = useState<number | null>(null);
   const [distance, setDistance] = useState<number | null>(null);
-  const [specialKm, setSpecialKm] = useState(0);
+  const [zoneKm, setZoneKm] = useState<ZoneKm>({ newKm: 0, crimeaKm: 0 });
   const [calculated, setCalculated] = useState(false);
   const [calculating, setCalculating] = useState(false);
   const [distanceError, setDistanceError] = useState(false);
@@ -116,17 +116,17 @@ export default function Index() {
     return sum;
   }
 
-  function priceFromDistance(dist: number, isRoundTrip = false, special = 0) {
+  function priceFromDistance(dist: number, isRoundTrip = false, zones: ZoneKm = { newKm: 0, crimeaKm: 0 }) {
     const isDelivery = TARIFFS[tariff].isDelivery;
-    const { rate, specialRate } = getRates(tariff, minivanSub, deliveryMode);
+    const rate = getRate(tariff, minivanSub, deliveryMode);
     const extras = isDelivery ? 0 : extrasTotal();
-    let base = calcRideBase(dist, special, rate, specialRate);
+    let base = calcRideBase(dist, zones, rate);
     if (isRoundTrip) base = Math.round((base * 0.95) / 50) * 50;
     const total = base + extras;
     return Math.max(total, MIN_ORDER_PRICE);
   }
 
-  type DistResult = { km: number; special: number };
+  type DistResult = { km: number; zones: ZoneKm };
 
   async function fetchDist(a: string, b: string): Promise<DistResult | null> {
     try {
@@ -141,7 +141,7 @@ export default function Index() {
         setRouteLabels({ from: data.from_label, to: data.to_label });
       }
       if (typeof data.distance === "number" && data.distance > 0) {
-        return { km: data.distance, special: Number(data.special_km) || 0 };
+        return { km: data.distance, zones: { newKm: Number(data.special_km) || 0, crimeaKm: Number(data.crimea_km) || 0 } };
       }
     } catch { /* no fallback */ }
     return null;
@@ -160,7 +160,7 @@ export default function Index() {
         setRouteLabels({ points: data.labels });
       }
       if (typeof data.distance === "number" && data.distance > 0) {
-        return { km: data.distance, special: Number(data.special_km) || 0 };
+        return { km: data.distance, zones: { newKm: Number(data.special_km) || 0, crimeaKm: Number(data.crimea_km) || 0 } };
       }
     } catch { /* no fallback */ }
     return null;
@@ -194,7 +194,7 @@ export default function Index() {
     if (result === null) {
       setPrice(null);
       setDistance(null);
-      setSpecialKm(0);
+      setZoneKm({ newKm: 0, crimeaKm: 0 });
       setCalculated(false);
       setDistanceError(true);
       setManualRequest(true);
@@ -205,11 +205,12 @@ export default function Index() {
     setManualRequest(false);
     setRouteLabels((prev) => ({ ...prev, geoPoints }));
     let totalDist = result.km;
-    let totalSpecial = result.special;
-    if (roundTrip) { totalDist *= 2; totalSpecial *= 2; }
-    setPrice(priceFromDistance(totalDist, roundTrip, totalSpecial) + (hasViaStop ? 1000 : 0));
+    const k = roundTrip ? 2 : 1;
+    const zones: ZoneKm = { newKm: result.zones.newKm * k, crimeaKm: result.zones.crimeaKm * k };
+    if (roundTrip) totalDist *= 2;
+    setPrice(priceFromDistance(totalDist, roundTrip, zones) + (hasViaStop ? 1000 : 0));
     setDistance(totalDist);
-    setSpecialKm(totalSpecial);
+    setZoneKm(zones);
     setCalculated(true);
     setCalculating(false);
   }
@@ -279,7 +280,7 @@ export default function Index() {
         setTime={setTime}
         price={price}
         distance={distance}
-        specialKm={specialKm}
+        zoneKm={zoneKm}
         routeLabels={routeLabels}
         calculated={calculated}
         calculating={calculating}

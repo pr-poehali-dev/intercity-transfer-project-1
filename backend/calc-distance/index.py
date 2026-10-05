@@ -5,7 +5,7 @@ import urllib.error
 import time
 import math
 from concurrent.futures import ThreadPoolExecutor
-from special_zones import in_special_zone, special_share, straight_points
+from special_zones import in_special_zone, special_share, zone_shares, straight_points
 from airports import airport_coords
 
 
@@ -381,16 +381,18 @@ def road_distance_full(from_coords, to_coords, gh_key: str):
                 data = json.loads(resp.read())
             paths = data.get('paths', [])
             if not paths:
-                return None, 0
+                return None, {'new': 0, 'crimea': 0}
             meters = paths[0].get('distance', 0)
             km = round(meters / 1000)
-            special_km = 0
+            zones = {'new': 0, 'crimea': 0}
             if need_points:
                 line = paths[0].get('points', {}).get('coordinates', [])
                 pts = [[p[1], p[0]] for p in line]
-                special_km = round(km * special_share(pts)) if len(pts) > 1 else 0
-            print(f"GH route {flat},{flon} -> {tlat},{tlon} = {km} km (special {special_km})")
-            return km, special_km
+                if len(pts) > 1:
+                    sh = zone_shares(pts)
+                    zones = {k: round(km * v) for k, v in sh.items()}
+            print(f"GH route {flat},{flon} -> {tlat},{tlon} = {km} km zones {zones}")
+            return km, zones
         except (urllib.error.URLError, TimeoutError, OSError) as e:
             last_err = e
             time.sleep(0.5 * (attempt + 1))
@@ -414,13 +416,19 @@ def _near_south(a, b) -> bool:
 
 
 def approx_special_km(from_coords, to_coords, km):
-    return round(km * special_share(straight_points(from_coords, to_coords))) if km else 0
+    if not km:
+        return {'new': 0, 'crimea': 0}
+    sh = zone_shares(straight_points(from_coords, to_coords))
+    return {k: round(km * v) for k, v in sh.items()}
+
+
+NO_ZONES = {'new': 0, 'crimea': 0}
 
 
 GEO_SCHEMA = 't_p48987818_intercity_transfer_p'
 
 
-CACHE_SOURCE = 'v3'
+CACHE_SOURCE = 'v4'
 ADDRESS_MARKERS = (' ул ', ' ул.', 'улица', ' пер ', ' пер.', 'переулок',
                    ' пр-кт', ' проспект', ' пр-д', ' проезд', ' ш ', ' шоссе',
                    ' б-р', ' бульвар', ' наб', ' тупик', ' аллея', ' кв-л',
@@ -455,15 +463,15 @@ def distance_from_cache(from_city: str, to_city: str, dsn: str):
         try:
             with conn.cursor() as cur:
                 cur.execute(
-                    f"SELECT distance_km, special_km FROM {GEO_SCHEMA}.distance_cache "
+                    f"SELECT distance_km, special_km, crimea_km FROM {GEO_SCHEMA}.distance_cache "
                     f"WHERE source = '{CACHE_SOURCE}' AND ("
                     f"     (lower(from_city) = '{a}' AND lower(to_city) = '{b}') "
                     f"  OR (lower(from_city) = '{b}' AND lower(to_city) = '{a}')) LIMIT 1"
                 )
                 row = cur.fetchone()
             if row:
-                print(f"distance cache HIT {a} -> {b} = {row[0]} km (special {row[1]})")
-                return int(row[0]), int(row[1] or 0)
+                print(f"distance cache HIT {a} -> {b} = {row[0]} km")
+                return int(row[0]), {'new': int(row[1] or 0), 'crimea': int(row[2] or 0)}
         finally:
             conn.close()
     except Exception as e:
@@ -472,12 +480,13 @@ def distance_from_cache(from_city: str, to_city: str, dsn: str):
 
 
 def distance_to_cache(from_city: str, to_city: str, km: int, dsn: str,
-                      source: str = CACHE_SOURCE, special_km: int = 0) -> None:
+                      source: str = CACHE_SOURCE, special_km=None) -> None:
     """Сохраняет расстояние между городами в новый кэш."""
     if not dsn or not km or not is_cacheable(from_city, to_city):
         return
     a = cache_name(from_city)
     b = cache_name(to_city)
+    zones = special_km or NO_ZONES
     try:
         import psycopg2
         conn = psycopg2.connect(dsn)
@@ -485,10 +494,12 @@ def distance_to_cache(from_city: str, to_city: str, km: int, dsn: str,
             with conn.cursor() as cur:
                 cur.execute(
                     f"INSERT INTO {GEO_SCHEMA}.distance_cache "
-                    f"(from_city, to_city, distance_km, source, special_km) "
-                    f"SELECT '{a}', '{b}', {int(km)}, '{CACHE_SOURCE}', {int(special_km or 0)} "
-                    f"WHERE NOT EXISTS (SELECT 1 FROM {GEO_SCHEMA}.distance_cache "
-                    f"WHERE source = '{CACHE_SOURCE}' AND lower(from_city) = '{a}' AND lower(to_city) = '{b}')"
+                    f"(from_city, to_city, distance_km, source, special_km, crimea_km) "
+                    f"VALUES ('{a}', '{b}', {int(km)}, '{CACHE_SOURCE}', {int(zones['new'])}, {int(zones['crimea'])}) "
+                    f"ON CONFLICT (from_city, to_city) DO UPDATE SET distance_km = EXCLUDED.distance_km, "
+                    f"source = EXCLUDED.source, special_km = EXCLUDED.special_km, crimea_km = EXCLUDED.crimea_km, "
+                    f"created_at = now() "
+                    f"WHERE {GEO_SCHEMA}.distance_cache.source IS DISTINCT FROM EXCLUDED.source"
                 )
             conn.commit()
         finally:
@@ -628,7 +639,7 @@ def segment_distance(from_city, to_city, dadata_key, gh_key, dsn):
         print(f"INSANE distance: {from_city} -> {to_city} = {dist} km")
         dist = None
     if not dist:
-        return None, 0
+        return None, dict(NO_ZONES)
     if not approx:
         distance_to_cache(from_city, to_city, dist, dsn, source=CACHE_SOURCE, special_km=special)
     return dist, special
@@ -661,7 +672,8 @@ def calc_multi(cities, dadata_key, gh_key, dsn):
                 segments
             ))
         total = sum(r[0] for r in results if r and r[0])
-        special_total = sum(r[1] for r in results if r and r[0])
+        special_total = sum(r[1]['new'] for r in results if r and r[0])
+        crimea_total = sum(r[1]['crimea'] for r in results if r and r[0])
         with ThreadPoolExecutor(max_workers=len(cities)) as ex:
             labels = list(ex.map(lambda c: geocode_label(c, dadata_key), cities))
     except Exception as e:
@@ -674,7 +686,7 @@ def calc_multi(cities, dadata_key, gh_key, dsn):
     return {
         'statusCode': 200,
         'headers': {'Access-Control-Allow-Origin': '*'},
-        'body': json.dumps({'distance': total, 'special_km': special_total, 'segments': [r[0] for r in results], 'labels': labels})
+        'body': json.dumps({'distance': total, 'special_km': special_total, 'crimea_km': crimea_total, 'segments': [r[0] for r in results], 'labels': labels})
     }
 
 
@@ -825,7 +837,7 @@ def handler(event: dict, context) -> dict:
         return {
             'statusCode': 200,
             'headers': {'Access-Control-Allow-Origin': '*', 'Content-Type': 'application/json'},
-            'body': json.dumps({'distance': cached_km[0], 'special_km': cached_km[1], 'cached': True})
+            'body': json.dumps({'distance': cached_km[0], 'special_km': cached_km[1]['new'], 'crimea_km': cached_km[1]['crimea'], 'cached': True})
         }
 
     try:
@@ -845,7 +857,7 @@ def handler(event: dict, context) -> dict:
         from_label = from_res[2] if len(from_res) > 2 else from_city
         to_label = to_res[2] if len(to_res) > 2 else to_city
         approx = False
-        special = 0
+        special = dict(NO_ZONES)
         try:
             dist, special = road_distance_full(from_coords, to_coords, gh_key)
         except Exception as ge:
@@ -881,7 +893,8 @@ def handler(event: dict, context) -> dict:
         'headers': {'Access-Control-Allow-Origin': '*'},
         'body': json.dumps({
             'distance': dist,
-            'special_km': min(special, dist) if dist else 0,
+            'special_km': special['new'] if dist else 0,
+            'crimea_km': special['crimea'] if dist else 0,
             'from_label': from_label,
             'to_label': to_label,
         })

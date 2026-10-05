@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import Icon from "@/components/ui/icon";
-import { TARIFFS, DELIVERY_OPTIONS, MINIVAN_SUBTARIFFS, CHILD_SEAT_PRICE, PET_OPTIONS, MIN_ORDER_PRICE, getRate, calcRideBase, NEW_REGIONS_MULTIPLIER, CRIMEA_MULTIPLIER, type ZoneKm, calcToll, type TollKm } from "./constants";
+import { TARIFFS, DELIVERY_OPTIONS, MINIVAN_SUBTARIFFS, CHILD_SEAT_PRICE, PET_OPTIONS, MIN_ORDER_PRICE, getRate, calcRideBase, type ZoneKm, calcToll, type TollKm } from "./constants";
 import { getDurationByDistance } from "./routesData";
 import RouteMap from "./RouteMap";
 
@@ -149,19 +149,19 @@ export default function BookingModal({
                     {distance != null && distance - zoneKm.newKm - zoneKm.crimeaKm > 0 && (
                       <div className="flex items-center gap-2">
                         <Icon name="MapPin" size={13} className="flex-shrink-0 text-muted-foreground" />
-                        {distance - zoneKm.newKm - zoneKm.crimeaKm} км по России — обычный тариф {rate} ₽/км
+                        {distance - zoneKm.newKm - zoneKm.crimeaKm} км по России
                       </div>
                     )}
                     {zoneKm.newKm > 0 && (
                       <div className="flex items-center gap-2">
                         <Icon name="MapPin" size={13} className="flex-shrink-0 text-neon" />
-                        {zoneKm.newKm} км по ДНР, ЛНР, Запорожской и Херсонской обл. — {rate * NEW_REGIONS_MULTIPLIER} ₽/км (×{NEW_REGIONS_MULTIPLIER})
+                        {zoneKm.newKm} км по ДНР, ЛНР, Запорожской и Херсонской обл.
                       </div>
                     )}
                     {zoneKm.crimeaKm > 0 && (
                       <div className="flex items-center gap-2">
                         <Icon name="MapPin" size={13} className="flex-shrink-0 text-neon" />
-                        {zoneKm.crimeaKm} км по Крыму и Севастополю — {rate * CRIMEA_MULTIPLIER} ₽/км (×{CRIMEA_MULTIPLIER})
+                        {zoneKm.crimeaKm} км по Крыму и Севастополю
                       </div>
                     )}
                   </div>
@@ -193,7 +193,7 @@ export default function BookingModal({
               {from}{via ? ` → ${via}` : ""} → {to}{roundTrip ? `${via ? ` → ${via}` : ""} → ${from}` : ""} · {cur.name}
               {roundTrip ? " · туда-обратно" : ""}
               {isDelivery
-                ? ` · ${DELIVERY_OPTIONS[deliveryMode].name} ${DELIVERY_OPTIONS[deliveryMode].pricePerKm} ₽/км`
+                ? ` · ${DELIVERY_OPTIONS[deliveryMode].name}`
                 : isMinivan
                   ? ` · ${MINIVAN_SUBTARIFFS[minivanSub].name} (${MINIVAN_SUBTARIFFS[minivanSub].desc})`
                   : ` · ${passengers} пасс.`

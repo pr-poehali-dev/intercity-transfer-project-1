@@ -34,7 +34,6 @@ export default function RouteMap({ points, className = "" }: RouteMapProps) {
   const mapRef = useRef<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
-  const [zonesShown, setZonesShown] = useState({ n: false, c: false });
 
   const key = points.filter(Boolean).join("|");
 
@@ -45,7 +44,6 @@ export default function RouteMap({ points, className = "" }: RouteMapProps) {
     let cancelled = false;
     setLoading(true);
     setError(false);
-    setZonesShown({ n: false, c: false });
 
     async function load() {
       try {
@@ -98,12 +96,6 @@ export default function RouteMap({ points, className = "" }: RouteMapProps) {
             })
           );
         });
-        if (!cancelled) {
-          setZonesShown({
-            n: parts.some((p) => p.zone === "n"),
-            c: parts.some((p) => p.zone === "c"),
-          });
-        }
 
         const marks = stops && stops.length >= 2 ? stops : [line[0], line[line.length - 1]];
         marks.forEach((c, i) => {
@@ -155,22 +147,6 @@ export default function RouteMap({ points, className = "" }: RouteMapProps) {
   return (
     <div className={`relative rounded-2xl overflow-hidden border border-border ${className}`}>
       <div ref={containerRef} className="w-full h-full min-h-[220px] bg-surface" />
-      {(zonesShown.n || zonesShown.c) && !loading && !error && (
-        <div className="absolute left-2 bottom-2 z-[400] flex flex-col gap-1 rounded-md bg-background/85 backdrop-blur-sm px-2 py-1 text-[11px] text-foreground border border-border">
-          {zonesShown.n && (
-            <div className="flex items-center gap-2">
-              <span className="inline-block w-4 h-1 rounded-full" style={{ background: NEW_ZONE_COLOR }} />
-              ДНР, ЛНР, Запорожская, Херсонская — тариф ×3
-            </div>
-          )}
-          {zonesShown.c && (
-            <div className="flex items-center gap-2">
-              <span className="inline-block w-4 h-1 rounded-full" style={{ background: CRIMEA_ZONE_COLOR }} />
-              Крым и Севастополь — тариф ×2
-            </div>
-          )}
-        </div>
-      )}
       {loading && (
         <div className="absolute inset-0 flex items-center justify-center bg-surface/80 backdrop-blur-sm z-[500]">
           <div className="flex items-center gap-2 text-sm text-muted-foreground">

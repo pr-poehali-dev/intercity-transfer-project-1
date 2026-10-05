@@ -54,6 +54,17 @@ export default function Index() {
   }, []);
 
   useEffect(() => {
+    const t = setTimeout(() => {
+      fetch(func2url["calc-distance"], {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ warm: true }),
+      }).catch(() => undefined);
+    }, 5000);
+    return () => clearTimeout(t);
+  }, []);
+
+  useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const qFrom = params.get("from");
     const qTo = params.get("to");

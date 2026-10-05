@@ -11,6 +11,7 @@ import Reviews from "./pages/Reviews";
 import Privacy from "./pages/Privacy";
 import Oferta from "./pages/Oferta";
 import NotFound from "./pages/NotFound";
+import Navi from "./pages/Navi";
 import func2url from "../backend/func2url.json";
 
 function YmlRedirect() {
@@ -51,6 +52,7 @@ const App = () => (
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/oferta" element={<Oferta />} />
           <Route path="/yml" element={<YmlRedirect />} />
+          <Route path="/navi" element={<Navi />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

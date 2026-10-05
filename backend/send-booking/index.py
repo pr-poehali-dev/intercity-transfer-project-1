@@ -80,7 +80,10 @@ def handler(event: dict, context) -> dict:
         pts = [f"{float(c[0]):.6f},{float(c[1]):.6f}" for c in coords]
         if round_trip:
             pts += pts[-2::-1]
-        route_url = 'https://yandex.ru/maps/?mode=routes&rtt=auto&rtext=' + '~'.join(pts)
+        route_url = (
+            'https://nashe-transfer.ru/navi?p=' + '~'.join(pts)
+            + '&n=' + quote('~'.join(route_names))
+        )
     else:
         route_url = 'https://yandex.ru/maps/?mode=routes&rtt=auto&rtext=' + '~'.join(quote(x) for x in stops)
 

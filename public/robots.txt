@@ -1,6 +1,7 @@
 User-agent: *
 Allow: /
 Disallow: /api/
+Disallow: /navi
 
 User-agent: Yandex
 Allow: /

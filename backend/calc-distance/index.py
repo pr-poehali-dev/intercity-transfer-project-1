@@ -392,15 +392,81 @@ def road_distance(from_coords, to_coords, gh_key: str):
 GEO_SCHEMA = 't_p48987818_intercity_transfer_p'
 
 
+CACHE_SOURCE = 'v2'
+ADDRESS_MARKERS = (' ул ', ' ул.', 'улица', ' пер ', ' пер.', 'переулок',
+                   ' пр-кт', ' проспект', ' пр-д', ' проезд', ' ш ', ' шоссе',
+                   ' б-р', ' бульвар', ' наб', ' тупик', ' аллея', ' кв-л',
+                   ' д ', ' д.', ' дом ', ' стр ', ' стр.', ' корп', ' влд ', ' владение',
+                   'аэропорт', 'вокзал', 'автостанция', 'ж/д', 'жд ')
+
+
+def is_cacheable(*names: str) -> bool:
+    """В кэш попадают только маршруты между населёнными пунктами, без точных адресов."""
+    for n in names:
+        low = f' {(n or "").lower()} '
+        if any(m in low for m in ADDRESS_MARKERS):
+            return False
+        if any(ch.isdigit() for ch in low):
+            return False
+    return True
+
+
+def cache_name(name: str) -> str:
+    return norm_yo((name or '').strip().lower()).replace("'", "''")
+
+
 def distance_from_cache(from_city: str, to_city: str, dsn: str):
-    """Кэш расстояний отключён: каждый расчёт считается заново."""
+    """Читает расстояние между городами из нового кэша (source = v2)."""
+    if not dsn or not is_cacheable(from_city, to_city):
+        return None
+    a = cache_name(from_city)
+    b = cache_name(to_city)
+    try:
+        import psycopg2
+        conn = psycopg2.connect(dsn)
+        try:
+            with conn.cursor() as cur:
+                cur.execute(
+                    f"SELECT distance_km FROM {GEO_SCHEMA}.distance_cache "
+                    f"WHERE source = '{CACHE_SOURCE}' AND ("
+                    f"     (lower(from_city) = '{a}' AND lower(to_city) = '{b}') "
+                    f"  OR (lower(from_city) = '{b}' AND lower(to_city) = '{a}')) LIMIT 1"
+                )
+                row = cur.fetchone()
+            if row:
+                print(f"distance cache HIT {a} -> {b} = {row[0]} km")
+                return int(row[0])
+        finally:
+            conn.close()
+    except Exception as e:
+        print(f"distance cache read failed: {type(e).__name__}: {e}")
     return None
 
 
 def distance_to_cache(from_city: str, to_city: str, km: int, dsn: str,
-                      source: str = 'graphhopper') -> None:
-    """Кэш расстояний отключён."""
-    return None
+                      source: str = CACHE_SOURCE) -> None:
+    """Сохраняет расстояние между городами в новый кэш."""
+    if not dsn or not km or not is_cacheable(from_city, to_city):
+        return
+    a = cache_name(from_city)
+    b = cache_name(to_city)
+    try:
+        import psycopg2
+        conn = psycopg2.connect(dsn)
+        try:
+            with conn.cursor() as cur:
+                cur.execute(
+                    f"INSERT INTO {GEO_SCHEMA}.distance_cache "
+                    f"(from_city, to_city, distance_km, source) "
+                    f"SELECT '{a}', '{b}', {int(km)}, '{CACHE_SOURCE}' "
+                    f"WHERE NOT EXISTS (SELECT 1 FROM {GEO_SCHEMA}.distance_cache "
+                    f"WHERE source = '{CACHE_SOURCE}' AND lower(from_city) = '{a}' AND lower(to_city) = '{b}')"
+                )
+            conn.commit()
+        finally:
+            conn.close()
+    except Exception as e:
+        print(f"distance cache write failed: {type(e).__name__}: {e}")
 
 
 def geometry_from_cache(cache_key: str, dsn: str):
@@ -532,7 +598,7 @@ def segment_distance(from_city, to_city, dadata_key, gh_key, dsn):
         print(f"INSANE distance: {from_city} -> {to_city} = {dist} km")
         dist = None
     if dist:
-        distance_to_cache(from_city, to_city, dist, dsn, source='graphhopper')
+        distance_to_cache(from_city, to_city, dist, dsn, source=CACHE_SOURCE)
     return dist
 
 
@@ -731,7 +797,7 @@ def handler(event: dict, context) -> dict:
         dist = None
 
     if dist and not approx:
-        distance_to_cache(from_city, to_city, dist, dsn, source='graphhopper')
+        distance_to_cache(from_city, to_city, dist, dsn, source=CACHE_SOURCE)
 
     return {
         'statusCode': 200,

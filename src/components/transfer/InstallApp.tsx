@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import Icon from "@/components/ui/icon";
 import { useInstallApp, markInstalled } from "@/hooks/use-install-app";
 
@@ -9,7 +10,7 @@ function isMobile() {
 }
 
 export function InstallHelp({ ios, onClose }: { ios: boolean; onClose: () => void }) {
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-[1000] bg-black/70 backdrop-blur-sm flex items-end sm:items-center justify-center p-3" onClick={onClose}>
       <div className="w-full max-w-sm bg-surface border border-border rounded-2xl p-5" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center gap-3 mb-4">
@@ -54,7 +55,8 @@ export function InstallHelp({ ios, onClose }: { ios: boolean; onClose: () => voi
           Понятно
         </button>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 

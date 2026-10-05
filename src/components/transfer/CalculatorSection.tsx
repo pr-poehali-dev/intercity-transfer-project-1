@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { TARIFFS, DELIVERY_OPTIONS, MINIVAN_SUBTARIFFS, CHILD_SEAT_PRICE, PET_OPTIONS, MIN_ORDER_PRICE, getRate, calcRideBase, NEW_REGIONS_MULTIPLIER, CRIMEA_MULTIPLIER, type ZoneKm, calcToll, type TollKm } from "./constants";
+import { CHOOSE_CAR_SURCHARGE, TARIFFS, DELIVERY_OPTIONS, MINIVAN_SUBTARIFFS, CHILD_SEAT_PRICE, PET_OPTIONS, MIN_ORDER_PRICE, getRate, calcRideBase, NEW_REGIONS_MULTIPLIER, CRIMEA_MULTIPLIER, type ZoneKm, calcToll, type TollKm } from "./constants";
 import { getDurationByDistance } from "./routesData";
 import CalculatorForm from "./CalculatorForm";
 import BookingModal from "./BookingModal";
@@ -36,6 +36,8 @@ interface CalculatorSectionProps {
   setDeliveryMode: (v: number) => void;
   minivanSub: number;
   setMinivanSub: (v: number) => void;
+  chooseCar: boolean;
+  setChooseCar: (v: boolean) => void;
   date: string;
   setDate: (v: string) => void;
   time: string;
@@ -63,6 +65,7 @@ export default function CalculatorSection({
   withPet, setWithPet, petOption, setPetOption,
   deliveryMode, setDeliveryMode,
   minivanSub, setMinivanSub,
+  chooseCar, setChooseCar,
   date, setDate,
   time, setTime,
   price, distance, zoneKm = { newKm: 0, crimeaKm: 0 }, tollKm = {}, routeLabels, calculated, calculating, distanceError, manualRequest,
@@ -103,7 +106,7 @@ export default function CalculatorSection({
     const t = TARIFFS[tariff];
     const isDelivery = t.isDelivery;
     const isMinivan = t.isMinivan;
-    const rate = getRate(tariff, minivanSub, deliveryMode);
+    const rate = getRate(tariff, minivanSub, deliveryMode, chooseCar);
     const extras = isDelivery ? 0 : ((withChildren ? childrenCount * CHILD_SEAT_PRICE : 0) + (withPet ? PET_OPTIONS[petOption].price : 0));
     const rideBase = distance ? calcRideBase(distance, zoneKm, rate) : 0;
     const finalPrice = distance
@@ -116,6 +119,7 @@ export default function CalculatorSection({
       ? `${t.name} · ${MINIVAN_SUBTARIFFS[minivanSub].name}`
       : t.name;
     const services: string[] = [];
+    if (chooseCar && !isDelivery) services.push(`Клиент выберет автомобиль сам из предложенных вариантов (+${CHOOSE_CAR_SURCHARGE} ₽/км)`);
     if (distance && (zoneKm.newKm > 0 || zoneKm.crimeaKm > 0)) {
       const normalKm = distance - zoneKm.newKm - zoneKm.crimeaKm;
       if (normalKm > 0) services.push(`По России: ${normalKm} км × ${rate} ₽/км (обычный тариф)`);
@@ -209,6 +213,7 @@ export default function CalculatorSection({
               petOption={petOption} setPetOption={setPetOption}
               deliveryMode={deliveryMode} setDeliveryMode={setDeliveryMode}
               minivanSub={minivanSub} setMinivanSub={setMinivanSub}
+              chooseCar={chooseCar} setChooseCar={setChooseCar}
               date={date} setDate={setDate}
               time={time} setTime={setTime}
               calculating={calculating}
@@ -228,7 +233,7 @@ export default function CalculatorSection({
           tariff={tariff} passengers={passengers}
           withChildren={withChildren} childrenCount={childrenCount}
           withPet={withPet} petOption={petOption}
-          deliveryMode={deliveryMode} minivanSub={minivanSub}
+          deliveryMode={deliveryMode} minivanSub={minivanSub} chooseCar={chooseCar}
           price={price ?? 0} distance={distance} zoneKm={zoneKm} tollKm={tollKm}
           manualRequest={manualRequest}
           routeLabels={routeLabels}

@@ -20,6 +20,7 @@ interface BookingModalProps {
   petOption: number;
   deliveryMode: number;
   minivanSub: number;
+  chooseCar?: boolean;
   price: number;
   distance: number | null;
   zoneKm?: ZoneKm;
@@ -45,7 +46,7 @@ interface BookingModalProps {
 export default function BookingModal({
   from, via, to, date, time, roundTrip, tariff, passengers,
   withChildren, childrenCount, withPet, petOption,
-  deliveryMode, minivanSub,
+  deliveryMode, minivanSub, chooseCar = false,
   price, distance, zoneKm = { newKm: 0, crimeaKm: 0 }, tollKm = {}, manualRequest, routeLabels,
   name, setName, phone, handlePhoneChange, isPhoneValid,
   comment, setComment,
@@ -56,7 +57,7 @@ export default function BookingModal({
   const cur = TARIFFS[tariff];
   const isDelivery = cur.isDelivery;
   const isMinivan = cur.isMinivan;
-  const rate = getRate(tariff, minivanSub, deliveryMode);
+  const rate = getRate(tariff, minivanSub, deliveryMode, chooseCar);
   const toll = calcToll(tollKm);
   const extras = isDelivery ? 0 : ((withChildren ? childrenCount * CHILD_SEAT_PRICE : 0) + (withPet ? PET_OPTIONS[petOption].price : 0));
   // Базовая стоимость поездки без extras (distance уже = односторонняя × 2 при туда-обратно)

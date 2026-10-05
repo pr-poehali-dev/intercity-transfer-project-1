@@ -167,10 +167,12 @@ export function calcToll(toll: TollKm): { total: number; roads: { name: string; 
   return { total, roads };
 }
 
-export function getRate(tariffIndex: number, minivanSub = 0, deliveryMode = 0): number {
+export const CHOOSE_CAR_SURCHARGE = 5;
+
+export function getRate(tariffIndex: number, minivanSub = 0, deliveryMode = 0, chooseCar = false): number {
   const t = TARIFFS[tariffIndex];
   const src = t.isDelivery ? DELIVERY_OPTIONS[deliveryMode] : t.isMinivan ? MINIVAN_SUBTARIFFS[minivanSub] : t;
-  return src.pricePerKm;
+  return src.pricePerKm + (chooseCar && !t.isDelivery ? CHOOSE_CAR_SURCHARGE : 0);
 }
 
 export function calcRideBase(distance: number, zones: ZoneKm, rate: number): number {

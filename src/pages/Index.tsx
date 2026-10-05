@@ -34,6 +34,7 @@ export default function Index() {
   const [petOption, setPetOption] = useState(0);
   const [deliveryMode, setDeliveryMode] = useState(0);
   const [minivanSub, setMinivanSub] = useState(0);
+  const [chooseCar, setChooseCar] = useState(false);
   const [price, setPrice] = useState<number | null>(null);
   const [distance, setDistance] = useState<number | null>(null);
   const [zoneKm, setZoneKm] = useState<ZoneKm>({ newKm: 0, crimeaKm: 0 });
@@ -119,7 +120,7 @@ export default function Index() {
 
   function priceFromDistance(dist: number, isRoundTrip = false, zones: ZoneKm = { newKm: 0, crimeaKm: 0 }) {
     const isDelivery = TARIFFS[tariff].isDelivery;
-    const rate = getRate(tariff, minivanSub, deliveryMode);
+    const rate = getRate(tariff, minivanSub, deliveryMode, chooseCar);
     const extras = isDelivery ? 0 : extrasTotal();
     let base = calcRideBase(dist, zones, rate);
     if (isRoundTrip) base = Math.round((base * 0.95) / 50) * 50;
@@ -241,6 +242,7 @@ export default function Index() {
   function handleSetPetOption(v: number) { setPetOption(v); setCalculated(false); }
   function handleSetDeliveryMode(v: number) { setDeliveryMode(v); setCalculated(false); }
   function handleSetMinivanSub(v: number) { setMinivanSub(v); setCalculated(false); }
+  function handleSetChooseCar(v: boolean) { setChooseCar(v); setCalculated(false); }
 
   return (
     <div className="min-h-screen bg-background text-foreground font-golos overflow-x-hidden">
@@ -277,6 +279,8 @@ export default function Index() {
         setDeliveryMode={handleSetDeliveryMode}
         minivanSub={minivanSub}
         setMinivanSub={handleSetMinivanSub}
+        chooseCar={chooseCar}
+        setChooseCar={handleSetChooseCar}
         date={date}
         setDate={setDate}
         time={time}

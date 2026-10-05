@@ -1,5 +1,5 @@
 import Icon from "@/components/ui/icon";
-import { TARIFFS, DELIVERY_OPTIONS, MINIVAN_SUBTARIFFS, PET_OPTIONS, QUICK_DATES, localDateStr } from "./constants";
+import { CHOOSE_CAR_SURCHARGE, TARIFFS, DELIVERY_OPTIONS, MINIVAN_SUBTARIFFS, PET_OPTIONS, QUICK_DATES, localDateStr } from "./constants";
 import type { IconName } from "./constants";
 import CitySelect from "./CitySelect";
 
@@ -31,6 +31,8 @@ interface CalculatorFormProps {
   setDeliveryMode: (v: number) => void;
   minivanSub: number;
   setMinivanSub: (v: number) => void;
+  chooseCar: boolean;
+  setChooseCar: (v: boolean) => void;
   date: string;
   setDate: (v: string) => void;
   time: string;
@@ -49,6 +51,7 @@ export default function CalculatorForm({
   withPet, setWithPet, petOption, setPetOption,
   deliveryMode, setDeliveryMode,
   minivanSub, setMinivanSub,
+  chooseCar, setChooseCar,
   date, setDate,
   time, setTime,
   calculating, distanceError, onCalculate,
@@ -182,6 +185,23 @@ export default function CalculatorForm({
               </button>
             ))}
           </div>
+        </div>
+      )}
+
+      {!TARIFFS[tariff].isDelivery && (
+        <div className="mb-6 -mt-2">
+          <button
+            type="button"
+            onClick={() => setChooseCar(!chooseCar)}
+            className={`w-full flex items-center gap-3 border rounded-xl p-3 text-left transition-all ${chooseCar ? "border-neon bg-neon/5" : "border-border bg-background hover:border-white/30"}`}
+          >
+            <div className={`w-5 h-5 rounded border flex items-center justify-center flex-shrink-0 ${chooseCar ? "bg-neon border-neon" : "border-muted-foreground"}`}>
+              {chooseCar && <Icon name="Check" size={14} className="text-background" />}
+            </div>
+            <Icon name="CarFront" fallback="Car" size={18} className={chooseCar ? "text-neon flex-shrink-0" : "text-muted-foreground flex-shrink-0"} />
+            <span className="flex-1 text-sm text-foreground">Выберу автомобиль сам из предложенных вариантов</span>
+            <span className={`text-xs font-semibold whitespace-nowrap ${chooseCar ? "text-neon" : "text-muted-foreground"}`}>+{CHOOSE_CAR_SURCHARGE} ₽/км</span>
+          </button>
         </div>
       )}
 

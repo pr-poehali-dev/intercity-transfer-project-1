@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import Icon from "@/components/ui/icon";
-import { TARIFFS, DELIVERY_OPTIONS, MINIVAN_SUBTARIFFS, CHILD_SEAT_PRICE, PET_OPTIONS, MIN_ORDER_PRICE, getRate, calcRideBase, NEW_REGIONS_MULTIPLIER, CRIMEA_MULTIPLIER, type ZoneKm } from "./constants";
+import { TARIFFS, DELIVERY_OPTIONS, MINIVAN_SUBTARIFFS, CHILD_SEAT_PRICE, PET_OPTIONS, MIN_ORDER_PRICE, getRate, calcRideBase, NEW_REGIONS_MULTIPLIER, CRIMEA_MULTIPLIER, type ZoneKm, calcToll, type TollKm } from "./constants";
 import { getDurationByDistance } from "./routesData";
 import RouteMap from "./RouteMap";
 
@@ -23,6 +23,7 @@ interface BookingModalProps {
   price: number;
   distance: number | null;
   zoneKm?: ZoneKm;
+  tollKm?: TollKm;
   manualRequest?: boolean;
   routeLabels?: { from?: string; to?: string; points?: string[]; geoPoints?: string[] };
   name: string;
@@ -45,7 +46,7 @@ export default function BookingModal({
   from, via, to, date, time, roundTrip, tariff, passengers,
   withChildren, childrenCount, withPet, petOption,
   deliveryMode, minivanSub,
-  price, distance, zoneKm = { newKm: 0, crimeaKm: 0 }, manualRequest, routeLabels,
+  price, distance, zoneKm = { newKm: 0, crimeaKm: 0 }, tollKm = {}, manualRequest, routeLabels,
   name, setName, phone, handlePhoneChange, isPhoneValid,
   comment, setComment,
   sending, sent, error, validationError,
@@ -56,6 +57,7 @@ export default function BookingModal({
   const isDelivery = cur.isDelivery;
   const isMinivan = cur.isMinivan;
   const rate = getRate(tariff, minivanSub, deliveryMode);
+  const toll = calcToll(tollKm);
   const extras = isDelivery ? 0 : ((withChildren ? childrenCount * CHILD_SEAT_PRICE : 0) + (withPet ? PET_OPTIONS[petOption].price : 0));
   // Базовая стоимость поездки без extras (distance уже = односторонняя × 2 при туда-обратно)
   const baseRide = distance ? calcRideBase(distance, zoneKm, rate) : null;
@@ -165,10 +167,25 @@ export default function BookingModal({
                   </div>
                 )}
 
-                <div className="inline-flex items-center gap-2 bg-yellow-500/10 border border-yellow-500/40 rounded-lg px-3 py-2 mb-3 text-xs text-yellow-200 font-medium">
-                  <Icon name="TriangleAlert" size={13} className="flex-shrink-0 text-yellow-400" />
-                  Без учёта платных дорог · точную стоимость подтвердит диспетчер
-                </div>
+                {toll.total > 0 ? (
+                  <div className="flex flex-col gap-1 bg-yellow-500/10 border border-yellow-500/40 rounded-lg px-3 py-2 mb-3 text-xs text-yellow-200 font-medium">
+                    <div className="flex items-center gap-2">
+                      <Icon name="TriangleAlert" size={13} className="flex-shrink-0 text-yellow-400" />
+                      Платные дороги ≈ {toll.total.toLocaleString("ru-RU")} ₽ — оплачиваются отдельно
+                    </div>
+                    <div className="pl-5 text-yellow-200/80 font-normal">
+                      {toll.roads.map((r) => `${r.name}: ${r.km} км`).join(" · ")}
+                    </div>
+                    <div className="pl-5 text-yellow-200/70 font-normal">
+                      Оценка для легкового авто, дневной тариф · точную сумму подтвердит диспетчер
+                    </div>
+                  </div>
+                ) : (
+                  <div className="inline-flex items-center gap-2 bg-yellow-500/10 border border-yellow-500/40 rounded-lg px-3 py-2 mb-3 text-xs text-yellow-200 font-medium">
+                    <Icon name="TriangleAlert" size={13} className="flex-shrink-0 text-yellow-400" />
+                    Платных дорог на маршруте не найдено · точную стоимость подтвердит диспетчер
+                  </div>
+                )}
               </>
             )}
 

@@ -141,6 +141,32 @@ export const CRIMEA_MULTIPLIER = 2; // Крым и Севастополь
 
 export interface ZoneKm { newKm: number; crimeaKm: number }
 
+// Платные дороги: средняя цена за км по всей трассе для легкового авто (1 категория),
+// будни, днём, без транспондера. Посчитано из тарифов Автодора на 2026 год:
+// М-11 Москва—СПб ≈ 4 580 ₽, М-12 Москва—Казань ≈ 5 350 ₽, М-4 Москва—Ростов ≈ 3 810 ₽.
+// В выходные дороже на 10–20%, с транспондером дешевле до 15%. Минивэны выше 2 м — 2 категория, дороже.
+export const TOLL_RATES: Record<string, number> = {
+  "М-11": 6.8,
+  "М-12": 7.2,
+  "М-4": 3.6,
+  "А-113": 4,
+};
+export const TOLL_RATE_DEFAULT = 4;
+
+export type TollKm = Record<string, number>;
+
+export function calcToll(toll: TollKm): { total: number; roads: { name: string; km: number; cost: number }[] } {
+  const roads = Object.entries(toll || {})
+    .filter(([, km]) => km > 0)
+    .map(([name, km]) => {
+      const rate = TOLL_RATES[name] ?? TOLL_RATE_DEFAULT;
+      return { name: name === "other" ? "прочие платные участки" : name === "А-113" ? "ЦКАД" : name, km, cost: Math.round((km * rate) / 50) * 50 };
+    })
+    .sort((a, b) => b.km - a.km);
+  const total = roads.reduce((s, r) => s + r.cost, 0);
+  return { total, roads };
+}
+
 export function getRate(tariffIndex: number, minivanSub = 0, deliveryMode = 0): number {
   const t = TARIFFS[tariffIndex];
   const src = t.isDelivery ? DELIVERY_OPTIONS[deliveryMode] : t.isMinivan ? MINIVAN_SUBTARIFFS[minivanSub] : t;

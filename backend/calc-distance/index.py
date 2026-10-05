@@ -361,16 +361,59 @@ def region_sanity_ok(road_km: int, from_city: str, to_city: str) -> bool:
     return True
 
 
-def road_distance_full(from_coords, to_coords, gh_key: str):
-    """Расстояние по дорогам и км внутри особых регионов через GraphHopper."""
+def _hav_lonlat(a, b):
+    lo1, la1 = map(math.radians, a)
+    lo2, la2 = map(math.radians, b)
+    x = math.sin((la2 - la1) / 2) ** 2 + math.cos(la1) * math.cos(la2) * math.sin((lo2 - lo1) / 2) ** 2
+    return 6371 * 2 * math.asin(math.sqrt(x))
+
+
+# Трассы, где почти весь путь платный, а в OSM разметка платности неполная: считаем все км по трассе.
+FULL_TOLL_REFS = {'М-11', 'М-12', 'М-4', 'А-113'}
+
+
+def toll_by_road(line, details, km_total):
+    """Платные км по трассам: {'М-11': 666, ...}. line — [[lon, lat]], details — path details GraphHopper."""
+    if not line or len(line) < 2:
+        return {}
+    seg = [_hav_lonlat(line[k], line[k + 1]) for k in range(len(line) - 1)]
+    geo_total = sum(seg) or 1
+    scale = km_total / geo_total if km_total else 1
+    toll_iv = [(i, j) for i, j, v in details.get('toll', []) if v in ('all', 'hgv')]
+    out = {}
+    counted = set()
+    for i, j, ref in details.get('street_ref', []) or []:
+        names = [r.strip() for r in (ref or '').split(';') if r.strip()]
+        full = next((n for n in names if n in FULL_TOLL_REFS), None)
+        if full:
+            out[full] = out.get(full, 0) + sum(seg[i:j]) * scale
+            counted.update(range(i, j))
+            continue
+        name = names[0] if names else 'other'
+        for a, b in toll_iv:
+            lo, hi = max(i, a), min(j, b)
+            if hi > lo:
+                out[name] = out.get(name, 0) + sum(seg[lo:hi]) * scale
+                counted.update(range(lo, hi))
+    rest = 0.0
+    for a, b in toll_iv:
+        rest += sum(seg[k] for k in range(a, b) if k not in counted)
+    if rest:
+        out['other'] = out.get('other', 0) + rest * scale
+    return {k: round(v) for k, v in out.items() if round(v) >= 3}
+
+
+def road_distance_full(from_coords, to_coords, gh_key: str, with_toll: bool = False):
+    """Расстояние по дорогам, км внутри особых регионов и (по запросу) платные км по трассам."""
     flat, flon = from_coords
     tlat, tlon = to_coords
-    need_points = any_special(from_coords, to_coords)
+    need_points = any_special(from_coords, to_coords) or with_toll
     url = (
         f'https://graphhopper.com/api/1/route'
         f'?point={flat},{flon}&point={tlat},{tlon}'
         f'&profile=car&locale=ru&instructions=false'
         + ('&points_encoded=false' if need_points else '&calc_points=false')
+        + ('&details=toll&details=street_ref' if with_toll else '')
         + f'&key={gh_key}'
     )
     req = urllib.request.Request(url, headers={'User-Agent': 'transfer-app'})
@@ -381,18 +424,21 @@ def road_distance_full(from_coords, to_coords, gh_key: str):
                 data = json.loads(resp.read())
             paths = data.get('paths', [])
             if not paths:
-                return None, {'new': 0, 'crimea': 0}
+                return (None, {'new': 0, 'crimea': 0}, {}) if with_toll else (None, {'new': 0, 'crimea': 0})
             meters = paths[0].get('distance', 0)
             km = round(meters / 1000)
             zones = {'new': 0, 'crimea': 0}
+            toll = {}
             if need_points:
                 line = paths[0].get('points', {}).get('coordinates', [])
                 pts = [[p[1], p[0]] for p in line]
                 if len(pts) > 1:
                     sh = zone_shares(pts)
                     zones = {k: round(km * v) for k, v in sh.items()}
-            print(f"GH route {flat},{flon} -> {tlat},{tlon} = {km} km zones {zones}")
-            return km, zones
+                if with_toll:
+                    toll = toll_by_road(line, paths[0].get('details', {}) or {}, km)
+            print(f"GH route {flat},{flon} -> {tlat},{tlon} = {km} km zones {zones} toll {toll}")
+            return (km, zones, toll) if with_toll else (km, zones)
         except (urllib.error.URLError, TimeoutError, OSError) as e:
             last_err = e
             time.sleep(0.5 * (attempt + 1))
@@ -428,7 +474,7 @@ NO_ZONES = {'new': 0, 'crimea': 0}
 GEO_SCHEMA = 't_p48987818_intercity_transfer_p'
 
 
-CACHE_SOURCE = 'v4'
+CACHE_SOURCE = 'v6'
 ADDRESS_MARKERS = (' ул ', ' ул.', 'улица', ' пер ', ' пер.', 'переулок',
                    ' пр-кт', ' проспект', ' пр-д', ' проезд', ' ш ', ' шоссе',
                    ' б-р', ' бульвар', ' наб', ' тупик', ' аллея', ' кв-л',
@@ -463,7 +509,7 @@ def distance_from_cache(from_city: str, to_city: str, dsn: str):
         try:
             with conn.cursor() as cur:
                 cur.execute(
-                    f"SELECT distance_km, special_km, crimea_km FROM {GEO_SCHEMA}.distance_cache "
+                    f"SELECT distance_km, special_km, crimea_km, toll_json FROM {GEO_SCHEMA}.distance_cache "
                     f"WHERE source = '{CACHE_SOURCE}' AND ("
                     f"     (lower(from_city) = '{a}' AND lower(to_city) = '{b}') "
                     f"  OR (lower(from_city) = '{b}' AND lower(to_city) = '{a}')) LIMIT 1"
@@ -471,7 +517,8 @@ def distance_from_cache(from_city: str, to_city: str, dsn: str):
                 row = cur.fetchone()
             if row:
                 print(f"distance cache HIT {a} -> {b} = {row[0]} km")
-                return int(row[0]), {'new': int(row[1] or 0), 'crimea': int(row[2] or 0)}
+                toll = json.loads(row[3]) if row[3] else {}
+                return int(row[0]), {'new': int(row[1] or 0), 'crimea': int(row[2] or 0)}, toll
         finally:
             conn.close()
     except Exception as e:
@@ -480,13 +527,14 @@ def distance_from_cache(from_city: str, to_city: str, dsn: str):
 
 
 def distance_to_cache(from_city: str, to_city: str, km: int, dsn: str,
-                      source: str = CACHE_SOURCE, special_km=None) -> None:
+                      source: str = CACHE_SOURCE, special_km=None, toll=None) -> None:
     """Сохраняет расстояние между городами в новый кэш."""
     if not dsn or not km or not is_cacheable(from_city, to_city):
         return
     a = cache_name(from_city)
     b = cache_name(to_city)
     zones = special_km or NO_ZONES
+    toll_j = json.dumps(toll or {}, ensure_ascii=False).replace("'", "''")
     try:
         import psycopg2
         conn = psycopg2.connect(dsn)
@@ -494,10 +542,11 @@ def distance_to_cache(from_city: str, to_city: str, km: int, dsn: str,
             with conn.cursor() as cur:
                 cur.execute(
                     f"INSERT INTO {GEO_SCHEMA}.distance_cache "
-                    f"(from_city, to_city, distance_km, source, special_km, crimea_km) "
-                    f"VALUES ('{a}', '{b}', {int(km)}, '{CACHE_SOURCE}', {int(zones['new'])}, {int(zones['crimea'])}) "
+                    f"(from_city, to_city, distance_km, source, special_km, crimea_km, toll_json) "
+                    f"VALUES ('{a}', '{b}', {int(km)}, '{CACHE_SOURCE}', {int(zones['new'])}, {int(zones['crimea'])}, '{toll_j}') "
                     f"ON CONFLICT (from_city, to_city) DO UPDATE SET distance_km = EXCLUDED.distance_km, "
                     f"source = EXCLUDED.source, special_km = EXCLUDED.special_km, crimea_km = EXCLUDED.crimea_km, "
+                    f"toll_json = EXCLUDED.toll_json, "
                     f"created_at = now() "
                     f"WHERE {GEO_SCHEMA}.distance_cache.source IS DISTINCT FROM EXCLUDED.source"
                 )
@@ -623,7 +672,7 @@ def short_city(name: str) -> str:
 
 
 def segment_distance(from_city, to_city, dadata_key, gh_key, dsn):
-    """Отрезок: (км, км в особых регионах). Кэш -> геокод -> GraphHopper."""
+    """Отрезок: (км, км в особых регионах, платные км по трассам). Кэш -> геокод -> GraphHopper."""
     cached = distance_from_cache(from_city, to_city, dsn)
     if cached:
         return cached
@@ -637,8 +686,9 @@ def segment_distance(from_city, to_city, dadata_key, gh_key, dsn):
     from_coords = from_res[:2]
     to_coords = to_res[:2]
     approx = False
+    toll = {}
     try:
-        dist, special = road_distance_full(from_coords, to_coords, gh_key)
+        dist, special, toll = road_distance_full(from_coords, to_coords, gh_key, with_toll=True)
     except Exception as ge:
         print(f"segment fallback {from_city} -> {to_city}: {type(ge).__name__}: {ge}")
         approx = True
@@ -651,10 +701,10 @@ def segment_distance(from_city, to_city, dadata_key, gh_key, dsn):
         print(f"INSANE distance: {from_city} -> {to_city} = {dist} km")
         dist = None
     if not dist:
-        return None, dict(NO_ZONES)
+        return None, dict(NO_ZONES), {}
     if not approx:
-        distance_to_cache(from_city, to_city, dist, dsn, source=CACHE_SOURCE, special_km=special)
-    return dist, special
+        distance_to_cache(from_city, to_city, dist, dsn, source=CACHE_SOURCE, special_km=special, toll=toll)
+    return dist, special, toll
 
 
 def geocode_label(query: str, api_key: str):
@@ -686,6 +736,11 @@ def calc_multi(cities, dadata_key, gh_key, dsn):
         total = sum(r[0] for r in results if r and r[0])
         special_total = sum(r[1]['new'] for r in results if r and r[0])
         crimea_total = sum(r[1]['crimea'] for r in results if r and r[0])
+        toll_total = {}
+        for r in results:
+            if r and r[0]:
+                for k, v in (r[2] or {}).items():
+                    toll_total[k] = toll_total.get(k, 0) + v
         with ThreadPoolExecutor(max_workers=len(cities)) as ex:
             labels = list(ex.map(lambda c: geocode_label(c, dadata_key), cities))
     except Exception as e:
@@ -698,7 +753,7 @@ def calc_multi(cities, dadata_key, gh_key, dsn):
     return {
         'statusCode': 200,
         'headers': {'Access-Control-Allow-Origin': '*'},
-        'body': json.dumps({'distance': total, 'special_km': special_total, 'crimea_km': crimea_total, 'segments': [r[0] for r in results], 'labels': labels})
+        'body': json.dumps({'distance': total, 'special_km': special_total, 'crimea_km': crimea_total, 'toll_km': toll_total, 'segments': [r[0] for r in results], 'labels': labels})
     }
 
 
@@ -849,7 +904,7 @@ def handler(event: dict, context) -> dict:
         return {
             'statusCode': 200,
             'headers': {'Access-Control-Allow-Origin': '*', 'Content-Type': 'application/json'},
-            'body': json.dumps({'distance': cached_km[0], 'special_km': cached_km[1]['new'], 'crimea_km': cached_km[1]['crimea'], 'cached': True})
+            'body': json.dumps({'distance': cached_km[0], 'special_km': cached_km[1]['new'], 'crimea_km': cached_km[1]['crimea'], 'toll_km': cached_km[2], 'cached': True})
         }
 
     try:
@@ -870,8 +925,9 @@ def handler(event: dict, context) -> dict:
         to_label = to_res[2] if len(to_res) > 2 else to_city
         approx = False
         special = dict(NO_ZONES)
+        toll = {}
         try:
-            dist, special = road_distance_full(from_coords, to_coords, gh_key)
+            dist, special, toll = road_distance_full(from_coords, to_coords, gh_key, with_toll=True)
         except Exception as ge:
             # Внешний маршрутизатор недоступен/исчерпал лимит — оцениваем
             # по прямой с типовым дорожным коэффициентом, чтобы клиент
@@ -898,7 +954,7 @@ def handler(event: dict, context) -> dict:
         dist = None
 
     if dist and not approx:
-        distance_to_cache(from_city, to_city, dist, dsn, source=CACHE_SOURCE, special_km=special)
+        distance_to_cache(from_city, to_city, dist, dsn, source=CACHE_SOURCE, special_km=special, toll=toll)
 
     return {
         'statusCode': 200,
@@ -907,6 +963,7 @@ def handler(event: dict, context) -> dict:
             'distance': dist,
             'special_km': special['new'] if dist else 0,
             'crimea_km': special['crimea'] if dist else 0,
+            'toll_km': toll if dist else {},
             'from_label': from_label,
             'to_label': to_label,
         })

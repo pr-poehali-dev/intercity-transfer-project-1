@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { TARIFFS, DELIVERY_OPTIONS, MINIVAN_SUBTARIFFS, CHILD_SEAT_PRICE, PET_OPTIONS, MIN_ORDER_PRICE, getRate, calcRideBase, NEW_REGIONS_MULTIPLIER, CRIMEA_MULTIPLIER, type ZoneKm } from "./constants";
+import { TARIFFS, DELIVERY_OPTIONS, MINIVAN_SUBTARIFFS, CHILD_SEAT_PRICE, PET_OPTIONS, MIN_ORDER_PRICE, getRate, calcRideBase, NEW_REGIONS_MULTIPLIER, CRIMEA_MULTIPLIER, type ZoneKm, calcToll, type TollKm } from "./constants";
 import { getDurationByDistance } from "./routesData";
 import CalculatorForm from "./CalculatorForm";
 import BookingModal from "./BookingModal";
@@ -43,6 +43,7 @@ interface CalculatorSectionProps {
   price: number | null;
   distance: number | null;
   zoneKm?: ZoneKm;
+  tollKm?: TollKm;
   routeLabels?: { from?: string; to?: string; points?: string[]; geoPoints?: string[] };
   calculated: boolean;
   calculating: boolean;
@@ -64,7 +65,7 @@ export default function CalculatorSection({
   minivanSub, setMinivanSub,
   date, setDate,
   time, setTime,
-  price, distance, zoneKm = { newKm: 0, crimeaKm: 0 }, routeLabels, calculated, calculating, distanceError, manualRequest,
+  price, distance, zoneKm = { newKm: 0, crimeaKm: 0 }, tollKm = {}, routeLabels, calculated, calculating, distanceError, manualRequest,
   onCalculate, onClose,
   sectionRef,
 }: CalculatorSectionProps) {
@@ -120,6 +121,8 @@ export default function CalculatorSection({
       if (normalKm > 0) services.push(`По России: ${normalKm} км × ${rate} ₽/км (обычный тариф)`);
     }
     if (zoneKm.newKm > 0) services.push(`ДНР/ЛНР/Запорожская/Херсонская: ${zoneKm.newKm} км × ${rate * NEW_REGIONS_MULTIPLIER} ₽/км (×${NEW_REGIONS_MULTIPLIER})`);
+    const toll = calcToll(tollKm);
+    if (toll.total > 0) services.push(`Платные дороги (примерно, оплачивает клиент отдельно): ~${toll.total} ₽ — ${toll.roads.map((r) => `${r.name} ${r.km} км`).join(", ")}`);
     if (zoneKm.crimeaKm > 0) services.push(`Крым/Севастополь: ${zoneKm.crimeaKm} км × ${rate * CRIMEA_MULTIPLIER} ₽/км (×${CRIMEA_MULTIPLIER})`);
     if (isDelivery) {
       services.push(`Доставка: ${DELIVERY_OPTIONS[deliveryMode].name} (${DELIVERY_OPTIONS[deliveryMode].pricePerKm} ₽/км)`);
@@ -212,7 +215,7 @@ export default function CalculatorSection({
           withChildren={withChildren} childrenCount={childrenCount}
           withPet={withPet} petOption={petOption}
           deliveryMode={deliveryMode} minivanSub={minivanSub}
-          price={price ?? 0} distance={distance} zoneKm={zoneKm}
+          price={price ?? 0} distance={distance} zoneKm={zoneKm} tollKm={tollKm}
           manualRequest={manualRequest}
           routeLabels={routeLabels}
           name={name} setName={setName}

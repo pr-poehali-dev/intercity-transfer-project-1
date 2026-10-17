@@ -6,11 +6,19 @@ type Pt = { lat: number; lon: number };
 
 function parsePoints(raw: string | null): Pt[] {
   if (!raw) return [];
-  return raw
-    .split("~")
-    .map((p) => p.split(",").map(Number))
-    .filter((p) => p.length === 2 && p.every((n) => Number.isFinite(n)))
-    .map(([lat, lon]) => ({ lat, lon }));
+  if (raw.includes("~") || raw.includes(",")) {
+    return raw
+      .split("~")
+      .map((p) => p.split(",").map(Number))
+      .filter((p) => p.length === 2 && p.every((n) => Number.isFinite(n)))
+      .map(([lat, lon]) => ({ lat, lon }));
+  }
+  const nums = raw.split("_").map(Number);
+  const out: Pt[] = [];
+  for (let i = 0; i + 1 < nums.length; i += 2) {
+    if (Number.isFinite(nums[i]) && Number.isFinite(nums[i + 1])) out.push({ lat: nums[i], lon: nums[i + 1] });
+  }
+  return out;
 }
 
 function naviLink(pts: Pt[]): string {
@@ -41,7 +49,7 @@ function webLink(pts: Pt[]): string {
 export default function Navi() {
   const params = useMemo(() => new URLSearchParams(window.location.search), []);
   const pts = useMemo(() => parsePoints(params.get("p")), [params]);
-  const names = (params.get("n") || "").split("~").filter(Boolean);
+  const names = (params.get("n") || "").split(/[~_]/).filter(Boolean);
   const ok = pts.length >= 2;
 
   useEffect(() => {

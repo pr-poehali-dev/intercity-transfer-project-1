@@ -30,6 +30,23 @@ function splitByZone(line: number[][], zones: string) {
   return parts;
 }
 
+async function fetchGeometry(cities: string[]): Promise<any> {
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      const res = await fetch(func2url["calc-distance"], {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ points: cities, geometry: true }),
+      });
+      const data = await res.json();
+      if (data?.line && data.line.length >= 2) return data;
+    } catch {
+      /* повторим */
+    }
+  }
+  return null;
+}
+
 export default function RouteMap({ points, labels, className = "" }: RouteMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<any>(null);
@@ -48,29 +65,48 @@ export default function RouteMap({ points, labels, className = "" }: RouteMapPro
 
     async function load() {
       try {
-        const [ymaps, res] = await Promise.all([
-          loadYandexMaps(),
-          fetch(func2url["calc-distance"], {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ points: cities, geometry: true }),
-          }).then((r) => r.json()),
-        ]);
+        const [ymaps, res] = await Promise.all([loadYandexMaps(), fetchGeometry(cities)]);
 
         if (cancelled || !containerRef.current) return;
 
         const line: number[][] | null = res?.line || null;
         const stops: number[][] | null = res?.stops || null;
 
-        if (!line || line.length < 2) {
-          setError(true);
-          setLoading(false);
-          return;
-        }
-
         if (mapRef.current) {
           mapRef.current.destroy();
           mapRef.current = null;
+        }
+
+        if (!line || line.length < 2) {
+          const fallbackMap = new ymaps.Map(
+            containerRef.current,
+            { center: [55.75, 37.62], zoom: 5, controls: ["zoomControl"] },
+            { suppressMapOpenBlock: true }
+          );
+          fallbackMap.behaviors.disable("scrollZoom");
+          mapRef.current = fallbackMap;
+          const multi = new ymaps.multiRouter.MultiRoute(
+            { referencePoints: cities, params: { routingMode: "auto", results: 1 } },
+            {
+              boundsAutoApply: true,
+              routeActiveStrokeColor: ACCENT,
+              routeActiveStrokeWidth: 6,
+              wayPointStartIconColor: ACCENT,
+              wayPointFinishIconColor: ACCENT,
+              viaPointIconFillColor: ACCENT,
+            }
+          );
+          multi.model.events.add("requestfail", () => {
+            if (!cancelled) {
+              setError(true);
+              setLoading(false);
+            }
+          });
+          multi.model.events.add("requestsuccess", () => {
+            if (!cancelled) setLoading(false);
+          });
+          fallbackMap.geoObjects.add(multi);
+          return;
         }
 
         const map = new ymaps.Map(

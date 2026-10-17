@@ -49,8 +49,10 @@ function webLink(pts: Pt[]): string {
 export default function Navi() {
   const params = useMemo(() => new URLSearchParams(window.location.search), []);
   const pts = useMemo(() => parsePoints(params.get("p")), [params]);
+  const stops = useMemo(() => (params.get("s") || "").split("_").map((x) => x.trim()).filter(Boolean), [params]);
   const names = (params.get("n") || "").split(/[~_]/).filter(Boolean);
-  const ok = pts.length >= 2;
+  const byCoords = pts.length >= 2;
+  const ok = byCoords || stops.length >= 2;
 
   useEffect(() => {
     document.title = "Маршрут поездки";
@@ -64,6 +66,9 @@ export default function Navi() {
     );
   }
 
+  const mapPoints = byCoords ? pts.map((p) => `${p.lat},${p.lon}`) : stops;
+  const labelsList = byCoords ? (names.length === pts.length ? names : undefined) : (names.length === stops.length ? names : undefined);
+  const textWebLink = `https://yandex.ru/maps/?mode=routes&rtt=auto&rtext=${stops.map((x) => encodeURIComponent(x)).join("~")}`;
   const btn = "flex items-center justify-center gap-2 w-full rounded-xl px-4 py-4 font-semibold text-base";
 
   return (
@@ -71,22 +76,26 @@ export default function Navi() {
       <div className="w-full max-w-2xl flex flex-col gap-3">
         <div className="text-xs font-display text-neon tracking-widest">МАРШРУТ ПОЕЗДКИ</div>
         <div className="font-display text-xl font-bold mb-2">
-          {names.length ? names.join(" → ") : `${pts.length} точки`}
+          {names.length ? names.join(" → ") : `${mapPoints.length} точки`}
         </div>
         <RouteMap
-          points={pts.map((p) => `${p.lat},${p.lon}`)}
-          labels={names.length === pts.length ? names : undefined}
+          points={mapPoints}
+          labels={labelsList}
           className="h-[55vh] min-h-[300px] mb-2"
         />
-        <a href={naviLink(pts)} className={`${btn} bg-neon text-background`}>
-          <Icon name="Navigation" size={18} />
-          Открыть в Навигаторе
-        </a>
-        <a href={mapsAppLink(pts)} className={`${btn} bg-surface border border-border text-foreground`}>
-          <Icon name="Map" size={18} />
-          Открыть в Яндекс Картах
-        </a>
-        <a href={webLink(pts)} target="_blank" rel="noreferrer" className={`${btn} bg-surface border border-border text-foreground`}>
+        {byCoords && (
+          <>
+            <a href={naviLink(pts)} className={`${btn} bg-neon text-background`}>
+              <Icon name="Navigation" size={18} />
+              Открыть в Навигаторе
+            </a>
+            <a href={mapsAppLink(pts)} className={`${btn} bg-surface border border-border text-foreground`}>
+              <Icon name="Map" size={18} />
+              Открыть в Яндекс Картах
+            </a>
+          </>
+        )}
+        <a href={byCoords ? webLink(pts) : textWebLink} target="_blank" rel="noreferrer" className={`${btn} bg-surface border border-border text-foreground`}>
           <Icon name="Globe" size={18} />
           Карта в браузере
         </a>

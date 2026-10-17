@@ -86,7 +86,11 @@ def handler(event: dict, context) -> dict:
             + '&n=' + '_'.join(quote(n.replace('_', ' '), safe='') for n in route_names)
         )
     else:
-        route_url = 'https://yandex.ru/maps/?mode=routes&rtt=auto&rtext=' + '~'.join(quote(x) for x in stops)
+        route_url = (
+            'https://nashe-transfer.ru/navi?s='
+            + '_'.join(quote(x.replace('_', ' '), safe='') for x in stops)
+            + '&n=' + '_'.join(quote(n.replace('_', ' '), safe='') for n in route_names)
+        )
 
     from_city = with_region(from_city, from_region)
     to_city = with_region(to_city, to_region)

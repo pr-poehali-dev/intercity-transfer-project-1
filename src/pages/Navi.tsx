@@ -1,6 +1,7 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Icon from "@/components/ui/icon";
 import RouteMap from "@/components/transfer/RouteMap";
+import func2url from "../../backend/func2url.json";
 
 type Pt = { lat: number; lon: number };
 
@@ -51,8 +52,33 @@ export default function Navi() {
   const pts = useMemo(() => parsePoints(params.get("p")), [params]);
   const stops = useMemo(() => (params.get("s") || "").split("_").map((x) => x.trim()).filter(Boolean), [params]);
   const names = (params.get("n") || "").split(/[~_]/).filter(Boolean);
-  const byCoords = pts.length >= 2;
-  const ok = byCoords || stops.length >= 2;
+  const [resolved, setResolved] = useState<Pt[]>([]);
+  const ok = pts.length >= 2 || stops.length >= 2;
+
+  useEffect(() => {
+    if (pts.length >= 2 || stops.length < 2) return;
+    let cancelled = false;
+    fetch(func2url["calc-distance"], {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ points: stops, coords_only: true }),
+    })
+      .then((r) => r.json())
+      .then((d) => {
+        if (cancelled || !Array.isArray(d?.coords)) return;
+        const list: Pt[] = d.coords
+          .filter((c: unknown) => Array.isArray(c) && c.length === 2)
+          .map((c: number[]) => ({ lat: c[0], lon: c[1] }));
+        if (list.length === stops.length) setResolved(list);
+      })
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
+  }, [pts, stops]);
+
+  const navPts = pts.length >= 2 ? pts : resolved;
+  const byCoords = navPts.length >= 2;
 
   useEffect(() => {
     document.title = "Маршрут поездки";
@@ -66,8 +92,8 @@ export default function Navi() {
     );
   }
 
-  const mapPoints = byCoords ? pts.map((p) => `${p.lat},${p.lon}`) : stops;
-  const labelsList = byCoords ? (names.length === pts.length ? names : undefined) : (names.length === stops.length ? names : undefined);
+  const mapPoints = pts.length >= 2 ? pts.map((p) => `${p.lat},${p.lon}`) : stops;
+  const labelsList = names.length === mapPoints.length ? names : undefined;
   const textWebLink = `https://yandex.ru/maps/?mode=routes&rtt=auto&rtext=${stops.map((x) => encodeURIComponent(x)).join("~")}`;
   const btn = "flex items-center justify-center gap-2 w-full rounded-xl px-4 py-4 font-semibold text-base";
 
@@ -85,17 +111,17 @@ export default function Navi() {
         />
         {byCoords && (
           <>
-            <a href={naviLink(pts)} className={`${btn} bg-neon text-background`}>
+            <a href={naviLink(navPts)} className={`${btn} bg-neon text-background`}>
               <Icon name="Navigation" size={18} />
               Открыть в Навигаторе
             </a>
-            <a href={mapsAppLink(pts)} className={`${btn} bg-surface border border-border text-foreground`}>
+            <a href={mapsAppLink(navPts)} className={`${btn} bg-surface border border-border text-foreground`}>
               <Icon name="Map" size={18} />
               Открыть в Яндекс Картах
             </a>
           </>
         )}
-        <a href={byCoords ? webLink(pts) : textWebLink} target="_blank" rel="noreferrer" className={`${btn} bg-surface border border-border text-foreground`}>
+        <a href={byCoords ? webLink(navPts) : textWebLink} target="_blank" rel="noreferrer" className={`${btn} bg-surface border border-border text-foreground`}>
           <Icon name="Globe" size={18} />
           Карта в браузере
         </a>

@@ -13,13 +13,14 @@ interface RouteMapProps {
 const ACCENT = "#ff9d0a";
 const NEW_ZONE_COLOR = "#e53935";
 const CRIMEA_ZONE_COLOR = "#8e44ef";
+const KURSK_ZONE_COLOR = "#1e88e5";
 
-type Zone = "n" | "c" | ".";
+type Zone = "n" | "c" | "k" | ".";
 
 function splitByZone(line: number[][], zones: string) {
   const parts: { zone: Zone; pts: number[][] }[] = [];
   for (let i = 0; i < line.length - 1; i++) {
-    const zone: Zone = zones[i] === "n" ? "n" : zones[i] === "c" ? "c" : ".";
+    const zone: Zone = zones[i] === "n" ? "n" : zones[i] === "c" ? "c" : zones[i] === "k" ? "k" : ".";
     const last = parts[parts.length - 1];
     if (last && last.zone === zone) {
       last.pts.push(line[i + 1]);
@@ -134,7 +135,7 @@ export default function RouteMap({ points, labels, className = "" }: RouteMapPro
         parts.forEach((p) => {
           map.geoObjects.add(
             new ymaps.Polyline(p.pts, {}, {
-              strokeColor: p.zone === "n" ? NEW_ZONE_COLOR : p.zone === "c" ? CRIMEA_ZONE_COLOR : ACCENT,
+              strokeColor: p.zone === "n" ? NEW_ZONE_COLOR : p.zone === "c" ? CRIMEA_ZONE_COLOR : p.zone === "k" ? KURSK_ZONE_COLOR : ACCENT,
               strokeWidth: p.zone === "." ? 5 : 6,
               strokeOpacity: 0.95,
             })

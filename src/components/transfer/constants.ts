@@ -140,8 +140,9 @@ export const QUICK_DATES = [
 // Особый тариф: множитель к цене за км, только для километров внутри регионов.
 export const NEW_REGIONS_MULTIPLIER = 3; // ДНР, ЛНР, Запорожская и Херсонская обл.
 export const CRIMEA_MULTIPLIER = 2; // Крым и Севастополь
+export const KURSK_SURCHARGE = 5; // Курская обл.: +5 ₽/км к тарифу
 
-export interface ZoneKm { newKm: number; crimeaKm: number }
+export interface ZoneKm { newKm: number; crimeaKm: number; kurskKm?: number }
 
 // Платные дороги: средняя цена за км по всей трассе для легкового авто (1 категория),
 // будни, днём, без транспондера. Посчитано из тарифов Автодора на 2026 год:
@@ -180,8 +181,9 @@ export function getRate(tariffIndex: number, minivanSub = 0, deliveryMode = 0, c
 export function calcRideBase(distance: number, zones: ZoneKm, rate: number): number {
   const nk = Math.min(Math.max(zones.newKm || 0, 0), distance);
   const ck = Math.min(Math.max(zones.crimeaKm || 0, 0), distance - nk);
-  const normal = distance - nk - ck;
-  const sum = normal * rate + nk * rate * NEW_REGIONS_MULTIPLIER + ck * rate * CRIMEA_MULTIPLIER;
+  const kk = Math.min(Math.max(zones.kurskKm || 0, 0), distance - nk - ck);
+  const normal = distance - nk - ck - kk;
+  const sum = normal * rate + nk * rate * NEW_REGIONS_MULTIPLIER + ck * rate * CRIMEA_MULTIPLIER + kk * (rate + KURSK_SURCHARGE);
   return Math.round((sum * getDistanceSurcharge(distance)) / PRICE_ROUND_STEP) * PRICE_ROUND_STEP;
 }
 

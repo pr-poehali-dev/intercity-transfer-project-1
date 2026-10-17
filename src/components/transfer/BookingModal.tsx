@@ -47,7 +47,7 @@ export default function BookingModal({
   from, via, to, date, time, roundTrip, tariff, passengers,
   withChildren, childrenCount, withPet, petOption,
   deliveryMode, minivanSub, chooseCar = false,
-  price, distance, zoneKm = { newKm: 0, crimeaKm: 0 }, tollKm = {}, manualRequest, routeLabels,
+  price, distance, zoneKm = { newKm: 0, crimeaKm: 0, kurskKm: 0 }, tollKm = {}, manualRequest, routeLabels,
   name, setName, phone, handlePhoneChange, isPhoneValid,
   comment, setComment,
   sending, sent, error, validationError,
@@ -145,18 +145,24 @@ export default function BookingModal({
                   </div>
                 )}
 
-                {(zoneKm.newKm > 0 || zoneKm.crimeaKm > 0) && (
+                {(zoneKm.newKm > 0 || zoneKm.crimeaKm > 0 || (zoneKm.kurskKm || 0) > 0) && (
                   <div className="flex flex-col gap-1 bg-neon/10 border border-neon/40 rounded-lg px-3 py-2 mb-3 text-xs text-foreground font-medium">
-                    {distance != null && distance - zoneKm.newKm - zoneKm.crimeaKm > 0 && (
+                    {distance != null && distance - zoneKm.newKm - zoneKm.crimeaKm - (zoneKm.kurskKm || 0) > 0 && (
                       <div className="flex items-center gap-2">
                         <Icon name="MapPin" size={13} className="flex-shrink-0 text-muted-foreground" />
-                        {distance - zoneKm.newKm - zoneKm.crimeaKm} км по России
+                        {distance - zoneKm.newKm - zoneKm.crimeaKm - (zoneKm.kurskKm || 0)} км по России
                       </div>
                     )}
                     {zoneKm.newKm > 0 && (
                       <div className="flex items-center gap-2">
                         <Icon name="MapPin" size={13} className="flex-shrink-0 text-neon" />
                         {zoneKm.newKm} км по ДНР, ЛНР, Запорожской и Херсонской обл.
+                      </div>
+                    )}
+                    {(zoneKm.kurskKm || 0) > 0 && (
+                      <div className="flex items-center gap-2">
+                        <Icon name="MapPin" size={13} className="flex-shrink-0 text-neon" />
+                        {zoneKm.kurskKm} км по Курской обл. (+5 ₽/км)
                       </div>
                     )}
                     {zoneKm.crimeaKm > 0 && (

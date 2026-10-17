@@ -37,7 +37,7 @@ export default function Index() {
   const [chooseCar, setChooseCar] = useState(false);
   const [price, setPrice] = useState<number | null>(null);
   const [distance, setDistance] = useState<number | null>(null);
-  const [zoneKm, setZoneKm] = useState<ZoneKm>({ newKm: 0, crimeaKm: 0 });
+  const [zoneKm, setZoneKm] = useState<ZoneKm>({ newKm: 0, crimeaKm: 0, kurskKm: 0 });
   const [tollKm, setTollKm] = useState<TollKm>({});
   const [calculated, setCalculated] = useState(false);
   const [calculating, setCalculating] = useState(false);
@@ -128,7 +128,7 @@ export default function Index() {
     return sum;
   }
 
-  function priceFromDistance(dist: number, isRoundTrip = false, zones: ZoneKm = { newKm: 0, crimeaKm: 0 }) {
+  function priceFromDistance(dist: number, isRoundTrip = false, zones: ZoneKm = { newKm: 0, crimeaKm: 0, kurskKm: 0 }) {
     const isDelivery = TARIFFS[tariff].isDelivery;
     const rate = getRate(tariff, minivanSub, deliveryMode, chooseCar);
     const extras = isDelivery ? 0 : extrasTotal();
@@ -153,7 +153,7 @@ export default function Index() {
         setRouteLabels({ from: data.from_label, to: data.to_label });
       }
       if (typeof data.distance === "number" && data.distance > 0) {
-        return { km: data.distance, zones: { newKm: Number(data.special_km) || 0, crimeaKm: Number(data.crimea_km) || 0 }, toll: data.toll_km || {} };
+        return { km: data.distance, zones: { newKm: Number(data.special_km) || 0, crimeaKm: Number(data.crimea_km) || 0, kurskKm: Number(data.kursk_km) || 0 }, toll: data.toll_km || {} };
       }
     } catch { /* no fallback */ }
     return null;
@@ -172,7 +172,7 @@ export default function Index() {
         setRouteLabels({ points: data.labels });
       }
       if (typeof data.distance === "number" && data.distance > 0) {
-        return { km: data.distance, zones: { newKm: Number(data.special_km) || 0, crimeaKm: Number(data.crimea_km) || 0 }, toll: data.toll_km || {} };
+        return { km: data.distance, zones: { newKm: Number(data.special_km) || 0, crimeaKm: Number(data.crimea_km) || 0, kurskKm: Number(data.kursk_km) || 0 }, toll: data.toll_km || {} };
       }
     } catch { /* no fallback */ }
     return null;
@@ -206,7 +206,7 @@ export default function Index() {
     if (result === null) {
       setPrice(null);
       setDistance(null);
-      setZoneKm({ newKm: 0, crimeaKm: 0 });
+      setZoneKm({ newKm: 0, crimeaKm: 0, kurskKm: 0 });
       setTollKm({});
       setCalculated(false);
       setDistanceError(true);
@@ -219,7 +219,7 @@ export default function Index() {
     setRouteLabels((prev) => ({ ...prev, geoPoints }));
     let totalDist = result.km;
     const k = roundTrip ? 2 : 1;
-    const zones: ZoneKm = { newKm: result.zones.newKm * k, crimeaKm: result.zones.crimeaKm * k };
+    const zones: ZoneKm = { newKm: result.zones.newKm * k, crimeaKm: result.zones.crimeaKm * k, kurskKm: (result.zones.kurskKm || 0) * k };
     if (roundTrip) totalDist *= 2;
     setPrice(priceFromDistance(totalDist, roundTrip, zones) + (hasViaStop ? 1000 : 0));
     setDistance(totalDist);

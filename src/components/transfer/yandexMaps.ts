@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import func2url from "../../../backend/func2url.json";
+import { YANDEX_MAPS_KEY } from "./yandexKey";
 
 declare global {
   interface Window {
@@ -10,6 +11,7 @@ declare global {
 let loaderPromise: Promise<any> | null = null;
 
 async function fetchKey(): Promise<string> {
+  if (YANDEX_MAPS_KEY) return YANDEX_MAPS_KEY;
   const res = await fetch(func2url["yandex-key"]);
   const data: { key?: string } = await res.json();
   if (!data.key) throw new Error("Yandex Maps API key is not configured");

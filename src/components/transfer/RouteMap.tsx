@@ -32,8 +32,11 @@ function splitByZone(line: number[][], zones: string) {
 
 async function fetchGeometry(cities: string[]): Promise<any> {
   for (let attempt = 0; attempt < 2; attempt++) {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 7000);
     try {
       const res = await fetch(func2url["calc-distance"], {
+        signal: ctrl.signal,
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ points: cities, geometry: true }),
@@ -42,7 +45,10 @@ async function fetchGeometry(cities: string[]): Promise<any> {
       if (data?.line && data.line.length >= 2) return data;
     } catch {
       /* повторим */
+    } finally {
+      clearTimeout(timer);
     }
+    if (ctrl.signal.aborted) break;
   }
   return null;
 }

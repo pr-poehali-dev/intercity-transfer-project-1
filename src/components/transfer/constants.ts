@@ -14,10 +14,10 @@ export const TRUST_BADGES = [
 ];
 
 export const TARIFFS = [
-  { name: "Эконом",    pricePerKm: 33, icon: "Car",       desc: "Комфортный седан",    maxPassengers: 4,  isDelivery: false, isMinivan: false, popular: true },
-  { name: "Комфорт",  pricePerKm: 38, icon: "Star",      desc: "Повышенный комфорт",  maxPassengers: 4,  isDelivery: false, isMinivan: false, popular: false },
+  { name: "Эконом",    pricePerKm: 35, icon: "Car",       desc: "Комфортный седан",    maxPassengers: 4,  isDelivery: false, isMinivan: false, popular: true },
+  { name: "Комфорт",  pricePerKm: 40, icon: "Star",      desc: "Повышенный комфорт",  maxPassengers: 4,  isDelivery: false, isMinivan: false, popular: false },
   { name: "Бизнес",   pricePerKm: 71, icon: "Gem",       desc: "Премиум класс",       maxPassengers: 4,  isDelivery: false, isMinivan: false, popular: false },
-  { name: "Универсал",pricePerKm: 41, icon: "Truck",     desc: "Везите больше",       maxPassengers: 4,  isDelivery: false, isMinivan: false, popular: false },
+  { name: "Универсал",pricePerKm: 37, icon: "Truck",     desc: "Везите больше",       maxPassengers: 4,  isDelivery: false, isMinivan: false, popular: false },
   { name: "Минивэн",  pricePerKm: 0,  icon: "Bus",       desc: "Выберите вместимость",maxPassengers: 10, isDelivery: false, isMinivan: true,  popular: false },
   { name: "Доставка", pricePerKm: 16, icon: "Package",   desc: "Грузы и посылки",     maxPassengers: 0,  isDelivery: true,  isMinivan: false, popular: false },
 ];
@@ -29,13 +29,15 @@ export const MINIVAN_SUBTARIFFS = [
 ];
 
 export const DELIVERY_OPTIONS = [
-  { name: "Попутная", pricePerKm: 16, desc: "Вместе с другим заказом", icon: "PackageSearch" },
-  { name: "Срочная", pricePerKm: 31, desc: "Отдельный рейс", icon: "Zap" },
+  { name: "Попутная", pricePerKm: 20, desc: "Вместе с другим заказом", icon: "PackageSearch" },
+  { name: "Срочная", pricePerKm: 33, desc: "Отдельный рейс", icon: "Zap" },
 ];
 
 export const CHILD_SEAT_PRICE = 500;
 
 export const MIN_ORDER_PRICE = 5000;
+
+export const PRICE_ROUND_STEP = 100;
 
 export const PET_OPTIONS = [
   { label: "До 5 кг", price: 500 },
@@ -160,7 +162,7 @@ export function calcToll(toll: TollKm): { total: number; roads: { name: string; 
     .filter(([, km]) => km > 0)
     .map(([name, km]) => {
       const rate = TOLL_RATES[name] ?? TOLL_RATE_DEFAULT;
-      return { name: name === "other" ? "прочие платные участки" : name === "А-113" ? "ЦКАД" : name, km, cost: Math.round((km * rate) / 50) * 50 };
+      return { name: name === "other" ? "прочие платные участки" : name === "А-113" ? "ЦКАД" : name, km, cost: Math.round((km * rate) / PRICE_ROUND_STEP) * PRICE_ROUND_STEP };
     })
     .sort((a, b) => b.km - a.km);
   const total = roads.reduce((s, r) => s + r.cost, 0);
@@ -180,11 +182,11 @@ export function calcRideBase(distance: number, zones: ZoneKm, rate: number): num
   const ck = Math.min(Math.max(zones.crimeaKm || 0, 0), distance - nk);
   const normal = distance - nk - ck;
   const sum = normal * rate + nk * rate * NEW_REGIONS_MULTIPLIER + ck * rate * CRIMEA_MULTIPLIER;
-  return Math.round((sum * getDistanceSurcharge(distance)) / 50) * 50;
+  return Math.round((sum * getDistanceSurcharge(distance)) / PRICE_ROUND_STEP) * PRICE_ROUND_STEP;
 }
 
 export function calcRoutePrice(distance: number, pricePerKm: number): number {
-  const price = Math.round((distance * pricePerKm * getDistanceSurcharge(distance)) / 50) * 50;
+  const price = Math.round((distance * pricePerKm * getDistanceSurcharge(distance)) / PRICE_ROUND_STEP) * PRICE_ROUND_STEP;
   return Math.max(price, MIN_ORDER_PRICE);
 }
 

@@ -7,7 +7,7 @@ import CalculatorSection from "@/components/transfer/CalculatorSection";
 import PopularRoutesSection from "@/components/transfer/PopularRoutesSection";
 import FeaturedRoutesCarousel from "@/components/transfer/FeaturedRoutesCarousel";
 import ContactsSection from "@/components/transfer/ContactsSection";
-import { TARIFFS, MINIVAN_SUBTARIFFS, CHILD_SEAT_PRICE, PET_OPTIONS, MIN_ORDER_PRICE, getRate, calcRideBase, type ZoneKm, type TollKm } from "@/components/transfer/constants";
+import { TARIFFS, MINIVAN_SUBTARIFFS, CHILD_SEAT_PRICE, PET_OPTIONS, MIN_ORDER_PRICE, PRICE_ROUND_STEP, getRate, calcRideBase, type ZoneKm, type TollKm } from "@/components/transfer/constants";
 import { resolveCity, resolveGeocodeQuery } from "@/components/transfer/regions";
 import HowItWorks from "@/components/transfer/HowItWorks";
 import GallerySection from "@/components/transfer/GallerySection";
@@ -133,7 +133,7 @@ export default function Index() {
     const rate = getRate(tariff, minivanSub, deliveryMode, chooseCar);
     const extras = isDelivery ? 0 : extrasTotal();
     let base = calcRideBase(dist, zones, rate);
-    if (isRoundTrip) base = Math.round((base * 0.95) / 50) * 50;
+    if (isRoundTrip) base = Math.round((base * 0.95) / PRICE_ROUND_STEP) * PRICE_ROUND_STEP;
     const total = base + extras;
     return Math.max(total, MIN_ORDER_PRICE);
   }

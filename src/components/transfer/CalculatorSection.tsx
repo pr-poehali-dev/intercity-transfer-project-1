@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { CHOOSE_CAR_SURCHARGE, TARIFFS, DELIVERY_OPTIONS, MINIVAN_SUBTARIFFS, CHILD_SEAT_PRICE, PET_OPTIONS, MIN_ORDER_PRICE, getRate, calcRideBase, NEW_REGIONS_MULTIPLIER, CRIMEA_MULTIPLIER, type ZoneKm, calcToll, type TollKm } from "./constants";
+import { CHOOSE_CAR_SURCHARGE, TARIFFS, DELIVERY_OPTIONS, MINIVAN_SUBTARIFFS, CHILD_SEAT_PRICE, PET_OPTIONS, MIN_ORDER_PRICE, PRICE_ROUND_STEP, getRate, calcRideBase, NEW_REGIONS_MULTIPLIER, CRIMEA_MULTIPLIER, type ZoneKm, calcToll, type TollKm } from "./constants";
 import { getDurationByDistance } from "./routesData";
 import CalculatorForm from "./CalculatorForm";
 import BookingModal from "./BookingModal";
@@ -111,7 +111,7 @@ export default function CalculatorSection({
     const rideBase = distance ? calcRideBase(distance, zoneKm, rate) : 0;
     const finalPrice = distance
       ? Math.max(
-          (roundTrip ? Math.round((rideBase * 0.95) / 50) * 50 : rideBase) + extras,
+          (roundTrip ? Math.round((rideBase * 0.95) / PRICE_ROUND_STEP) * PRICE_ROUND_STEP : rideBase) + extras,
           MIN_ORDER_PRICE
         )
       : price;

@@ -14,6 +14,7 @@ import NotFound from "./pages/NotFound";
 import Navi from "./pages/Navi";
 import InstallPage from "./pages/InstallPage";
 import InstallAppBanner from "./components/transfer/InstallApp";
+import OfflineBanner from "./components/transfer/OfflineBanner";
 import func2url from "../backend/func2url.json";
 
 function YmlRedirect() {
@@ -47,6 +48,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <ScrollToTop />
+        <OfflineBanner />
         <InstallAppBanner />
         <Routes>
           <Route path="/" element={<Index />} />

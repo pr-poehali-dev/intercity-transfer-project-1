@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { CHOOSE_CAR_SURCHARGE, TARIFFS, DELIVERY_OPTIONS, MINIVAN_SUBTARIFFS, CHILD_SEAT_PRICE, PET_OPTIONS, MIN_ORDER_PRICE, PRICE_ROUND_STEP, getRate, calcRideBase, KURSK_SURCHARGE, NEW_REGIONS_MULTIPLIER, CRIMEA_MULTIPLIER, type ZoneKm, calcToll, type TollKm } from "./constants";
+import { CHOOSE_CAR_SURCHARGE, TARIFFS, DELIVERY_OPTIONS, MINIVAN_SUBTARIFFS, CHILD_SEAT_PRICE, PET_OPTIONS, MIN_ORDER_PRICE, PRICE_ROUND_STEP, getRate, calcRideBase, NEW_REGIONS_MULTIPLIER, CRIMEA_MULTIPLIER, type ZoneKm, calcToll, type TollKm } from "./constants";
 import { getDurationByDistance } from "./routesData";
 import CalculatorForm from "./CalculatorForm";
 import BookingModal from "./BookingModal";
@@ -120,16 +120,14 @@ export default function CalculatorSection({
       : t.name;
     const services: string[] = [];
     if (chooseCar && !isDelivery) services.push(`Клиент выберет автомобиль сам из предложенных вариантов (+${CHOOSE_CAR_SURCHARGE} ₽/км)`);
-    const kurskKm = zoneKm.kurskKm || 0;
-    if (distance && (zoneKm.newKm > 0 || zoneKm.crimeaKm > 0 || kurskKm > 0)) {
-      const normalKm = distance - zoneKm.newKm - zoneKm.crimeaKm - kurskKm;
-      if (normalKm > 0) services.push(`По России: ${normalKm} км × ${rate} ₽/км (обычный тариф)`);
+    if (distance && (zoneKm.newKm > 0 || zoneKm.crimeaKm > 0)) {
+      const normalKm = distance - zoneKm.newKm - zoneKm.crimeaKm;
+      if (normalKm > 0) services.push(`По России: ${normalKm} км`);
     }
-    if (zoneKm.newKm > 0) services.push(`ДНР/ЛНР/Запорожская/Херсонская: ${zoneKm.newKm} км × ${rate * NEW_REGIONS_MULTIPLIER} ₽/км (×${NEW_REGIONS_MULTIPLIER})`);
+    if (zoneKm.newKm > 0) services.push(`ДНР/ЛНР/Зап./Херс.: ${zoneKm.newKm} км × ${rate * NEW_REGIONS_MULTIPLIER} ₽/км (×${NEW_REGIONS_MULTIPLIER})`);
     const toll = calcToll(tollKm);
     if (toll.total > 0) services.push(`Платные дороги (примерно, оплачивает клиент отдельно): ~${toll.total} ₽ — ${toll.roads.map((r) => `${r.name} ${r.km} км`).join(", ")}`);
-    if (kurskKm > 0) services.push(`Курская обл.: ${kurskKm} км × ${rate + KURSK_SURCHARGE} ₽/км (+${KURSK_SURCHARGE} ₽/км)`);
-    if (zoneKm.crimeaKm > 0) services.push(`Крым/Севастополь: ${zoneKm.crimeaKm} км × ${rate * CRIMEA_MULTIPLIER} ₽/км (×${CRIMEA_MULTIPLIER})`);
+    if (zoneKm.crimeaKm > 0) services.push(`Крым/Сев.: ${zoneKm.crimeaKm} км × ${rate * CRIMEA_MULTIPLIER} ₽/км (×${CRIMEA_MULTIPLIER})`);
     if (isDelivery) {
       services.push(`Доставка: ${DELIVERY_OPTIONS[deliveryMode].name} (${DELIVERY_OPTIONS[deliveryMode].pricePerKm} ₽/км)`);
     } else {

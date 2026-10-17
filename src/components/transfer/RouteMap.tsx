@@ -52,6 +52,7 @@ export default function RouteMap({ points, labels, className = "" }: RouteMapPro
   const mapRef = useRef<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [attempt, setAttempt] = useState(0);
 
   const key = points.filter(Boolean).join("|");
 
@@ -156,7 +157,8 @@ export default function RouteMap({ points, labels, className = "" }: RouteMapPro
         });
 
         if (!cancelled) setLoading(false);
-      } catch {
+      } catch (e) {
+        console.error("[RouteMap] load error", e);
         if (!cancelled) {
           setError(true);
           setLoading(false);
@@ -169,7 +171,7 @@ export default function RouteMap({ points, labels, className = "" }: RouteMapPro
       cancelled = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [key]);
+  }, [key, attempt]);
 
   useEffect(() => {
     return () => {
@@ -198,6 +200,14 @@ export default function RouteMap({ points, labels, className = "" }: RouteMapPro
           <div className="flex flex-col items-center gap-1 text-sm text-muted-foreground">
             <Icon name="MapPinOff" size={22} className="text-muted-foreground" />
             Не удалось построить маршрут на карте
+            <button
+              type="button"
+              onClick={() => setAttempt((a) => a + 1)}
+              className="mt-2 inline-flex items-center gap-1.5 rounded-lg bg-neon text-background font-semibold px-3 py-1.5"
+            >
+              <Icon name="RefreshCw" size={14} />
+              Повторить
+            </button>
           </div>
         </div>
       )}

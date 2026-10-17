@@ -172,7 +172,7 @@ export default function CalculatorForm({
                   ХИТ
                 </div>
               )}
-              <Icon name={t.icon as IconName} size={18} className={`mx-auto mb-1 ${tariff === i ? "text-neon" : t.popular ? "text-neon/70" : ""}`} />
+              <img src={t.image} alt={t.name} loading="lazy" className={`w-full aspect-[16/9] object-cover rounded-lg mb-1.5 transition-opacity ${tariff === i ? "opacity-100" : "opacity-80"}`} />
               <div className="font-display text-sm sm:text-base font-semibold leading-tight">{t.name}</div>
               <div className="text-[11px] sm:text-xs opacity-70 leading-tight mt-0.5">{t.desc}</div>
             </button>
@@ -196,7 +196,7 @@ export default function CalculatorForm({
                     : "border-border bg-background text-muted-foreground hover:border-white/30"
                 }`}
               >
-                <Icon name="Users" size={18} className={`mx-auto mb-1.5 ${minivanSub === i ? "text-neon" : ""}`} />
+                <img src={s.image} alt={s.name} loading="lazy" className="w-full aspect-[16/9] object-cover rounded-lg mb-1.5" />
                 <div className="font-display text-sm font-semibold leading-tight">{s.name}</div>
                 <div className="text-[11px] opacity-70 mt-0.5">{s.desc}</div>
               </button>

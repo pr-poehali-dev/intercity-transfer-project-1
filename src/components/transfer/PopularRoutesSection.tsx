@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Icon from "@/components/ui/icon";
 import { ROUTES_WITH_DURATION as ROUTES } from "./routesData";
-import { TARIFFS, MINIVAN_SUBTARIFFS, getTariffPrice, localDateStr, QUICK_DATES, type IconName } from "./constants";
+import { TARIFFS, MINIVAN_SUBTARIFFS, getTariffPrice, localDateStr, QUICK_DATES } from "./constants";
 
 const GROUPS = [
   { label: "Из Москвы", filter: (slug: string) => slug.startsWith("moskva-") },
@@ -199,7 +199,7 @@ export default function PopularRoutesSection() {
                             : "border-border hover:border-neon hover:bg-neon/5"
                         }`}
                       >
-                        <Icon name={t.icon as IconName} size={15} className="text-neon flex-shrink-0" />
+                        <img src={t.image} alt={t.name} loading="lazy" className="w-12 h-8 object-cover rounded flex-shrink-0" />
                         <span className="font-display text-sm font-semibold truncate flex-1">{t.name}</span>
                         {t.popular && !tooSmall && (
                           <span className="bg-neon text-background text-[9px] font-display font-bold px-1.5 py-0.5 rounded flex-shrink-0">ХИТ</span>

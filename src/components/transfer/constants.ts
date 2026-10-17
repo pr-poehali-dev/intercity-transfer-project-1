@@ -14,18 +14,18 @@ export const TRUST_BADGES = [
 ];
 
 export const TARIFFS = [
-  { name: "Эконом",    pricePerKm: 35, icon: "Car",       desc: "Комфортный седан",    maxPassengers: 4,  isDelivery: false, isMinivan: false, popular: true },
-  { name: "Комфорт",  pricePerKm: 40, icon: "Star",      desc: "Повышенный комфорт",  maxPassengers: 4,  isDelivery: false, isMinivan: false, popular: false },
-  { name: "Бизнес",   pricePerKm: 71, icon: "Gem",       desc: "Премиум класс",       maxPassengers: 4,  isDelivery: false, isMinivan: false, popular: false },
-  { name: "Универсал",pricePerKm: 37, icon: "Truck",     desc: "Везите больше",       maxPassengers: 4,  isDelivery: false, isMinivan: false, popular: false },
-  { name: "Минивэн",  pricePerKm: 0,  icon: "Bus",       desc: "Выберите вместимость",maxPassengers: 10, isDelivery: false, isMinivan: true,  popular: false },
-  { name: "Доставка", pricePerKm: 16, icon: "Package",   desc: "Грузы и посылки",     maxPassengers: 0,  isDelivery: true,  isMinivan: false, popular: false },
+  { name: "Эконом",    pricePerKm: 35, icon: "Car",       desc: "Комфортный седан",    maxPassengers: 4,  isDelivery: false, isMinivan: false, popular: true, image: "https://cdn.poehali.dev/projects/62498eaa-31ad-4421-848c-bf54bb4f1b4a/files/6e01eb79-b40f-4b80-8dd4-2da773defa7f.jpg" },
+  { name: "Комфорт",  pricePerKm: 40, icon: "Star",      desc: "Повышенный комфорт",  maxPassengers: 4,  isDelivery: false, isMinivan: false, popular: false, image: "https://cdn.poehali.dev/projects/62498eaa-31ad-4421-848c-bf54bb4f1b4a/files/73680ff5-cd51-4596-aeef-e973f483cfff.jpg" },
+  { name: "Бизнес",   pricePerKm: 71, icon: "Gem",       desc: "Премиум класс",       maxPassengers: 4,  isDelivery: false, isMinivan: false, popular: false, image: "https://cdn.poehali.dev/projects/62498eaa-31ad-4421-848c-bf54bb4f1b4a/files/9607ef12-7a22-4e7e-8aef-d7a39eb57b99.jpg" },
+  { name: "Универсал",pricePerKm: 37, icon: "Truck",     desc: "Везите больше",       maxPassengers: 4,  isDelivery: false, isMinivan: false, popular: false, image: "https://cdn.poehali.dev/projects/62498eaa-31ad-4421-848c-bf54bb4f1b4a/files/86bc9e53-a05a-4fab-acb5-7555cc2b726b.jpg" },
+  { name: "Минивэн",  pricePerKm: 0,  icon: "Bus",       desc: "Выберите вместимость",maxPassengers: 10, isDelivery: false, isMinivan: true,  popular: false, image: "https://cdn.poehali.dev/projects/62498eaa-31ad-4421-848c-bf54bb4f1b4a/files/61e6a981-8425-4491-8ee5-7b3df43686ed.jpg" },
+  { name: "Доставка", pricePerKm: 20, icon: "Package",   desc: "Грузы и посылки",     maxPassengers: 0,  isDelivery: true,  isMinivan: false, popular: false, image: "https://cdn.poehali.dev/projects/62498eaa-31ad-4421-848c-bf54bb4f1b4a/files/97243112-ba65-40a2-9278-390c8254d207.jpg" },
 ];
 
 export const MINIVAN_SUBTARIFFS = [
-  { name: "Компакт вэн", seats: 5,  pricePerKm: 46, desc: "до 5 мест" },
-  { name: "Минивэн",     seats: 7,  pricePerKm: 56, desc: "до 7 мест" },
-  { name: "Минивэн XL",  seats: 10, pricePerKm: 66, desc: "до 10 мест" },
+  { name: "Компакт вэн", seats: 5,  pricePerKm: 46, desc: "до 5 мест", image: "https://cdn.poehali.dev/projects/62498eaa-31ad-4421-848c-bf54bb4f1b4a/files/6fb87bb6-0725-49de-aacb-373dd259ecd6.jpg" },
+  { name: "Минивэн",     seats: 7,  pricePerKm: 56, desc: "до 7 мест", image: "https://cdn.poehali.dev/projects/62498eaa-31ad-4421-848c-bf54bb4f1b4a/files/61e6a981-8425-4491-8ee5-7b3df43686ed.jpg" },
+  { name: "Минивэн XL",  seats: 10, pricePerKm: 66, desc: "до 10 мест", image: "https://cdn.poehali.dev/projects/62498eaa-31ad-4421-848c-bf54bb4f1b4a/files/1f9ba3d9-a698-40fe-9d51-e95fc3790e63.jpg" },
 ];
 
 export const DELIVERY_OPTIONS = [

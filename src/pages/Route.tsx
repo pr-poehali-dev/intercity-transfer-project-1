@@ -202,7 +202,7 @@ export default function RoutePage() {
                     ХИТ
                   </div>
                 )}
-                <Icon name={t.icon as "Car"} size={24} className="text-neon mx-auto mb-2" />
+                <img src={t.image} alt={t.name} loading="lazy" className="w-full aspect-[16/9] object-cover rounded-lg mb-3" />
                 <div className="font-display text-base font-bold mb-1 truncate">{t.name}</div>
                 <div className="text-xs text-muted-foreground mb-2 truncate">{t.desc}</div>
                 <div className="font-display text-lg text-neon font-bold truncate">
@@ -233,7 +233,8 @@ export default function RoutePage() {
                         m.seats < pax ? "opacity-35 cursor-not-allowed" : "hover:border-neon hover:bg-neon/5"
                       }`}
                     >
-                      <div className="min-w-0">
+                      <img src={m.image} alt={m.name} loading="lazy" className="w-14 h-9 object-cover rounded flex-shrink-0" />
+                      <div className="min-w-0 flex-1">
                         <div className="font-display text-sm font-semibold truncate">{m.name}</div>
                         <div className="text-[11px] text-muted-foreground truncate">{m.desc}</div>
                       </div>

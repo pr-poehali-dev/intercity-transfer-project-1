@@ -9,6 +9,7 @@ interface NavbarProps {
 
 const MENU = [
   { to: "/#calc", label: "Калькулятор", icon: "Calculator" },
+  { to: "/tarify", label: "Тарифы", icon: "Wallet" },
   { to: "/#routes", label: "Маршруты", icon: "MapPin" },
   { to: "/#how", label: "Как это работает", icon: "CheckCircle" },
   { to: "/#about", label: "О нас", icon: "Shield" },
@@ -18,7 +19,7 @@ const MENU = [
 ] as const;
 
 const DESKTOP_MENU = MENU.filter((m) =>
-  ["/#calc", "/#routes", "/otzyvy", "/#contacts"].includes(m.to)
+  ["/#calc", "/tarify", "/#routes", "/otzyvy", "/#contacts"].includes(m.to)
 );
 
 export default function Navbar({ onBookClick }: NavbarProps) {

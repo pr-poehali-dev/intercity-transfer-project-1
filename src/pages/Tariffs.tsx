@@ -1,4 +1,5 @@
 import Icon from "@/components/ui/icon";
+import Navbar from "@/components/transfer/Navbar";
 import {
   TARIFFS,
   MINIVAN_SUBTARIFFS,
@@ -41,7 +42,8 @@ export default function Tariffs() {
   const cars = TARIFFS.filter((t) => !t.isMinivan && !t.isDelivery);
 
   return (
-    <div className="min-h-screen bg-background text-foreground px-4 py-8">
+    <div className="min-h-screen bg-background text-foreground px-4 pt-24 pb-8">
+      <Navbar />
       <div className="max-w-3xl mx-auto">
         <div className="text-center mb-6">
           <h1 className="font-display font-bold text-3xl uppercase tracking-wide">

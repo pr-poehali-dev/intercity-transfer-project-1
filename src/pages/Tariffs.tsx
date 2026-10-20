@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import Icon from "@/components/ui/icon";
 import Navbar from "@/components/transfer/Navbar";
 import {
@@ -98,6 +99,16 @@ export default function Tariffs() {
         <p className="text-center text-xs text-muted-foreground mt-5">
           Платные дороги оплачиваются клиентом отдельно
         </p>
+
+        <div className="flex justify-center mt-6">
+          <Link
+            to="/#calc"
+            className="inline-flex items-center gap-2 bg-neon text-background font-display font-bold text-base px-8 py-4 rounded-xl hover:opacity-90 transition-all glow-neon hover:scale-[1.02] active:scale-[0.98]"
+          >
+            <Icon name="Calculator" size={18} />
+            РАССЧИТАТЬ ПОЕЗДКУ
+          </Link>
+        </div>
       </div>
     </div>
   );

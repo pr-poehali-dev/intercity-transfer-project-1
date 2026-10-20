@@ -75,7 +75,7 @@ export default function Tariffs() {
               <Row key={p.label} name={`Животное ${p.label.toLowerCase()}`} price={`${fmt(p.price)} ₽`} />
             ))}
             <Row name="Выбор автомобиля" note="из предложенных вариантов" price={`+${CHOOSE_CAR_SURCHARGE} ₽/км`} />
-            <Row name="Промежуточная остановка" price="1 000 ₽" />
+            <Row name="Промежуточная остановка" price="бесплатно" />
           </Block>
 
           <Block title="Особые регионы" icon="MapPin">

@@ -236,7 +236,7 @@ export default function Index() {
     const k = roundTrip ? 2 : 1;
     const zones: ZoneKm = { newKm: result.zones.newKm * k, crimeaKm: result.zones.crimeaKm * k, kurskKm: (result.zones.kurskKm || 0) * k };
     if (roundTrip) totalDist *= 2;
-    setPrice(priceFromDistance(totalDist, roundTrip, zones) + (hasViaStop ? 1000 : 0));
+    setPrice(priceFromDistance(totalDist, roundTrip, zones));
     setDistance(totalDist);
     setZoneKm(zones);
     setTollKm(Object.fromEntries(Object.entries(result.toll).map(([r, km]) => [r, km * k])));

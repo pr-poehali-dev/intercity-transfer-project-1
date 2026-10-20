@@ -140,15 +140,35 @@ export default function Index() {
 
   type DistResult = { km: number; zones: ZoneKm; toll: TollKm };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  async function postCalc(body: object): Promise<any | null> {
+    for (let attempt = 0; attempt < 3; attempt++) {
+      const ctrl = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), 12000);
+      try {
+        const res = await fetch(func2url["calc-distance"], {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+          signal: ctrl.signal,
+          cache: "no-store",
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (typeof data?.distance === "number" && data.distance > 0) return data;
+        }
+      } catch { /* повторим */ } finally {
+        clearTimeout(timer);
+      }
+      await new Promise((r) => setTimeout(r, 800));
+    }
+    return null;
+  }
+
   async function fetchDist(a: string, b: string): Promise<DistResult | null> {
     try {
-      const res = await fetch(func2url["calc-distance"], {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ from: a, to: b }),
-      });
-      if (!res.ok) return null;
-      const data = await res.json();
+      const data = await postCalc({ from: a, to: b });
+      if (!data) return null;
       if (data.from_label || data.to_label) {
         setRouteLabels({ from: data.from_label, to: data.to_label });
       }
@@ -161,13 +181,8 @@ export default function Index() {
 
   async function fetchDistMulti(points: string[]): Promise<DistResult | null> {
     try {
-      const res = await fetch(func2url["calc-distance"], {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ points }),
-      });
-      if (!res.ok) return null;
-      const data = await res.json();
+      const data = await postCalc({ points });
+      if (!data) return null;
       if (Array.isArray(data.labels) && data.labels.length) {
         setRouteLabels({ points: data.labels });
       }

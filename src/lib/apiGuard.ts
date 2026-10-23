@@ -1,4 +1,4 @@
-const BOT_RE = /bot|crawl|spider|slurp|yandex|google|bing|lighthouse|headless|prerender|preview|facebookexternalhit|telegram|whatsapp|vkshare|curl|wget|python/i;
+const BOT_RE = /bot|crawl|spider|slurp|lighthouse|headless|prerender|facebookexternalhit|vkshare|curl|wget|python/i;
 
 export const isBot = typeof navigator !== "undefined" && BOT_RE.test(navigator.userAgent || "");
 

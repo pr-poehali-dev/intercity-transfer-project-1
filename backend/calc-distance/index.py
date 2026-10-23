@@ -835,11 +835,11 @@ def handler(event: dict, context) -> dict:
             'body': json.dumps({'coords': coords})
         }
 
-    if body.get('warm') and dsn and dadata_key and gh_key:
+    if body.get('warm'):
         return {
             'statusCode': 200,
             'headers': {'Access-Control-Allow-Origin': '*', 'Content-Type': 'application/json'},
-            'body': json.dumps(warm_cache_batch(dadata_key, gh_key, dsn))
+            'body': json.dumps({'warmed': 0, 'disabled': True})
         }
 
     if body.get('geometry'):

@@ -14,6 +14,7 @@ import GallerySection from "@/components/transfer/GallerySection";
 import ReviewsSection from "@/components/transfer/ReviewsSection";
 import SeoTextSection from "@/components/transfer/SeoTextSection";
 import func2url from "../../backend/func2url.json";
+import { cacheGet, cacheSet } from "@/lib/apiGuard";
 
 export default function Index() {
   const [from, setFrom] = useState("");
@@ -56,17 +57,6 @@ export default function Index() {
     const hh = String(now.getHours()).padStart(2, "0");
     const mm = String(now.getMinutes()).padStart(2, "0");
     setTime(`${hh}:${mm}`);
-  }, []);
-
-  useEffect(() => {
-    const t = setTimeout(() => {
-      fetch(func2url["calc-distance"], {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ warm: true }),
-      }).catch(() => undefined);
-    }, 5000);
-    return () => clearTimeout(t);
   }, []);
 
   useEffect(() => {
@@ -142,7 +132,11 @@ export default function Index() {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async function postCalc(body: object): Promise<any | null> {
-    for (let attempt = 0; attempt < 3; attempt++) {
+    const ck = "calc:" + JSON.stringify(body);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const hit = cacheGet<any>(ck, 24 * 3600 * 1000);
+    if (hit) return hit;
+    for (let attempt = 0; attempt < 2; attempt++) {
       const ctrl = new AbortController();
       const timer = setTimeout(() => ctrl.abort(), 12000);
       try {
@@ -155,7 +149,10 @@ export default function Index() {
         });
         if (res.ok) {
           const data = await res.json();
-          if (typeof data?.distance === "number" && data.distance > 0) return data;
+          if (typeof data?.distance === "number" && data.distance > 0) {
+            cacheSet(ck, data);
+            return data;
+          }
         }
       } catch { /* повторим */ } finally {
         clearTimeout(timer);

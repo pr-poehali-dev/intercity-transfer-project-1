@@ -6,15 +6,19 @@ import ReviewCard, { type Review } from "@/components/transfer/ReviewCard";
 import ReviewForm from "@/components/transfer/ReviewForm";
 import { REVIEWS } from "@/components/transfer/constants";
 import func2url from "../../backend/func2url.json";
+import { isBot, cacheGet, cacheSet } from "@/lib/apiGuard";
 
 export default function Reviews() {
   const [reviews, setReviews] = useState<Review[]>(REVIEWS);
   const [loading, setLoading] = useState(true);
 
   function load() {
-    fetch(func2url["reviews"])
-      .then((r) => r.json())
-      .then((d) => {
+    const cached = cacheGet<{ reviews?: Review[] }>("reviews", 30 * 60 * 1000);
+    const req = cached || isBot
+      ? Promise.resolve(cached || {})
+      : fetch(func2url["reviews"]).then((r) => r.json()).then((d) => { cacheSet("reviews", d); return d; });
+    req
+      .then((d: { reviews?: Review[] }) => {
         if (Array.isArray(d.reviews) && d.reviews.length) setReviews(d.reviews);
       })
       .catch(() => { /* fallback to static reviews */ })

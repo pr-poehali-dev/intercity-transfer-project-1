@@ -4,14 +4,18 @@ import Icon from "@/components/ui/icon";
 import { REVIEWS } from "./constants";
 import ReviewCard, { type Review } from "./ReviewCard";
 import func2url from "../../../backend/func2url.json";
+import { isBot, cacheGet, cacheSet } from "@/lib/apiGuard";
 
 export default function ReviewsSection() {
   const [reviews, setReviews] = useState<Review[]>(REVIEWS);
 
   useEffect(() => {
-    fetch(func2url["reviews"])
-      .then((r) => r.json())
-      .then((d) => {
+    const cached = cacheGet<{ reviews?: Review[] }>("reviews", 30 * 60 * 1000);
+    const req = cached || isBot
+      ? Promise.resolve(cached || {})
+      : fetch(func2url["reviews"]).then((r) => r.json()).then((d) => { cacheSet("reviews", d); return d; });
+    req
+      .then((d: { reviews?: Review[] }) => {
         if (Array.isArray(d.reviews) && d.reviews.length) setReviews(d.reviews);
       })
       .catch(() => { /* fallback to static reviews */ });

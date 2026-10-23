@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import Icon from "@/components/ui/icon";
 import func2url from "../../../backend/func2url.json";
+import { cacheGet, cacheSet } from "@/lib/apiGuard";
 
 interface AddressInputProps {
   value: string;
@@ -42,20 +43,26 @@ export default function AddressInput({ value, onChange, placeholder }: AddressIn
     setSearching(true);
     const timer = setTimeout(async () => {
       try {
-        const res = await fetch(func2url["search-locations"], {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ query: q }),
-        });
-        const data = await res.json();
-        setResults(data.suggestions || []);
+        const ck = "loc:" + q.toLowerCase();
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        let data = cacheGet<{ suggestions?: any[] }>(ck, 7 * 24 * 3600 * 1000);
+        if (!data) {
+          const res = await fetch(func2url["search-locations"], {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ query: q }),
+          });
+          data = await res.json();
+          cacheSet(ck, data);
+        }
+        setResults(data?.suggestions || []);
         setOpen(true);
       } catch {
         setResults([]);
       } finally {
         setSearching(false);
       }
-    }, 350);
+    }, 700);
     return () => clearTimeout(timer);
   }, [value]);
 

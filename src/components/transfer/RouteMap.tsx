@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import Icon from "@/components/ui/icon";
 import { loadYandexMaps } from "./yandexMaps";
 import func2url from "../../../backend/func2url.json";
+import { isBot, cacheGet, cacheSet } from "@/lib/apiGuard";
 
 interface RouteMapProps {
   points: string[];
@@ -32,7 +33,10 @@ function splitByZone(line: number[][], zones: string) {
 }
 
 async function fetchGeometry(cities: string[]): Promise<any> {
-  for (let attempt = 0; attempt < 2; attempt++) {
+  const ck = "geo:" + cities.join("|").toLowerCase();
+  const hit = cacheGet<any>(ck, 7 * 24 * 3600 * 1000);
+  if (hit) return hit;
+  for (let attempt = 0; attempt < 1; attempt++) {
     const ctrl = new AbortController();
     const timer = setTimeout(() => ctrl.abort(), 7000);
     try {
@@ -43,7 +47,10 @@ async function fetchGeometry(cities: string[]): Promise<any> {
         body: JSON.stringify({ points: cities, geometry: true }),
       });
       const data = await res.json();
-      if (data?.line && data.line.length >= 2) return data;
+      if (data?.line && data.line.length >= 2) {
+        cacheSet(ck, data);
+        return data;
+      }
     } catch {
       /* повторим */
     } finally {
@@ -66,6 +73,10 @@ export default function RouteMap({ points, labels, className = "" }: RouteMapPro
   useEffect(() => {
     const cities = points.map((p) => p.trim()).filter(Boolean);
     if (cities.length < 2) return;
+    if (isBot) {
+      setLoading(false);
+      return;
+    }
 
     let cancelled = false;
     setLoading(true);

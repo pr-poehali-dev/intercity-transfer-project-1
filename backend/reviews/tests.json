@@ -44,6 +44,17 @@
         "mark_booked": true
       },
       "expectedStatus": 400
+    },
+    {
+      "name": "Edit without password",
+      "method": "POST",
+      "path": "/?action=calc_log",
+      "body": {
+        "edit": true,
+        "id": 1,
+        "note": "x"
+      },
+      "expectedStatus": 401
     }
   ]
 }

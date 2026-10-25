@@ -62,6 +62,117 @@ def city_by_ip(ip: str) -> str:
         return ''
 
 
+STATUSES = ('new', 'called', 'booked', 'refused', 'spam')
+
+
+def is_admin(event: dict) -> bool:
+    headers = {k.lower(): v for k, v in (event.get('headers') or {}).items()}
+    password = os.environ.get('ADMIN_PASSWORD', '')
+    return bool(password) and headers.get('x-admin-password', '') == password
+
+
+def edit_row(schema: str, body: dict) -> dict:
+    row_id = to_int(body.get('id'))
+    if not row_id:
+        return resp(400, {'error': 'id required'})
+    sets = []
+    if 'status' in body:
+        st = body.get('status')
+        if st not in STATUSES:
+            return resp(400, {'error': 'bad status'})
+        sets.append(f"status = '{st}'")
+    for field, col in (('note', 'note'), ('client_name', 'client_name'), ('client_phone', 'client_phone'),
+                       ('from', 'from_text'), ('to', 'to_text'), ('tariff', 'tariff'), ('city', 'client_city')):
+        if field in body:
+            val = (body.get(field) or '').strip()
+            sets.append(f"{col} = '{esc(val)}'" if val or col in ('note', 'client_name', 'client_phone', 'client_city', 'tariff') else '')
+    for field, col in (('price', 'price'), ('distance', 'distance_km')):
+        if field in body:
+            v = to_int(body.get(field))
+            sets.append(f"{col} = {v if v is not None else 'NULL'}")
+    for field in ('booked', 'hidden'):
+        if field in body:
+            sets.append(f"{field} = {'TRUE' if body.get(field) else 'FALSE'}")
+    sets = [x for x in sets if x]
+    if not sets:
+        return resp(400, {'error': 'nothing to update'})
+    conn = psycopg2.connect(os.environ['DATABASE_URL'])
+    conn.autocommit = True
+    cur = conn.cursor()
+    cur.execute(f"UPDATE {schema}.calc_log SET {', '.join(sets)} WHERE id = {row_id}")
+    conn.close()
+    return resp(200, {'ok': True})
+
+
+def parse_day(value: str):
+    return datetime.strptime(value, '%Y-%m-%d') - timedelta(hours=3)
+
+
+def list_rows(schema: str, qs: dict) -> dict:
+    today = (datetime.utcnow() + timedelta(hours=3)).strftime('%Y-%m-%d')
+    d_from = qs.get('date_from') or qs.get('date') or today
+    d_to = qs.get('date_to') or d_from
+    try:
+        start = parse_day(d_from)
+        end = parse_day(d_to) + timedelta(days=1)
+    except ValueError:
+        return resp(400, {'error': 'bad date'})
+    if (end - start).days > 93:
+        start = end - timedelta(days=93)
+
+    where = [f"created_at >= '{start.isoformat()}'", f"created_at < '{end.isoformat()}'"]
+    if qs.get('show_hidden') != '1':
+        where.append('hidden = FALSE')
+    q = (qs.get('q') or '').strip().lower()
+    if q:
+        e = esc(q).replace('%', '').replace('_', '').replace('\\', '')
+        where.append(
+            f"(lower(from_text) LIKE '%{e}%' OR lower(to_text) LIKE '%{e}%' OR lower(coalesce(via_text,'')) LIKE '%{e}%' "
+            f"OR lower(coalesce(client_name,'')) LIKE '%{e}%' OR coalesce(client_phone,'') LIKE '%{e}%' "
+            f"OR lower(coalesce(note,'')) LIKE '%{e}%')"
+        )
+    if qs.get('ip'):
+        where.append(f"client_ip = '{esc(qs['ip'])}'")
+    if qs.get('city'):
+        where.append(f"lower(coalesce(client_city,'')) LIKE '%{esc(qs['city'].lower())}%'")
+    if qs.get('tariff'):
+        where.append(f"tariff = '{esc(qs['tariff'])}'")
+    if qs.get('status') in STATUSES:
+        where.append(f"status = '{qs['status']}'")
+    if qs.get('booked') in ('0', '1'):
+        where.append(f"booked = {'TRUE' if qs['booked'] == '1' else 'FALSE'}")
+    if qs.get('success') in ('0', '1'):
+        where.append(f"success = {'TRUE' if qs['success'] == '1' else 'FALSE'}")
+
+    conn = psycopg2.connect(os.environ['DATABASE_URL'])
+    cur = conn.cursor()
+    cur.execute(
+        f"SELECT id, created_at + interval '3 hours', from_text, to_text, via_text, distance_km, price, tariff, round_trip, success, "
+        f"booked, booked_at + interval '3 hours', client_name, client_phone, client_ip, client_city, status, note, hidden "
+        f"FROM {schema}.calc_log WHERE {' AND '.join(where)} ORDER BY created_at DESC LIMIT 2000"
+    )
+    rows = cur.fetchall()
+    cur.execute(
+        f"SELECT DISTINCT tariff FROM {schema}.calc_log WHERE tariff IS NOT NULL AND tariff <> '' ORDER BY tariff"
+    )
+    tariffs = [r[0] for r in cur.fetchall()]
+    conn.close()
+    items = [
+        {
+            'id': r[0],
+            'date': r[1].strftime('%d.%m'), 'time': r[1].strftime('%H:%M'),
+            'from': r[2], 'to': r[3], 'via': r[4],
+            'distance': r[5], 'price': r[6], 'tariff': r[7],
+            'round_trip': r[8], 'success': r[9],
+            'booked': r[10], 'booked_time': r[11].strftime('%d.%m %H:%M') if r[11] else None,
+            'client_name': r[12], 'client_phone': r[13],
+            'ip': r[14], 'city': r[15], 'status': r[16], 'note': r[17], 'hidden': r[18],
+        }
+        for r in rows
+    ]
+    return resp(200, {'date_from': d_from, 'date_to': d_to, 'items': items, 'tariffs': tariffs})
+
+
 def handle_calc_log(event: dict) -> dict:
     method = event.get('httpMethod')
 
@@ -69,6 +180,10 @@ def handle_calc_log(event: dict) -> dict:
 
     if method == 'POST':
         body = json.loads(event.get('body') or '{}')
+        if body.get('edit'):
+            if not is_admin(event):
+                return resp(401, {'error': 'Неверный пароль'})
+            return edit_row(schema, body)
         if body.get('mark_booked'):
             ids = [to_int(i) for i in (body.get('ids') or [])]
             ids = [i for i in ids if i][:20]
@@ -112,39 +227,6 @@ def handle_calc_log(event: dict) -> dict:
         conn.close()
         return resp(200, {'ok': True, 'id': new_id})
 
-    headers = {k.lower(): v for k, v in (event.get('headers') or {}).items()}
-    password = os.environ.get('ADMIN_PASSWORD', '')
-    if not password or headers.get('x-admin-password', '') != password:
+    if not is_admin(event):
         return resp(401, {'error': 'Неверный пароль'})
-
-    qs = event.get('queryStringParameters') or {}
-    day = qs.get('date') or (datetime.utcnow() + timedelta(hours=3)).strftime('%Y-%m-%d')
-    try:
-        start = datetime.strptime(day, '%Y-%m-%d') - timedelta(hours=3)
-    except ValueError:
-        return resp(400, {'error': 'bad date'})
-    end = start + timedelta(days=1)
-
-    conn = psycopg2.connect(os.environ['DATABASE_URL'])
-    cur = conn.cursor()
-    cur.execute(
-        f"SELECT created_at + interval '3 hours', from_text, to_text, via_text, distance_km, price, tariff, round_trip, success, "
-        f"booked, booked_at + interval '3 hours', client_name, client_phone, client_ip, client_city "
-        f"FROM {schema}.calc_log WHERE created_at >= '{start.isoformat()}' AND created_at < '{end.isoformat()}' "
-        f"ORDER BY created_at DESC LIMIT 1000"
-    )
-    rows = cur.fetchall()
-    conn.close()
-    items = [
-        {
-            'time': r[0].strftime('%H:%M'),
-            'from': r[1], 'to': r[2], 'via': r[3],
-            'distance': r[4], 'price': r[5], 'tariff': r[6],
-            'round_trip': r[7], 'success': r[8],
-            'booked': r[9], 'booked_time': r[10].strftime('%H:%M') if r[10] else None,
-            'client_name': r[11], 'client_phone': r[12],
-            'ip': r[13], 'city': r[14],
-        }
-        for r in rows
-    ]
-    return resp(200, {'date': day, 'items': items})
+    return list_rows(schema, event.get('queryStringParameters') or {})

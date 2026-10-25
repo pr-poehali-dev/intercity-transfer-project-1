@@ -4,10 +4,12 @@ import os
 import psycopg2
 import requests
 
+from calc_log import handle_calc_log
+
 CORS = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type',
+    'Access-Control-Allow-Headers': 'Content-Type, X-Admin-Password',
     'Access-Control-Max-Age': '86400',
 }
 
@@ -42,10 +44,13 @@ def notify_vk(name: str, route: str, rating: int, text: str):
 
 
 def handler(event: dict, context) -> dict:
-    """Отдаёт одобренные отзывы клиентов и принимает новые на модерацию."""
+    """Отзывы клиентов (выдача и приём на модерацию) и журнал расчётов цены (?action=calc_log)."""
     method = event.get('httpMethod')
     if method == 'OPTIONS':
         return {'statusCode': 200, 'headers': CORS, 'body': ''}
+
+    if (event.get('queryStringParameters') or {}).get('action') == 'calc_log':
+        return handle_calc_log(event)
 
     schema = os.environ.get('MAIN_DB_SCHEMA', 'public')
     conn = psycopg2.connect(os.environ['DATABASE_URL'])

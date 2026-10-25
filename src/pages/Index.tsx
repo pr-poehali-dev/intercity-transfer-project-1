@@ -14,7 +14,7 @@ import GallerySection from "@/components/transfer/GallerySection";
 import ReviewsSection from "@/components/transfer/ReviewsSection";
 import SeoTextSection from "@/components/transfer/SeoTextSection";
 import func2url from "../../backend/func2url.json";
-import { cacheGet, cacheSet } from "@/lib/apiGuard";
+import { cacheGet, cacheSet, isBot } from "@/lib/apiGuard";
 
 export default function Index() {
   const [from, setFrom] = useState("");
@@ -198,6 +198,18 @@ export default function Index() {
     return region ? `${geo}, ${region}` : geo;
   }
 
+  function logCalc(data: { distance?: number | null; price?: number | null; success: boolean; via?: string }) {
+    if (isBot) return;
+    const t = TARIFFS[tariff];
+    const tariffName = t.isMinivan ? MINIVAN_SUBTARIFFS[minivanSub]?.name || t.name : t.name;
+    fetch(`${func2url["reviews"]}?action=calc_log`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ from, to, via: data.via || "", distance: data.distance, price: data.price, tariff: tariffName, round_trip: roundTrip, success: data.success }),
+      keepalive: true,
+    }).catch(() => undefined);
+  }
+
   async function calculate() {
     const norm = (s: string) => s.trim().toLowerCase();
     if (!from || !to || calculating) return;
@@ -224,6 +236,7 @@ export default function Index() {
       setDistanceError(true);
       setManualRequest(true);
       setCalculating(false);
+      logCalc({ success: false, via: hasViaStop ? via : "" });
       return;
     }
     setDistanceError(false);
@@ -233,7 +246,9 @@ export default function Index() {
     const k = roundTrip ? 2 : 1;
     const zones: ZoneKm = { newKm: result.zones.newKm * k, crimeaKm: result.zones.crimeaKm * k, kurskKm: (result.zones.kurskKm || 0) * k };
     if (roundTrip) totalDist *= 2;
-    setPrice(priceFromDistance(totalDist, roundTrip, zones));
+    const finalPrice = priceFromDistance(totalDist, roundTrip, zones);
+    setPrice(finalPrice);
+    logCalc({ distance: totalDist, price: finalPrice, success: true, via: hasViaStop ? via : "" });
     setDistance(totalDist);
     setZoneKm(zones);
     setTollKm(Object.fromEntries(Object.entries(result.toll).map(([r, km]) => [r, km * k])));

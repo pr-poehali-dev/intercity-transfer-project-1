@@ -14,6 +14,7 @@ import NotFound from "./pages/NotFound";
 import Navi from "./pages/Navi";
 import InstallPage from "./pages/InstallPage";
 import Tariffs from "./pages/Tariffs";
+import CalcJournal from "./pages/CalcJournal";
 import InstallAppBanner from "./components/transfer/InstallApp";
 import OfflineBanner from "./components/transfer/OfflineBanner";
 import func2url from "../backend/func2url.json";
@@ -59,6 +60,7 @@ const App = () => (
           <Route path="/oferta" element={<Oferta />} />
           <Route path="/yml" element={<YmlRedirect />} />
           <Route path="/navi" element={<Navi />} />
+          <Route path="/zhurnal" element={<CalcJournal />} />
           <Route path="/app" element={<InstallPage />} />
           <Route path="/tarify" element={<Tariffs />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

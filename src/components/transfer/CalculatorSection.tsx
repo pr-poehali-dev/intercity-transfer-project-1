@@ -4,7 +4,7 @@ import { getDurationByDistance } from "./routesData";
 import CalculatorForm from "./CalculatorForm";
 import BookingModal from "./BookingModal";
 import func2url from "../../../backend/func2url.json";
-import { getCalcIds, clearCalcIds } from "@/lib/apiGuard";
+import { getCalcIds, clearCalcIds, ymGoal } from "@/lib/apiGuard";
 
 interface CalculatorSectionProps {
   from: string;
@@ -179,6 +179,7 @@ export default function CalculatorSection({
       }
       const data = await res.json();
       if (!data.ok) throw new Error(data.error || "Сервер не подтвердил отправку");
+      ymGoal("booking_sent", { "Заявка": `${from} → ${to}`, "Тариф": tariffLabel });
       const calcIds = getCalcIds();
       if (calcIds.length) {
         fetch(`${func2url["reviews"]}?action=calc_log`, {

@@ -54,3 +54,16 @@ export function clearCalcIds() {
     /* пропускаем */
   }
 }
+
+const YM_ID = 109705581;
+
+export function ymGoal(goal: string, params?: Record<string, unknown>) {
+  try {
+    const ym = (window as unknown as { ym?: (...a: unknown[]) => void }).ym;
+    if (!ym) return;
+    ym(YM_ID, "reachGoal", goal, params);
+    if (params) ym(YM_ID, "params", params);
+  } catch {
+    /* пропускаем */
+  }
+}

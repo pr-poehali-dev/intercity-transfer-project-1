@@ -1,6 +1,7 @@
 import { useState } from "react";
 import Icon from "@/components/ui/icon";
 import func2url from "../../../backend/func2url.json";
+import { ymGoal } from "@/lib/apiGuard";
 
 export default function ContactsSection() {
   const [name, setName] = useState("");
@@ -48,6 +49,7 @@ export default function ContactsSection() {
         }),
       });
       if (!res.ok) throw new Error();
+      ymGoal("contact_form_sent");
       setSent(true);
       setName("");
       setPhone("");

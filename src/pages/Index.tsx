@@ -14,7 +14,7 @@ import GallerySection from "@/components/transfer/GallerySection";
 import ReviewsSection from "@/components/transfer/ReviewsSection";
 import SeoTextSection from "@/components/transfer/SeoTextSection";
 import func2url from "../../backend/func2url.json";
-import { cacheGet, cacheSet, isBot, rememberCalcId } from "@/lib/apiGuard";
+import { cacheGet, cacheSet, isBot, rememberCalcId, ymGoal } from "@/lib/apiGuard";
 
 export default function Index() {
   const [from, setFrom] = useState("");
@@ -202,6 +202,8 @@ export default function Index() {
     if (isBot) return;
     const t = TARIFFS[tariff];
     const tariffName = t.isMinivan ? MINIVAN_SUBTARIFFS[minivanSub]?.name || t.name : t.name;
+    const routeText = `${from} → ${data.via ? data.via + " → " : ""}${to}`;
+    ymGoal(data.success ? "calc_price" : "calc_failed", { "Маршрут": routeText, "Тариф": tariffName, "Цена": data.price ?? "не посчитано" });
     fetch(`${func2url["reviews"]}?action=calc_log`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },

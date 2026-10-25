@@ -14,6 +14,10 @@ type Row = {
   tariff: string;
   round_trip: boolean;
   success: boolean;
+  booked: boolean;
+  booked_time: string | null;
+  client_name: string | null;
+  client_phone: string | null;
 };
 
 const PASS_KEY = "journal_pass";
@@ -83,6 +87,9 @@ export default function CalcJournal() {
 
   const ok = rows.filter((r) => r.success);
   const sum = ok.reduce((s, r) => s + (r.price || 0), 0);
+  const booked = rows.filter((r) => r.booked);
+  const bookedSum = booked.reduce((s, r) => s + (r.price || 0), 0);
+  const conversion = ok.length ? Math.round((booked.length / ok.length) * 100) : 0;
 
   return (
     <div className="min-h-screen bg-background text-foreground p-4 sm:p-8">
@@ -105,7 +112,7 @@ export default function CalcJournal() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           <div className="rounded-xl border border-border bg-card p-4">
             <div className="text-sm text-muted-foreground">Всего расчётов</div>
             <div className="text-2xl font-bold">{rows.length}</div>
@@ -117,6 +124,13 @@ export default function CalcJournal() {
           <div className="rounded-xl border border-border bg-card p-4">
             <div className="text-sm text-muted-foreground">Сумма посчитанных цен</div>
             <div className="text-2xl font-bold">{sum.toLocaleString("ru-RU")} ₽</div>
+          </div>
+          <div className="rounded-xl border border-green-500/40 bg-green-500/10 p-4">
+            <div className="text-sm text-muted-foreground">Оставили заявку</div>
+            <div className="text-2xl font-bold">
+              {booked.length} <span className="text-base font-normal text-muted-foreground">({conversion}%)</span>
+            </div>
+            <div className="text-xs text-muted-foreground">на {bookedSum.toLocaleString("ru-RU")} ₽</div>
           </div>
         </div>
 
@@ -130,11 +144,12 @@ export default function CalcJournal() {
                 <th className="p-3">Тариф</th>
                 <th className="p-3 text-right">Км</th>
                 <th className="p-3 text-right">Цена</th>
+                <th className="p-3">Заявка</th>
               </tr>
             </thead>
             <tbody>
               {rows.map((r, i) => (
-                <tr key={i} className="border-b border-border last:border-0 align-top">
+                <tr key={i} className={`border-b border-border last:border-0 align-top ${r.booked ? "bg-green-500/10" : ""}`}>
                   <td className="p-3 whitespace-nowrap">{r.time}</td>
                   <td className="p-3">{r.from}</td>
                   <td className="p-3">
@@ -147,11 +162,24 @@ export default function CalcJournal() {
                   <td className="p-3 text-right whitespace-nowrap">
                     {r.success ? `${(r.price || 0).toLocaleString("ru-RU")} ₽` : <span className="text-red-500">не посчитано</span>}
                   </td>
+                  <td className="p-3 whitespace-nowrap">
+                    {r.booked ? (
+                      <div>
+                        <div className="font-semibold text-green-500">Да, в {r.booked_time}</div>
+                        {r.client_name && <div>{r.client_name}</div>}
+                        {r.client_phone && (
+                          <a href={`tel:${r.client_phone}`} className="underline">{r.client_phone}</a>
+                        )}
+                      </div>
+                    ) : (
+                      <span className="text-muted-foreground">нет</span>
+                    )}
+                  </td>
                 </tr>
               ))}
               {!rows.length && (
                 <tr>
-                  <td colSpan={6} className="p-6 text-center text-muted-foreground">
+                  <td colSpan={7} className="p-6 text-center text-muted-foreground">
                     {loading ? "Загружаю..." : "За этот день расчётов нет"}
                   </td>
                 </tr>

@@ -14,7 +14,7 @@ import GallerySection from "@/components/transfer/GallerySection";
 import ReviewsSection from "@/components/transfer/ReviewsSection";
 import SeoTextSection from "@/components/transfer/SeoTextSection";
 import func2url from "../../backend/func2url.json";
-import { cacheGet, cacheSet, isBot } from "@/lib/apiGuard";
+import { cacheGet, cacheSet, isBot, rememberCalcId } from "@/lib/apiGuard";
 
 export default function Index() {
   const [from, setFrom] = useState("");
@@ -207,7 +207,10 @@ export default function Index() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ from, to, via: data.via || "", distance: data.distance, price: data.price, tariff: tariffName, round_trip: roundTrip, success: data.success }),
       keepalive: true,
-    }).catch(() => undefined);
+    })
+      .then((r) => r.json())
+      .then((d) => { if (d?.id) rememberCalcId(d.id); })
+      .catch(() => undefined);
   }
 
   async function calculate() {

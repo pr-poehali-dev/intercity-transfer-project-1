@@ -35,6 +35,15 @@
       "method": "GET",
       "path": "/?action=calc_log",
       "expectedStatus": 401
+    },
+    {
+      "name": "Mark booked without ids",
+      "method": "POST",
+      "path": "/?action=calc_log",
+      "body": {
+        "mark_booked": true
+      },
+      "expectedStatus": 400
     }
   ]
 }

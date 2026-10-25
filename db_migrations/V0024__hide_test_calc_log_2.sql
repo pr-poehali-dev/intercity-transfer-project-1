@@ -1,0 +1,1 @@
+UPDATE t_p48987818_intercity_transfer_p.calc_log SET created_at = '2000-01-01' WHERE from_text = 'ТЕСТ' AND to_text = 'ТЕСТ';

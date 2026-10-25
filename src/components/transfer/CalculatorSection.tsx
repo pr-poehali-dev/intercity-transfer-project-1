@@ -4,6 +4,7 @@ import { getDurationByDistance } from "./routesData";
 import CalculatorForm from "./CalculatorForm";
 import BookingModal from "./BookingModal";
 import func2url from "../../../backend/func2url.json";
+import { getCalcIds, clearCalcIds } from "@/lib/apiGuard";
 
 interface CalculatorSectionProps {
   from: string;
@@ -178,6 +179,15 @@ export default function CalculatorSection({
       }
       const data = await res.json();
       if (!data.ok) throw new Error(data.error || "Сервер не подтвердил отправку");
+      const calcIds = getCalcIds();
+      if (calcIds.length) {
+        fetch(`${func2url["reviews"]}?action=calc_log`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ mark_booked: true, ids: calcIds, name, phone }),
+          keepalive: true,
+        }).then(() => clearCalcIds()).catch(() => undefined);
+      }
       setSent(true);
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);

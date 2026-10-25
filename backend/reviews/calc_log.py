@@ -38,6 +38,23 @@ def handle_calc_log(event: dict) -> dict:
 
     if method == 'POST':
         body = json.loads(event.get('body') or '{}')
+        if body.get('mark_booked'):
+            ids = [to_int(i) for i in (body.get('ids') or [])]
+            ids = [i for i in ids if i][:20]
+            if not ids:
+                return resp(400, {'error': 'ids required'})
+            name = esc((body.get('name') or '').strip())
+            phone = esc((body.get('phone') or '').strip())
+            conn = psycopg2.connect(os.environ['DATABASE_URL'])
+            conn.autocommit = True
+            cur = conn.cursor()
+            cur.execute(
+                f"UPDATE {schema}.calc_log SET booked = TRUE, booked_at = now(), "
+                f"client_name = '{name}', client_phone = '{phone}' "
+                f"WHERE id IN ({','.join(str(i) for i in ids)}) AND created_at > now() - interval '3 days'"
+            )
+            conn.close()
+            return resp(200, {'ok': True})
         frm = (body.get('from') or '').strip()
         to = (body.get('to') or '').strip()
         if not frm or not to:
@@ -56,10 +73,11 @@ def handle_calc_log(event: dict) -> dict:
             f"INSERT INTO {schema}.calc_log (from_text, to_text, via_text, distance_km, price, tariff, round_trip, success) "
             f"VALUES ('{esc(frm)}', '{esc(to)}', {via_sql}, "
             f"{km if km is not None else 'NULL'}, {price if price is not None else 'NULL'}, "
-            f"'{esc(tariff)}', {rt}, {ok})"
+            f"'{esc(tariff)}', {rt}, {ok}) RETURNING id"
         )
+        new_id = cur.fetchone()[0]
         conn.close()
-        return resp(200, {'ok': True})
+        return resp(200, {'ok': True, 'id': new_id})
 
     headers = {k.lower(): v for k, v in (event.get('headers') or {}).items()}
     password = os.environ.get('ADMIN_PASSWORD', '')
@@ -77,7 +95,8 @@ def handle_calc_log(event: dict) -> dict:
     conn = psycopg2.connect(os.environ['DATABASE_URL'])
     cur = conn.cursor()
     cur.execute(
-        f"SELECT created_at + interval '3 hours', from_text, to_text, via_text, distance_km, price, tariff, round_trip, success "
+        f"SELECT created_at + interval '3 hours', from_text, to_text, via_text, distance_km, price, tariff, round_trip, success, "
+        f"booked, booked_at + interval '3 hours', client_name, client_phone "
         f"FROM {schema}.calc_log WHERE created_at >= '{start.isoformat()}' AND created_at < '{end.isoformat()}' "
         f"ORDER BY created_at DESC LIMIT 1000"
     )
@@ -89,6 +108,8 @@ def handle_calc_log(event: dict) -> dict:
             'from': r[1], 'to': r[2], 'via': r[3],
             'distance': r[4], 'price': r[5], 'tariff': r[6],
             'round_trip': r[7], 'success': r[8],
+            'booked': r[9], 'booked_time': r[10].strftime('%H:%M') if r[10] else None,
+            'client_name': r[11], 'client_phone': r[12],
         }
         for r in rows
     ]

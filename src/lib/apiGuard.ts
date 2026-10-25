@@ -23,3 +23,34 @@ export function cacheSet(key: string, value: unknown) {
     /* переполнено — пропускаем */
   }
 }
+const CALC_IDS_KEY = "calc_log_ids";
+
+export function rememberCalcId(id: number) {
+  try {
+    const now = Date.now();
+    const list: { id: number; t: number }[] = JSON.parse(localStorage.getItem(CALC_IDS_KEY) || "[]");
+    const fresh = list.filter((x) => now - x.t < 2 * 24 * 3600 * 1000).slice(-19);
+    fresh.push({ id, t: now });
+    localStorage.setItem(CALC_IDS_KEY, JSON.stringify(fresh));
+  } catch {
+    /* пропускаем */
+  }
+}
+
+export function getCalcIds(): number[] {
+  try {
+    const now = Date.now();
+    const list: { id: number; t: number }[] = JSON.parse(localStorage.getItem(CALC_IDS_KEY) || "[]");
+    return list.filter((x) => now - x.t < 2 * 24 * 3600 * 1000).map((x) => x.id);
+  } catch {
+    return [];
+  }
+}
+
+export function clearCalcIds() {
+  try {
+    localStorage.removeItem(CALC_IDS_KEY);
+  } catch {
+    /* пропускаем */
+  }
+}

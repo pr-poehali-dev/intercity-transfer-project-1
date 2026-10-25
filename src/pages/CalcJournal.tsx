@@ -18,6 +18,8 @@ type Row = {
   booked_time: string | null;
   client_name: string | null;
   client_phone: string | null;
+  ip: string | null;
+  city: string | null;
 };
 
 const PASS_KEY = "journal_pass";
@@ -139,6 +141,7 @@ export default function CalcJournal() {
             <thead className="text-left text-muted-foreground border-b border-border">
               <tr>
                 <th className="p-3">Время</th>
+                <th className="p-3">Город клиента / IP</th>
                 <th className="p-3">Откуда</th>
                 <th className="p-3">Куда</th>
                 <th className="p-3">Тариф</th>
@@ -151,6 +154,10 @@ export default function CalcJournal() {
               {rows.map((r, i) => (
                 <tr key={i} className={`border-b border-border last:border-0 align-top ${r.booked ? "bg-green-500/10" : ""}`}>
                   <td className="p-3 whitespace-nowrap">{r.time}</td>
+                  <td className="p-3">
+                    <div>{r.city || <span className="text-muted-foreground">—</span>}</div>
+                    {r.ip && <div className="text-xs text-muted-foreground font-mono">{r.ip}</div>}
+                  </td>
                   <td className="p-3">{r.from}</td>
                   <td className="p-3">
                     {r.via && <div className="text-muted-foreground text-xs">через {r.via}</div>}
@@ -179,7 +186,7 @@ export default function CalcJournal() {
               ))}
               {!rows.length && (
                 <tr>
-                  <td colSpan={7} className="p-6 text-center text-muted-foreground">
+                  <td colSpan={8} className="p-6 text-center text-muted-foreground">
                     {loading ? "Загружаю..." : "За этот день расчётов нет"}
                   </td>
                 </tr>

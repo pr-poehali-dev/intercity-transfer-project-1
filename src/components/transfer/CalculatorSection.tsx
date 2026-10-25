@@ -99,7 +99,6 @@ export default function CalculatorSection({
   }
 
   async function handleBook() {
-    if (!name.trim()) { setValidationError("Заполните имя"); return; }
     if (!isPhoneValid(phone)) { setValidationError("Введите корректный номер телефона (11 цифр)"); return; }
     setValidationError("");
     setError("");
@@ -153,7 +152,7 @@ export default function CalculatorSection({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name,
+          name: name.trim() || "—",
           phone,
           from_city: from,
           from_region: fromRegion || undefined,

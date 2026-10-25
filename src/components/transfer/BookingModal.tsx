@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { ymGoal } from "@/lib/apiGuard";
 import { Link } from "react-router-dom";
 import Icon from "@/components/ui/icon";
 import { TARIFFS, DELIVERY_OPTIONS, MINIVAN_SUBTARIFFS, CHILD_SEAT_PRICE, PET_OPTIONS, MIN_ORDER_PRICE, PRICE_ROUND_STEP, getRate, calcRideBase, type ZoneKm, calcToll, type TollKm } from "./constants";
@@ -54,6 +55,8 @@ export default function BookingModal({
   onBook, onClose, onSuccessClose,
 }: BookingModalProps) {
   const [consent, setConsent] = useState(false);
+  const [consentHint, setConsentHint] = useState(false);
+  const [phoneTracked, setPhoneTracked] = useState(false);
   const cur = TARIFFS[tariff];
   const isDelivery = cur.isDelivery;
   const isMinivan = cur.isMinivan;
@@ -294,13 +297,16 @@ export default function BookingModal({
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="Ваше имя"
+                placeholder="Ваше имя (необязательно)"
                 className="w-full bg-background border border-border rounded-lg px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/60"
               />
               <input
                 type="tel"
                 value={phone}
-                onChange={(e) => handlePhoneChange(e.target.value)}
+                onChange={(e) => {
+                  handlePhoneChange(e.target.value);
+                  if (!phoneTracked) { setPhoneTracked(true); ymGoal("phone_started"); }
+                }}
                 placeholder="+7 (999) 123-45-67"
                 className={`w-full bg-background border rounded-lg px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/60 ${
                   phone && !isPhoneValid(phone) ? "border-red-500/60" : "border-border"
@@ -318,11 +324,11 @@ export default function BookingModal({
               />
             </div>
 
-            <label className="flex items-start gap-2.5 mb-4 cursor-pointer select-none">
+            <label className={`flex items-start gap-2.5 mb-4 cursor-pointer select-none rounded-lg ${consentHint && !consent ? "ring-2 ring-red-400 p-2 -m-2 mb-2" : ""}`}>
               <input
                 type="checkbox"
                 checked={consent}
-                onChange={(e) => setConsent(e.target.checked)}
+                onChange={(e) => { setConsent(e.target.checked); setConsentHint(false); }}
                 className="mt-0.5 w-4 h-4 accent-neon flex-shrink-0"
               />
               <span className="text-xs text-muted-foreground leading-snug">
@@ -337,10 +343,16 @@ export default function BookingModal({
               </span>
             </label>
 
+            {consentHint && !consent && (
+              <div className="text-sm text-red-400 mb-3">Поставьте галочку согласия, чтобы отправить заявку</div>
+            )}
             {validationError && <div className="text-sm text-red-400 mb-3">{validationError}</div>}
             <button
-              onClick={onBook}
-              disabled={sending || !consent}
+              onClick={() => {
+                if (!consent) { setConsentHint(true); ymGoal("booking_no_consent"); return; }
+                onBook();
+              }}
+              disabled={sending}
               className="w-full bg-neon text-background font-display font-bold py-4 rounded-xl hover:opacity-90 transition-all glow-neon disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {sending ? "ОТПРАВЛЯЕМ..." : `ОФОРМИТЬ — ${price.toLocaleString("ru-RU")} ₽`}

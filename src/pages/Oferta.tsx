@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router-compat";
 import Icon from "@/components/ui/icon";
 import Navbar from "@/components/transfer/Navbar";
 import { OFERTA_BLOCKS } from "./ofertaContent";

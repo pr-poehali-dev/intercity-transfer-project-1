@@ -1,1 +1,0 @@
-ALTER TABLE t_p48987818_intercity_transfer_p.distance_cache ADD COLUMN IF NOT EXISTS kursk_km integer DEFAULT 0;

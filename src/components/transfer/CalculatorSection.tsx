@@ -54,7 +54,7 @@ interface CalculatorSectionProps {
   manualRequest?: boolean;
   onCalculate: () => void;
   onClose: () => void;
-  sectionRef: React.RefObject<HTMLDivElement>;
+  sectionRef: React.RefObject<HTMLDivElement | null>;
 }
 
 export default function CalculatorSection({

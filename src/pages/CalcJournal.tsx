@@ -27,7 +27,7 @@ function Stat({ label, value, sub, accent }: { label: string; value: React.React
 }
 
 export default function CalcJournal() {
-  const [password, setPassword] = useState(() => sessionStorage.getItem(PASS_KEY) || "");
+  const [password, setPassword] = useState("");
   const [authed, setAuthed] = useState(false);
   const [filters, setFilters] = useState<JournalFilters>(emptyFilters());
   const [rows, setRows] = useState<JournalRow[]>([]);
@@ -64,7 +64,11 @@ export default function CalcJournal() {
   }
 
   useEffect(() => {
-    if (password) load();
+    const saved = sessionStorage.getItem(PASS_KEY) || "";
+    if (saved) {
+      setPassword(saved);
+      load(saved);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

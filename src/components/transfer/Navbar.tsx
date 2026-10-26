@@ -1,6 +1,6 @@
 import { useState } from "react";
 import Icon from "@/components/ui/icon";
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router-compat";
 import { useInstallFlow } from "./InstallApp";
 
 interface NavbarProps {

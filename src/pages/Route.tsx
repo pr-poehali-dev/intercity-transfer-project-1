@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate, Link } from "react-router-dom";
+import { useParams, useNavigate, Link } from "@/lib/router-compat";
 import Icon from "@/components/ui/icon";
 import Navbar from "@/components/transfer/Navbar";
 import RouteMap from "@/components/transfer/RouteMap";

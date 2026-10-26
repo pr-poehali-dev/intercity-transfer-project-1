@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import Icon from "@/components/ui/icon";
 import RouteMap from "@/components/transfer/RouteMap";
 import func2url from "../../backend/func2url.json";
+import { useLocation } from "@/lib/router-compat";
 
 type Pt = { lat: number; lon: number };
 
@@ -48,7 +49,8 @@ function webLink(pts: Pt[]): string {
 }
 
 export default function Navi() {
-  const params = useMemo(() => new URLSearchParams(window.location.search), []);
+  const { search } = useLocation();
+  const params = useMemo(() => new URLSearchParams(search), [search]);
   const pts = useMemo(() => parsePoints(params.get("p")), [params]);
   const stops = useMemo(() => (params.get("s") || "").split("_").map((x) => x.trim()).filter(Boolean), [params]);
   const names = (params.get("n") || "").split(/[~_]/).filter(Boolean);
@@ -88,6 +90,9 @@ export default function Navi() {
     return (
       <div className="min-h-screen flex items-center justify-center p-6 text-muted-foreground">
         Маршрут не найден
+        <p className="sr-only">
+          Страница маршрута поездки НАШЕ Трансфер: откройте ссылку с точками маршрута, чтобы построить путь в Яндекс Навигаторе, Яндекс Картах или в браузере.
+        </p>
       </div>
     );
   }

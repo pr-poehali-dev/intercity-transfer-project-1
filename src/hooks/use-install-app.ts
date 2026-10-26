@@ -54,7 +54,9 @@ export function isIOS(): boolean {
 
 export function useInstallApp() {
   const [, force] = useState(0);
+  const [mounted, setMounted] = useState(false);
   useEffect(() => {
+    setMounted(true);
     const l = () => force((x) => x + 1);
     listeners.add(l);
     return () => {
@@ -62,10 +64,10 @@ export function useInstallApp() {
     };
   }, []);
 
-  const installed = isStandalone();
-  const ios = isIOS();
-  const canPrompt = !!deferred;
-  const available = !installed && !wasInstalled() && (canPrompt || ios);
+  const installed = mounted && isStandalone();
+  const ios = mounted && isIOS();
+  const canPrompt = mounted && !!deferred;
+  const available = mounted && !installed && !wasInstalled() && (canPrompt || ios);
 
   async function install(): Promise<"prompted" | "ios" | "unavailable"> {
     if (deferred) {

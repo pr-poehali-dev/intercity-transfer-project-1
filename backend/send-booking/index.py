@@ -4,24 +4,31 @@ import requests
 from urllib.parse import quote
 
 
-def send_vk(message: str):
+def send_vk(message: str, link: str = ''):
     token = os.environ.get('VK_BOT_TOKEN', '')
     user_id = os.environ.get('VK_USER_ID', '')
     if not (token and user_id):
         print("VK secrets not configured, skipping VK")
         return
-    resp = requests.post(
-        'https://api.vk.com/method/messages.send',
-        data={
-            'user_id': user_id,
-            'message': message,
-            'random_id': 0,
-            'access_token': token,
-            'v': '5.199',
-        },
-        timeout=3,
-    )
+    data = {
+        'user_id': user_id,
+        'message': message,
+        'random_id': 0,
+        'access_token': token,
+        'v': '5.199',
+    }
+    if link:
+        data['keyboard'] = json.dumps({
+            'inline': True,
+            'buttons': [[{'action': {'type': 'open_link', 'link': link, 'label': '🗺 Открыть маршрут'}}]],
+        }, ensure_ascii=False)
+    resp = requests.post('https://api.vk.com/method/messages.send', data=data, timeout=3)
     result = resp.json()
+    if 'error' in result and link:
+        print(f"VK keyboard error, fallback to text link: {result['error']}")
+        data.pop('keyboard', None)
+        data['message'] = message + f"\n\n{link}"
+        result = requests.post('https://api.vk.com/method/messages.send', data=data, timeout=3).json()
     print(f"VK response: {result}")
     if 'error' in result:
         raise Exception(f"VK error: {result['error']}")
@@ -146,8 +153,7 @@ def handler(event: dict, context) -> dict:
     msg1 = (
         f"🕛 {date}\n\n"
         f"🚘 Тариф: {tariff}\n\n"
-        f"🗺 Маршрут: {route_text}\n"
-        f"{route_url}\n\n"
+        f"🗺 Маршрут: {route_text}\n\n"
         f"🔵 Откуда: {from_city}\n\n"
         f"{via_line}"
         f"🟢 Куда: {to_city}\n\n"
@@ -162,7 +168,7 @@ def handler(event: dict, context) -> dict:
     )
 
     try:
-        send_vk(msg1)
+        send_vk(msg1, route_url)
     except Exception as e:
         print(f"VK error: {e}")
 

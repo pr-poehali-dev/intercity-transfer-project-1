@@ -34,8 +34,30 @@ def send_vk(message: str, link: str = ''):
         raise Exception(f"VK error: {result['error']}")
 
 
+def send_telegram(message: str, link: str = ''):
+    token = os.environ.get('TELEGRAM_BOT_TOKEN', '')
+    chat_id = os.environ.get('TELEGRAM_CHAT_ID', '')
+    if not (token and chat_id):
+        print("Telegram secrets not configured, skipping Telegram")
+        return
+    url = f'https://api.telegram.org/bot{token}/sendMessage'
+    payload = {'chat_id': chat_id, 'text': message, 'disable_web_page_preview': True}
+    if link:
+        payload['reply_markup'] = {
+            'inline_keyboard': [[{'text': 'Маршрут', 'url': link, 'style': 'success'}]],
+        }
+    result = requests.post(url, json=payload, timeout=(2, 3)).json()
+    if not result.get('ok') and link:
+        print(f"Telegram button error, retry plain: {result}")
+        payload['reply_markup'] = {'inline_keyboard': [[{'text': 'Маршрут', 'url': link}]]}
+        result = requests.post(url, json=payload, timeout=(2, 3)).json()
+    print(f"Telegram response ok={result.get('ok')} {'' if result.get('ok') else result}")
+    if not result.get('ok'):
+        raise Exception(f"Telegram error: {result.get('description')}")
+
+
 def handler(event: dict, context) -> dict:
-    """Отправляет заявку на бронирование в ВКонтакте."""
+    """Отправляет заявку на бронирование в ВКонтакте и Telegram."""
     if event.get('httpMethod') == 'OPTIONS':
         return {
             'statusCode': 200,
@@ -170,6 +192,11 @@ def handler(event: dict, context) -> dict:
         send_vk(msg1, route_url)
     except Exception as e:
         print(f"VK error: {e}")
+
+    try:
+        send_telegram(msg1, route_url)
+    except Exception as e:
+        print(f"Telegram error: {e}")
 
     return {
         'statusCode': 200,

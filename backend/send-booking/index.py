@@ -153,7 +153,6 @@ def handler(event: dict, context) -> dict:
     msg1 = (
         f"🕛 {date}\n\n"
         f"🚘 Тариф: {tariff}\n\n"
-        f"🗺 Маршрут: {route_text}\n\n"
         f"🔵 Откуда: {from_city}\n\n"
         f"{via_line}"
         f"🟢 Куда: {to_city}\n\n"

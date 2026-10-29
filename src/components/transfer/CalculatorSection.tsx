@@ -126,12 +126,12 @@ export default function CalculatorSection({
     }
     if (zoneKm.newKm > 0) services.push(`ДНР/ЛНР/Зап./Херс.: ${zoneKm.newKm} км × ${rate * NEW_REGIONS_MULTIPLIER} ₽/км (×${NEW_REGIONS_MULTIPLIER})`);
     const toll = calcToll(tollKm);
-    if (toll.total > 0) services.push(`Платные дороги (примерно, оплачивает клиент отдельно): ~${toll.total} ₽ — ${toll.roads.map((r) => `${r.name} ${r.km} км`).join(", ")}`);
+    if (toll.total > 0) services.push(`Платные дороги ~${toll.total} ₽ (оплачивает клиент)`);
     if (zoneKm.crimeaKm > 0) services.push(`Крым/Сев.: ${zoneKm.crimeaKm} км × ${rate * CRIMEA_MULTIPLIER} ₽/км (×${CRIMEA_MULTIPLIER})`);
     if (isDelivery) {
       services.push(`Доставка: ${DELIVERY_OPTIONS[deliveryMode].name} (${DELIVERY_OPTIONS[deliveryMode].pricePerKm} ₽/км)`);
     } else {
-      if (withChildren) services.push(`С детьми до 6 лет: ${childrenCount} (+${childrenCount * CHILD_SEAT_PRICE} ₽)`);
+      if (withChildren) services.push(`С детьми +${childrenCount * CHILD_SEAT_PRICE} ₽/в цене`);
       if (withPet) services.push(`Перевозка животного ${PET_OPTIONS[petOption].label} (+${PET_OPTIONS[petOption].price} ₽)`);
     }
     const routePoints = routeLabels?.geoPoints && routeLabels.geoPoints.length >= 2

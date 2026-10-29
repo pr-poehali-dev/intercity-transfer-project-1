@@ -19,6 +19,7 @@ import { Route as TarifyRouteImport } from './routes/tarify'
 import { Route as YmlRouteImport } from './routes/yml'
 import { Route as ZhurnalRouteImport } from './routes/zhurnal'
 import { Route as MarshrutSlugRouteImport } from './routes/marshrut.$slug'
+import { Route as RCodeRouteImport } from './routes/r.$code'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -70,6 +71,11 @@ const MarshrutSlugRoute = MarshrutSlugRouteImport.update({
   path: '/marshrut/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RCodeRoute = RCodeRouteImport.update({
+  id: '/r/$code',
+  path: '/r/$code',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -82,6 +88,7 @@ export interface FileRoutesByFullPath {
   '/yml': typeof YmlRoute
   '/zhurnal': typeof ZhurnalRoute
   '/marshrut/$slug': typeof MarshrutSlugRoute
+  '/r/$code': typeof RCodeRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -94,6 +101,7 @@ export interface FileRoutesByTo {
   '/yml': typeof YmlRoute
   '/zhurnal': typeof ZhurnalRoute
   '/marshrut/$slug': typeof MarshrutSlugRoute
+  '/r/$code': typeof RCodeRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -107,6 +115,7 @@ export interface FileRoutesById {
   '/yml': typeof YmlRoute
   '/zhurnal': typeof ZhurnalRoute
   '/marshrut/$slug': typeof MarshrutSlugRoute
+  '/r/$code': typeof RCodeRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -121,6 +130,7 @@ export interface FileRouteTypes {
     | '/yml'
     | '/zhurnal'
     | '/marshrut/$slug'
+    | '/r/$code'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -133,6 +143,7 @@ export interface FileRouteTypes {
     | '/yml'
     | '/zhurnal'
     | '/marshrut/$slug'
+    | '/r/$code'
   id:
     | '__root__'
     | '/'
@@ -145,6 +156,7 @@ export interface FileRouteTypes {
     | '/yml'
     | '/zhurnal'
     | '/marshrut/$slug'
+    | '/r/$code'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -158,6 +170,7 @@ export interface RootRouteChildren {
   YmlRoute: typeof YmlRoute
   ZhurnalRoute: typeof ZhurnalRoute
   MarshrutSlugRoute: typeof MarshrutSlugRoute
+  RCodeRoute: typeof RCodeRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -232,6 +245,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MarshrutSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/r/$code': {
+      id: '/r/$code'
+      path: '/r/$code'
+      fullPath: '/r/$code'
+      preLoaderRoute: typeof RCodeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -246,6 +266,7 @@ const rootRouteChildren: RootRouteChildren = {
   YmlRoute: YmlRoute,
   ZhurnalRoute: ZhurnalRoute,
   MarshrutSlugRoute: MarshrutSlugRoute,
+  RCodeRoute: RCodeRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

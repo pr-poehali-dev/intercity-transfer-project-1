@@ -1,6 +1,9 @@
 import json
 import os
 import requests
+import secrets
+import string
+import psycopg2
 from urllib.parse import quote
 
 
@@ -56,6 +59,46 @@ def send_telegram(message: str, link: str = ''):
         raise Exception(f"Telegram error: {result.get('description')}")
 
 
+ALPHABET = string.ascii_lowercase + string.digits
+
+
+def db():
+    return psycopg2.connect(os.environ['DATABASE_URL'])
+
+
+def schema():
+    return os.environ.get('MAIN_DB_SCHEMA', 'public')
+
+
+def make_short(url: str) -> str:
+    conn = db()
+    cur = conn.cursor()
+    code = ''
+    for _ in range(5):
+        code = ''.join(secrets.choice(ALPHABET) for _ in range(6))
+        safe_url = url.replace("'", "''")
+        cur.execute(
+            f"INSERT INTO {schema()}.short_links (code, url) VALUES ('{code}', '{safe_url}') "
+            f"ON CONFLICT (code) DO NOTHING"
+        )
+        if cur.rowcount == 1:
+            break
+    conn.commit()
+    conn.close()
+    return f'https://nashe-transfer.ru/r/{code}'
+
+
+def resolve_short(code: str):
+    if not code or not all(c in ALPHABET for c in code) or len(code) > 16:
+        return None
+    conn = db()
+    cur = conn.cursor()
+    cur.execute(f"SELECT url FROM {schema()}.short_links WHERE code = '{code}'")
+    row = cur.fetchone()
+    conn.close()
+    return row[0] if row else None
+
+
 def handler(event: dict, context) -> dict:
     """Отправляет заявку на бронирование в ВКонтакте и Telegram."""
     if event.get('httpMethod') == 'OPTIONS':
@@ -68,6 +111,15 @@ def handler(event: dict, context) -> dict:
                 'Access-Control-Max-Age': '86400',
             },
             'body': ''
+        }
+
+    if event.get('httpMethod') == 'GET':
+        code = (event.get('queryStringParameters') or {}).get('code', '')
+        url = resolve_short(code)
+        return {
+            'statusCode': 200 if url else 404,
+            'headers': {'Access-Control-Allow-Origin': '*', 'Content-Type': 'application/json'},
+            'body': json.dumps({'url': url}),
         }
 
     body = json.loads(event.get('body') or '{}')
@@ -187,6 +239,11 @@ def handler(event: dict, context) -> dict:
         f"{comment_line}"
         f"☎️ {phone} · {name}"
     )
+
+    try:
+        route_url = make_short(route_url)
+    except Exception as e:
+        print(f"Short link error: {e}")
 
     try:
         send_vk(msg1, route_url)

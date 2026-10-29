@@ -29,6 +29,12 @@
         "comment": "Встретить с табличкой"
       },
       "expectedStatus": 200
+    },
+    {
+      "name": "Unknown short link",
+      "method": "GET",
+      "path": "/?code=zzzzzz",
+      "expectedStatus": 404
     }
   ]
 }
